@@ -1,6 +1,6 @@
 module Network.HTTP.Types
 (
-  Method(..)
+  Method(GET, POST, HEAD, PUT, DELETE, TRACE, CONNECT, OPTIONS)
 , byteStringToMethod
 , methodToByteString
 )
@@ -14,7 +14,10 @@ localError :: String -> String -> a
 localError f s = error $ "Network.HTTP.Types." ++ f ++ ": " ++ s
 
 -- | HTTP method.
--- Note that the Show instance is only for debugging and should NOT be used to generate HTTP method strings. Use 'methodToByteString' instead.
+-- 
+-- Note that the Show instance is only for debugging and should NOT be used to generate HTTP method strings; use 'methodToByteString' instead.
+-- 
+-- The constructor 'OtherMethod' is not exported for forwards compatibility reasons.
 data Method
     = GET
     | POST
@@ -57,4 +60,3 @@ methodToByteString m
         OtherMethod bs -> bs
         _ -> fromMaybe (localError "methodToByteString" "This should not happen (methodListB is incomplete)") $
              lookup m methodListB
-
