@@ -45,11 +45,12 @@ methodListA
 methodListB :: [(Method, Ascii.ByteString)]
 methodListB = map (\(a, b) -> (b, a)) methodListA
 
--- | 
+-- | Convert a method 'ByteString' to a 'Method'.
 byteStringToMethod :: Ascii.ByteString -> Method
 byteStringToMethod bs' = fromMaybe (OtherMethod bs) $ lookup bs methodListA
     where bs = Ascii.map toUpper bs'
 
+-- | Convert a 'Method' to a 'ByteString'.
 methodToByteString :: Method -> Ascii.ByteString
 methodToByteString m
     = case m of
