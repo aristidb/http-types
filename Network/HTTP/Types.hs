@@ -4,6 +4,8 @@ module Network.HTTP.Types
   Method(GET, POST, HEAD, PUT, DELETE, TRACE, CONNECT, OPTIONS)
 , byteStringToMethod
 , methodToByteString
+, stringToMethod
+, methodToString
   -- * Versions
 , HttpVersion(httpMajor, httpMinor)
 , http09
@@ -79,6 +81,14 @@ methodToByteString m
         OtherMethod bs -> bs
         _ -> fromMaybe (localError "methodToByteString" "This should not happen (methodListB is incomplete)") $
              lookup m methodListB
+
+-- | Convert a method 'String' to a 'Method'.
+stringToMethod :: String -> Method
+stringToMethod = byteStringToMethod . Ascii.pack
+
+-- | Convert a 'Method' to a 'String'.
+methodToString :: Method -> String
+methodToString = Ascii.unpack . methodToByteString
 
 -- | HTTP Version.
 -- 
