@@ -1,6 +1,6 @@
 module Network.HTTP.Types
 (
-  Method
+  Method(..)
 , byteStringToMethod
 , methodToByteString
 )
