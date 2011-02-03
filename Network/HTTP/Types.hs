@@ -1,11 +1,12 @@
 module Network.HTTP.Types
 (
   -- * Methods
-  Method(GET, POST, HEAD, PUT, DELETE, TRACE, CONNECT, OPTIONS)
-, byteStringToMethod
-, methodToByteString
-, stringToMethod
-, methodToString
+  Method
+, MethodADT(GET, POST, HEAD, PUT, DELETE, TRACE, CONNECT, OPTIONS)
+, methodToADT
+, methodFromADT
+, stringToMethodADT
+, methodADTToString
   -- * Versions
 , HttpVersion(httpMajor, httpMinor)
 , http09
@@ -33,12 +34,15 @@ import qualified Data.ByteString.Char8 as Ascii
 localError :: String -> String -> a
 localError f s = error $ "Network.HTTP.Types." ++ f ++ ": " ++ s
 
--- | HTTP method.
+-- | HTTP method (flat string type).
+type Method = Ascii.ByteString
+
+-- | HTTP method (ADT version).
 -- 
 -- Note that the Show instance is only for debugging and should NOT be used to generate HTTP method strings; use 'methodToByteString' instead.
 -- 
 -- The constructor 'OtherMethod' is not exported for forwards compatibility reasons.
-data Method
+data MethodADT
     = GET
     | POST
     | HEAD  
@@ -53,7 +57,7 @@ data Method
 -- These are ordered by suspected frequency. More popular methods should go first.
 -- The reason is that methodListA and methodListB are used with lookup.
 -- lookup is probably faster for these few cases than setting up an elaborate data structure.
-methodListA :: [(Ascii.ByteString, Method)]
+methodListA :: [(Ascii.ByteString, MethodADT)]
 methodListA 
     = [ (Ascii.pack "GET", GET)
       , (Ascii.pack "POST", POST)
@@ -65,28 +69,28 @@ methodListA
       , (Ascii.pack "OPTIONS", OPTIONS)
       ]
 
-methodListB :: [(Method, Ascii.ByteString)]
+methodListB :: [(MethodADT, Ascii.ByteString)]
 methodListB = map (\(a, b) -> (b, a)) methodListA
 
--- | Convert a method 'ByteString' to a 'Method'.
-byteStringToMethod :: Ascii.ByteString -> Method
-byteStringToMethod bs = fromMaybe (OtherMethod bs) $ lookup bs methodListA
+-- | Convert a method 'ByteString' to a 'MethodADT'.
+methodToADT :: Method -> MethodADT
+methodToADT bs = fromMaybe (OtherMethod bs) $ lookup bs methodListA
 
--- | Convert a 'Method' to a 'ByteString'.
-methodToByteString :: Method -> Ascii.ByteString
-methodToByteString m
+-- | Convert a 'MethodADT' to a 'ByteString'.
+methodFromADT :: MethodADT -> Method
+methodFromADT m
     = case m of
         OtherMethod bs -> bs
         _ -> fromMaybe (localError "methodToByteString" "This should not happen (methodListB is incomplete)") $
              lookup m methodListB
 
--- | Convert a method 'String' to a 'Method'.
-stringToMethod :: String -> Method
-stringToMethod = byteStringToMethod . Ascii.pack
+-- | Convert a method 'String' to a 'MethodADT'.
+stringToMethodADT :: String -> MethodADT
+stringToMethodADT = methodToADT . Ascii.pack
 
--- | Convert a 'Method' to a 'String'.
-methodToString :: Method -> String
-methodToString = Ascii.unpack . methodToByteString
+-- | Convert a 'MethodADT' to a 'String'.
+methodADTToString :: MethodADT -> String
+methodADTToString = Ascii.unpack . methodFromADT
 
 -- | HTTP Version.
 -- 
