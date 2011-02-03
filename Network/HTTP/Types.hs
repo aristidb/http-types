@@ -1,7 +1,10 @@
 module Network.HTTP.Types
 (
+  -- * Case insensitive HTTP ByteStrings
+  HttpCIByteString(..)
+, mkHttpCIByteString
   -- * Methods
-  Method
+, Method
 , MethodADT(GET, POST, HEAD, PUT, DELETE, TRACE, CONNECT, OPTIONS)
 , methodToADT
 , methodFromADT
@@ -25,17 +28,49 @@ module Network.HTTP.Types
 , status404, statusNotFound
 , status405, statusNotAllowed
 , status500, statusServerError
+  -- * Headers
+, RequestHeaders
+, ResponseHeaders
+  -- * Query string
+, Query
+, QuerySimple
 )
 where
 
+import           Data.Char
 import           Data.Maybe
+import qualified Data.ByteString       as B
 import qualified Data.ByteString.Char8 as Ascii
 
 localError :: String -> String -> a
 localError f s = error $ "Network.HTTP.Types." ++ f ++ ": " ++ s
 
+-- | Case-insensitive HTTP ByteStrings, mostly for use in Header names.
+data HttpCIByteString
+    = HttpCIByteString {
+        ciOriginal :: !B.ByteString
+      , ciLowerCase :: !B.ByteString
+      }
+
+mkHttpCIByteString :: B.ByteString -> HttpCIByteString
+mkHttpCIByteString orig = HttpCIByteString {
+                            ciOriginal = orig
+                          , ciLowerCase = Ascii.map toLower orig
+                          }
+
+instance Eq HttpCIByteString where
+    HttpCIByteString { ciLowerCase = a } == HttpCIByteString { ciLowerCase = b } 
+        = a == b
+
+instance Ord HttpCIByteString where
+    compare HttpCIByteString { ciLowerCase = a } HttpCIByteString { ciLowerCase = b } 
+        = compare a b
+
+instance Show HttpCIByteString where
+    show = show . ciOriginal
+
 -- | HTTP method (flat string type).
-type Method = Ascii.ByteString
+type Method = B.ByteString
 
 -- | HTTP method (ADT version).
 -- 
@@ -51,13 +86,13 @@ data MethodADT
     | TRACE
     | CONNECT
     | OPTIONS
-    | OtherMethod Ascii.ByteString
+    | OtherMethod B.ByteString
     deriving (Show, Eq, Ord)
 
 -- These are ordered by suspected frequency. More popular methods should go first.
 -- The reason is that methodListA and methodListB are used with lookup.
 -- lookup is probably faster for these few cases than setting up an elaborate data structure.
-methodListA :: [(Ascii.ByteString, MethodADT)]
+methodListA :: [(B.ByteString, MethodADT)]
 methodListA 
     = [ (Ascii.pack "GET", GET)
       , (Ascii.pack "POST", POST)
@@ -69,7 +104,7 @@ methodListA
       , (Ascii.pack "OPTIONS", OPTIONS)
       ]
 
-methodListB :: [(MethodADT, Ascii.ByteString)]
+methodListB :: [(MethodADT, B.ByteString)]
 methodListB = map (\(a, b) -> (b, a)) methodListA
 
 -- | Convert a method 'ByteString' to a 'MethodADT'.
@@ -125,7 +160,7 @@ http11 = HttpVersion 1 1
 data Status
     = Status {
         statusCode :: Int
-      , statusMessage :: Ascii.ByteString
+      , statusMessage :: B.ByteString
       }
     deriving (Show)
 
@@ -189,3 +224,18 @@ statusNotAllowed = status405
 status500, statusServerError :: Status
 status500 = Status 500 $ Ascii.pack "Internal Server Error"
 statusServerError = status500
+
+-- | Request Header
+type RequestHeaders = [(HttpCIByteString, B.ByteString)]
+
+-- | Response Headers
+type ResponseHeaders = [(HttpCIByteString, B.ByteString)]
+
+-- | Query.
+-- 
+-- General form: a=b&c=d, but if the value is Nothing, it becomes
+-- a&c=d.
+type Query = [(B.ByteString, Maybe B.ByteString)]
+
+-- | Simplified Query type without support for parameter-less items.
+type QuerySimple = [(B.ByteString, B.ByteString)]
