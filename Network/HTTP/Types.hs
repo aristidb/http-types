@@ -19,12 +19,12 @@ module Network.HTTP.Types
 , stringToMethodADT
 , methodADTToString
   -- * Versions
-, HttpVersion(httpMajor, httpMinor)
+, HttpVersion(..)
 , http09
 , http10
 , http11
   -- * Status
-, Status(statusCode, statusMessage)
+, Status(..)
 , status200, statusOK
 , status201, statusCreated
 , status301, statusMovedPermanently
