@@ -27,7 +27,6 @@ module Network.HTTP.Types
 )
 where
 
-import           Data.Char
 import           Data.Maybe
 import qualified Data.ByteString.Char8 as Ascii
 
@@ -71,8 +70,7 @@ methodListB = map (\(a, b) -> (b, a)) methodListA
 
 -- | Convert a method 'ByteString' to a 'Method'.
 byteStringToMethod :: Ascii.ByteString -> Method
-byteStringToMethod bs' = fromMaybe (OtherMethod bs) $ lookup bs methodListA
-    where bs = Ascii.map toUpper bs'
+byteStringToMethod bs = fromMaybe (OtherMethod bs) $ lookup bs methodListA
 
 -- | Convert a 'Method' to a 'ByteString'.
 methodToByteString :: Method -> Ascii.ByteString
