@@ -5,6 +5,14 @@ module Network.HTTP.Types
 , mkHttpCIByteString
   -- * Methods
 , Method
+, methodGet
+, methodPost
+, methodHead
+, methodPut
+, methodDelete
+, methodTrace
+, methodConnect
+, methodOptions
 , MethodADT(GET, POST, HEAD, PUT, DELETE, TRACE, CONNECT, OPTIONS)
 , methodToADT
 , methodFromADT
@@ -72,6 +80,17 @@ instance Show HttpCIByteString where
 -- | HTTP method (flat string type).
 type Method = B.ByteString
 
+-- | HTTP Method constants.
+methodGet, methodPost, methodHead, methodPut, methodDelete, methodTrace, methodConnect, methodOptions :: Method
+methodGet     = Ascii.pack "GET"
+methodPost    = Ascii.pack "POST"
+methodHead    = Ascii.pack "HEAD"
+methodPut     = Ascii.pack "PUT"
+methodDelete  = Ascii.pack "DELETE"
+methodTrace   = Ascii.pack "TRACE"
+methodConnect = Ascii.pack "CONNECT"
+methodOptions = Ascii.pack "OPTIONS"
+
 -- | HTTP method (ADT version).
 -- 
 -- Note that the Show instance is only for debugging and should NOT be used to generate HTTP method strings; use 'methodToByteString' instead.
@@ -92,19 +111,19 @@ data MethodADT
 -- These are ordered by suspected frequency. More popular methods should go first.
 -- The reason is that methodListA and methodListB are used with lookup.
 -- lookup is probably faster for these few cases than setting up an elaborate data structure.
-methodListA :: [(B.ByteString, MethodADT)]
+methodListA :: [(Method, MethodADT)]
 methodListA 
-    = [ (Ascii.pack "GET", GET)
-      , (Ascii.pack "POST", POST)
-      , (Ascii.pack "HEAD", HEAD)
-      , (Ascii.pack "PUT", PUT)
-      , (Ascii.pack "DELETE", DELETE)
-      , (Ascii.pack "TRACE", TRACE)
-      , (Ascii.pack "CONNECT", CONNECT)
-      , (Ascii.pack "OPTIONS", OPTIONS)
+    = [ (methodGet, GET)
+      , (methodPost, POST)
+      , (methodHead, HEAD)
+      , (methodPut, PUT)
+      , (methodDelete, DELETE)
+      , (methodTrace, TRACE)
+      , (methodConnect, CONNECT)
+      , (methodOptions, OPTIONS)
       ]
 
-methodListB :: [(MethodADT, B.ByteString)]
+methodListB :: [(MethodADT, Method)]
 methodListB = map (\(a, b) -> (b, a)) methodListA
 
 -- | Convert a method 'ByteString' to a 'MethodADT'.
