@@ -10,10 +10,10 @@ Name:                http-types
 Version:             0.1
 
 -- A short (one-line) description of the package.
-Synopsis:            Generic HTTP types for Haskell (for both client and server code)
+Synopsis:            Generic HTTP types for Haskell (for both client and server code).
 
 -- A longer description of the package.
--- Description:         
+Description:         Generic HTTP types for Haskell (for both client and server code).
 
 -- URL for the project homepage or repository.
 Homepage:            https://github.com/aristidb/http-types
@@ -32,9 +32,9 @@ Author:              Aristid Breitkreuz
 Maintainer:          aristidb@googlemail.com
 
 -- A copyright notice.
--- Copyright:           
+Copyright:           (C) 2011 Aristid Breitkreuz
 
-Category:            Network
+Category:            Network, Web
 
 Build-type:          Simple
 
