@@ -47,6 +47,7 @@ where
 
 import           Data.Char
 import           Data.Maybe
+import           Data.String
 import qualified Data.ByteString       as B
 import qualified Data.ByteString.Char8 as Ascii
 
@@ -76,6 +77,9 @@ instance Ord HttpCIByteString where
 
 instance Show HttpCIByteString where
     show = show . ciOriginal
+
+instance IsString HttpCIByteString where
+    fromString = mkHttpCIByteString . Ascii.pack
 
 -- | HTTP method (flat string type).
 type Method = B.ByteString
