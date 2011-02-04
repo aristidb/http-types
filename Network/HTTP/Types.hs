@@ -45,15 +45,19 @@ module Network.HTTP.Types
 , SimpleQuery
 , renderQuery
 , renderSimpleQuery
+, parseQuery
+, parseSimpleQuery
   -- * URL encoding / decoding
 , urlEncode
 , urlDecode
 )
 where
 
+import           Control.Arrow         (second)
 import           Data.Array
 import           Data.Char
 import           Data.List
+import           Data.Maybe
 import           Data.String
 import           Numeric
 import qualified Data.ByteString       as B
@@ -277,6 +281,25 @@ renderQuery useQuestionMark = B.concat
 -- | Convert 'SimpleQuery' to 'ByteString'.
 renderSimpleQuery :: Bool -> SimpleQuery -> B.ByteString
 renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . map (\(k, v) -> (k, Just v))
+
+-- | Parse 'Query' from a 'ByteString'.
+parseQuery :: B.ByteString -> Query
+parseQuery bs = case Ascii.uncons bs of
+                  Nothing         -> []
+                  Just ('?', bs') -> parseQuery' bs'
+                  _               -> parseQuery' bs
+    where
+      parseQuery' = map parseQueryItem . Ascii.split '&'
+      parseQueryItem q = (k, v)
+        where (k', v') = Ascii.break (== '=') q
+              k = urlDecode k'
+              v = if B.null v'
+                  then Nothing
+                  else Just $ urlDecode $ B.tail v'
+
+-- | Parse 'SimpleQuery' from a 'ByteString'.
+parseSimpleQuery :: B.ByteString -> SimpleQuery
+parseSimpleQuery = map (second $ fromMaybe B.empty) . parseQuery
 
 -- | Percent-encoding for URLs.
 urlEncode :: B.ByteString -> B.ByteString
