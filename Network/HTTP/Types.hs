@@ -70,9 +70,6 @@ import           Numeric
 import qualified Data.ByteString       as B
 import qualified Data.ByteString.Char8 as Ascii
 
-localError :: String -> String -> a
-localError f s = error $ "Network.HTTP.Types." ++ f ++ ": " ++ s
-
 -- | Case-insensitive HTTP ByteStrings, mostly for use in Header names.
 data CIByteString
     = CIByteString {
