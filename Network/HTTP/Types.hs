@@ -258,17 +258,17 @@ type SimpleQuery = [SimpleQueryItem]
 renderQuery :: Bool -> [(B.ByteString, Maybe B.ByteString)] -> B.ByteString
 renderQuery useQuestionMark = B.concat 
                               . addQuestionMark
-                              . intercalate ["&"] 
+                              . intercalate [Ascii.pack "&"] 
                               . map showQueryItem 
     where
       addQuestionMark :: [B.ByteString] -> [B.ByteString]
       addQuestionMark [] = []
-      addQuestionMark xs | useQuestionMark = "?" : xs
+      addQuestionMark xs | useQuestionMark = Ascii.pack "?" : xs
                          | otherwise       = xs
       
       showQueryItem :: (B.ByteString, Maybe B.ByteString) -> [B.ByteString]
       showQueryItem (n, Nothing) = [urlEncode n]
-      showQueryItem (n, Just v) = [urlEncode n, "=", urlEncode v]
+      showQueryItem (n, Just v) = [urlEncode n, Ascii.pack "=", urlEncode v]
 
 renderSimpleQuery :: Bool -> [(B.ByteString, B.ByteString)] -> B.ByteString
 renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . map (\(k, v) -> (k, Just v))
