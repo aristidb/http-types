@@ -43,8 +43,9 @@ module Network.HTTP.Types
 , Query
 , SimpleQueryItem
 , SimpleQuery
-  -- * URL encoding
+  -- * URL encoding / decoding
 , urlEncode
+, urlDecode
 )
 where
 
@@ -53,6 +54,7 @@ import           Data.Char
 import           Data.List
 import           Data.String
 import           Data.Word
+import           Numeric
 import qualified Data.ByteString       as B
 import qualified Data.ByteString.Char8 as Ascii
 
@@ -297,3 +299,13 @@ urlEncode = Ascii.concatMap (Ascii.pack . encodeChar)
       h :: Int -> Char
       h i | i < 10    = chr $ ord '0' + i
           | otherwise = chr $ ord 'A' + i - 10
+
+-- | Percent-decoding.
+urlDecode :: B.ByteString -> B.ByteString
+urlDecode bs = case Ascii.uncons bs of
+                 Nothing -> B.empty
+                 Just ('%', x) -> case readHex $ Ascii.unpack pc of
+                                    [(v, "")] -> chr v `Ascii.cons` urlDecode bs'
+                                    _ -> Ascii.cons '%' $ urlDecode x
+                     where (pc, bs') = Ascii.splitAt 2 x
+                 Just (c, bs') -> Ascii.cons c $ urlDecode bs'
