@@ -43,8 +43,8 @@ module Network.HTTP.Types
 )
 where
 
+import           Data.Array
 import           Data.Char
-import           Data.Maybe
 import           Data.String
 import qualified Data.ByteString       as B
 import qualified Data.ByteString.Char8 as Ascii
@@ -107,25 +107,24 @@ data StdMethod
     | TRACE
     | CONNECT
     | OPTIONS
-    deriving (Read, Show, Eq, Ord, Enum, Bounded)
-
+    deriving (Read, Show, Eq, Ord, Enum, Bounded, Ix)
 -- These are ordered by suspected frequency. More popular methods should go first.
--- The reason is that methodListA and methodListB are used with lookup.
+-- The reason is that methodList is used with lookup.
 -- lookup is probably faster for these few cases than setting up an elaborate data structure.
-methodListA :: [(Method, StdMethod)]
-methodListA = map (\m -> (Ascii.pack $ show m, m)) [minBound :: StdMethod .. maxBound]
 
-methodListB :: [(StdMethod, Method)]
-methodListB = map (\(a, b) -> (b, a)) methodListA
+methodArray :: Array StdMethod Method
+methodArray = listArray (minBound, maxBound) $ map (Ascii.pack . show) [minBound :: StdMethod .. maxBound]
+
+methodList :: [(Method, StdMethod)]
+methodList = map (\(a, b) -> (b, a)) (assocs methodArray)
 
 -- | Convert a method 'ByteString' to a 'StdMethod' if possible.
 parseMethod :: Method -> Either B.ByteString StdMethod
-parseMethod bs = maybe (Left bs) Right $ lookup bs methodListA
+parseMethod bs = maybe (Left bs) Right $ lookup bs methodList
 
 -- | Convert a 'StdMethod' to a 'ByteString'.
 renderMethod :: StdMethod -> Method
-renderMethod m = fromMaybe (localError "renderMethod" "This should not happen (methodListB is incomplete)") $
-                 lookup m methodListB
+renderMethod m = methodArray ! m
 
 -- | HTTP Version.
 -- 
