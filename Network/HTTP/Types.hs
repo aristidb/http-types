@@ -43,6 +43,8 @@ module Network.HTTP.Types
 , Query
 , SimpleQueryItem
 , SimpleQuery
+, renderQuery
+, renderSimpleQuery
   -- * URL encoding / decoding
 , urlEncode
 , urlDecode
