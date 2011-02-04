@@ -38,6 +38,13 @@ module Network.HTTP.Types
 , Header
 , RequestHeaders
 , ResponseHeaders
+, headerAccept
+, headerCacheControl
+, headerConnection
+, headerContentLength
+, headerContentType
+, headerContentMD5
+, headerDate
   -- * Query string
 , QueryItem
 , Query
@@ -246,6 +253,20 @@ type RequestHeaders = [Header]
 
 -- | Response Headers
 type ResponseHeaders = [Header]
+
+makeHeader :: String -> B.ByteString -> Header
+makeHeader a = \b -> (a', b)
+    where a' = mkCIByteString $ Ascii.pack a
+
+-- | HTTP Headers
+headerAccept, headerCacheControl, headerConnection, headerContentLength, headerContentType, headerContentMD5, headerDate :: B.ByteString -> Header
+headerAccept        = makeHeader "Accept"
+headerCacheControl  = makeHeader "Cache-Control"
+headerConnection    = makeHeader "Connection"
+headerContentLength = makeHeader "Content-Length"
+headerContentType   = makeHeader "Content-Type"
+headerContentMD5    = makeHeader "Content-MD5"
+headerDate          = makeHeader "Date"
 
 -- | Query item
 type QueryItem = (B.ByteString, Maybe B.ByteString)
