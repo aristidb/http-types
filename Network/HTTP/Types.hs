@@ -1,8 +1,8 @@
 module Network.HTTP.Types
 (
   -- * Case insensitive HTTP ByteStrings
-  HttpCIByteString(..)
-, mkHttpCIByteString
+  CIByteString(..)
+, mkCIByteString
   -- * Methods
 , Method
 , methodGet
@@ -67,31 +67,31 @@ localError :: String -> String -> a
 localError f s = error $ "Network.HTTP.Types." ++ f ++ ": " ++ s
 
 -- | Case-insensitive HTTP ByteStrings, mostly for use in Header names.
-data HttpCIByteString
-    = HttpCIByteString {
+data CIByteString
+    = CIByteString {
         ciOriginal :: !B.ByteString
       , ciLowerCase :: !B.ByteString
       }
 
-mkHttpCIByteString :: B.ByteString -> HttpCIByteString
-mkHttpCIByteString orig = HttpCIByteString {
+mkCIByteString :: B.ByteString -> CIByteString
+mkCIByteString orig = CIByteString {
                             ciOriginal = orig
                           , ciLowerCase = Ascii.map toLower orig
                           }
 
-instance Eq HttpCIByteString where
-    HttpCIByteString { ciLowerCase = a } == HttpCIByteString { ciLowerCase = b } 
+instance Eq CIByteString where
+    CIByteString { ciLowerCase = a } == CIByteString { ciLowerCase = b } 
         = a == b
 
-instance Ord HttpCIByteString where
-    compare HttpCIByteString { ciLowerCase = a } HttpCIByteString { ciLowerCase = b } 
+instance Ord CIByteString where
+    compare CIByteString { ciLowerCase = a } CIByteString { ciLowerCase = b } 
         = compare a b
 
-instance Show HttpCIByteString where
+instance Show CIByteString where
     show = show . ciOriginal
 
-instance IsString HttpCIByteString where
-    fromString = mkHttpCIByteString . Ascii.pack
+instance IsString CIByteString where
+    fromString = mkCIByteString . Ascii.pack
 
 -- | HTTP method (flat string type).
 type Method = B.ByteString
@@ -239,7 +239,7 @@ status500 = Status 500 $ Ascii.pack "Internal Server Error"
 statusServerError = status500
 
 -- | Header
-type Header = (HttpCIByteString, B.ByteString)
+type Header = (CIByteString, B.ByteString)
 
 -- | Request Headers
 type RequestHeaders = [Header]
