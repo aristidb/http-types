@@ -13,11 +13,9 @@ module Network.HTTP.Types
 , methodTrace
 , methodConnect
 , methodOptions
-, MethodADT(GET, POST, HEAD, PUT, DELETE, TRACE, CONNECT, OPTIONS)
-, methodToADT
-, methodFromADT
-, stringToMethodADT
-, methodADTToString
+, StdMethod(..)
+, parseMethod
+, renderMethod
   -- * Versions
 , HttpVersion(..)
 , http09
@@ -86,21 +84,21 @@ type Method = B.ByteString
 
 -- | HTTP Method constants.
 methodGet, methodPost, methodHead, methodPut, methodDelete, methodTrace, methodConnect, methodOptions :: Method
-methodGet     = Ascii.pack "GET"
-methodPost    = Ascii.pack "POST"
-methodHead    = Ascii.pack "HEAD"
-methodPut     = Ascii.pack "PUT"
-methodDelete  = Ascii.pack "DELETE"
-methodTrace   = Ascii.pack "TRACE"
-methodConnect = Ascii.pack "CONNECT"
-methodOptions = Ascii.pack "OPTIONS"
+methodGet     = renderMethod GET
+methodPost    = renderMethod POST
+methodHead    = renderMethod HEAD
+methodPut     = renderMethod PUT
+methodDelete  = renderMethod DELETE
+methodTrace   = renderMethod TRACE
+methodConnect = renderMethod CONNECT
+methodOptions = renderMethod OPTIONS
 
--- | HTTP method (ADT version).
+-- | HTTP standard method (as defined by RFC 2616).
 -- 
 -- Note that the Show instance is only for debugging and should NOT be used to generate HTTP method strings; use 'methodToByteString' instead.
 -- 
 -- The constructor 'OtherMethod' is not exported for forwards compatibility reasons.
-data MethodADT
+data StdMethod
     = GET
     | POST
     | HEAD  
@@ -109,46 +107,25 @@ data MethodADT
     | TRACE
     | CONNECT
     | OPTIONS
-    | OtherMethod B.ByteString
-    deriving (Show, Eq, Ord)
+    deriving (Read, Show, Eq, Ord, Enum, Bounded)
 
 -- These are ordered by suspected frequency. More popular methods should go first.
 -- The reason is that methodListA and methodListB are used with lookup.
 -- lookup is probably faster for these few cases than setting up an elaborate data structure.
-methodListA :: [(Method, MethodADT)]
-methodListA 
-    = [ (methodGet, GET)
-      , (methodPost, POST)
-      , (methodHead, HEAD)
-      , (methodPut, PUT)
-      , (methodDelete, DELETE)
-      , (methodTrace, TRACE)
-      , (methodConnect, CONNECT)
-      , (methodOptions, OPTIONS)
-      ]
+methodListA :: [(Method, StdMethod)]
+methodListA = map (\m -> (Ascii.pack $ show m, m)) [minBound :: StdMethod .. maxBound]
 
-methodListB :: [(MethodADT, Method)]
+methodListB :: [(StdMethod, Method)]
 methodListB = map (\(a, b) -> (b, a)) methodListA
 
--- | Convert a method 'ByteString' to a 'MethodADT'.
-methodToADT :: Method -> MethodADT
-methodToADT bs = fromMaybe (OtherMethod bs) $ lookup bs methodListA
+-- | Convert a method 'ByteString' to a 'StdMethod' if possible.
+parseMethod :: Method -> Either B.ByteString StdMethod
+parseMethod bs = maybe (Left bs) Right $ lookup bs methodListA
 
--- | Convert a 'MethodADT' to a 'ByteString'.
-methodFromADT :: MethodADT -> Method
-methodFromADT m
-    = case m of
-        OtherMethod bs -> bs
-        _ -> fromMaybe (localError "methodToByteString" "This should not happen (methodListB is incomplete)") $
-             lookup m methodListB
-
--- | Convert a method 'String' to a 'MethodADT'.
-stringToMethodADT :: String -> MethodADT
-stringToMethodADT = methodToADT . Ascii.pack
-
--- | Convert a 'MethodADT' to a 'String'.
-methodADTToString :: MethodADT -> String
-methodADTToString = Ascii.unpack . methodFromADT
+-- | Convert a 'StdMethod' to a 'ByteString'.
+renderMethod :: StdMethod -> Method
+renderMethod m = fromMaybe (localError "renderMethod" "This should not happen (methodListB is incomplete)") $
+                 lookup m methodListB
 
 -- | HTTP Version.
 -- 
