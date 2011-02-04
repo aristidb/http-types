@@ -258,7 +258,8 @@ type SimpleQueryItem = (B.ByteString, B.ByteString)
 -- | Simplified Query type without support for parameter-less items.
 type SimpleQuery = [SimpleQueryItem]
 
-renderQuery :: Bool -> [(B.ByteString, Maybe B.ByteString)] -> B.ByteString
+-- | Convert 'Query' to 'ByteString'.
+renderQuery :: Bool -> Query -> B.ByteString
 renderQuery useQuestionMark = B.concat 
                               . addQuestionMark
                               . intercalate [Ascii.pack "&"] 
@@ -273,7 +274,8 @@ renderQuery useQuestionMark = B.concat
       showQueryItem (n, Nothing) = [urlEncode n]
       showQueryItem (n, Just v) = [urlEncode n, Ascii.pack "=", urlEncode v]
 
-renderSimpleQuery :: Bool -> [(B.ByteString, B.ByteString)] -> B.ByteString
+-- | Convert 'SimpleQuery' to 'ByteString'.
+renderSimpleQuery :: Bool -> SimpleQuery -> B.ByteString
 renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . map (\(k, v) -> (k, Just v))
 
 -- | Percent-encoding for URLs.
