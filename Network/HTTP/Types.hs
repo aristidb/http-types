@@ -53,7 +53,6 @@ import           Data.Array
 import           Data.Char
 import           Data.List
 import           Data.String
-import           Data.Word
 import           Numeric
 import qualified Data.ByteString       as B
 import qualified Data.ByteString.Char8 as Ascii
