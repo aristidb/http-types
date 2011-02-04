@@ -35,17 +35,24 @@ module Network.HTTP.Types
 , status405, statusNotAllowed
 , status500, statusServerError
   -- * Headers
+, Header
 , RequestHeaders
 , ResponseHeaders
   -- * Query string
+, QueryItem
 , Query
-, QuerySimple
+, SimpleQueryItem
+, SimpleQuery
+  -- * URL encoding
+, urlEncode
 )
 where
 
 import           Data.Array
 import           Data.Char
+import           Data.List
 import           Data.String
+import           Data.Word
 import qualified Data.ByteString       as B
 import qualified Data.ByteString.Char8 as Ascii
 
@@ -224,17 +231,69 @@ status500, statusServerError :: Status
 status500 = Status 500 $ Ascii.pack "Internal Server Error"
 statusServerError = status500
 
--- | Request Header
-type RequestHeaders = [(HttpCIByteString, B.ByteString)]
+-- | Header
+type Header = (HttpCIByteString, B.ByteString)
+
+-- | Request Headers
+type RequestHeaders = [Header]
 
 -- | Response Headers
-type ResponseHeaders = [(HttpCIByteString, B.ByteString)]
+type ResponseHeaders = [Header]
+
+-- | Query item
+type QueryItem = (B.ByteString, Maybe B.ByteString)
 
 -- | Query.
 -- 
 -- General form: a=b&c=d, but if the value is Nothing, it becomes
 -- a&c=d.
-type Query = [(B.ByteString, Maybe B.ByteString)]
+type Query = [QueryItem]
+
+-- | Simplified Query item type without support for parameter-less items.
+type SimpleQueryItem = (B.ByteString, B.ByteString)
 
 -- | Simplified Query type without support for parameter-less items.
-type QuerySimple = [(B.ByteString, B.ByteString)]
+type SimpleQuery = [SimpleQueryItem]
+
+renderQuery :: Bool -> [(B.ByteString, Maybe B.ByteString)] -> B.ByteString
+renderQuery useQuestionMark = B.concat 
+                              . addQuestionMark
+                              . intercalate ["&"] 
+                              . map showQueryItem 
+    where
+      addQuestionMark :: [B.ByteString] -> [B.ByteString]
+      addQuestionMark [] = []
+      addQuestionMark xs | useQuestionMark = "?" : xs
+                         | otherwise       = xs
+      
+      showQueryItem :: (B.ByteString, Maybe B.ByteString) -> [B.ByteString]
+      showQueryItem (n, Nothing) = [urlEncode n]
+      showQueryItem (n, Just v) = [urlEncode n, "=", urlEncode v]
+
+renderSimpleQuery :: Bool -> [(B.ByteString, B.ByteString)] -> B.ByteString
+renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . map (\(k, v) -> (k, Just v))
+
+-- | Percent-encoding for URLs.
+urlEncode :: B.ByteString -> B.ByteString
+urlEncode = Ascii.concatMap (Ascii.pack . encodeChar)
+    where
+      encodeChar :: Char -> [Char]
+      encodeChar ch | unreserved ch = [ch]
+                    | otherwise     = h2 $ ord ch
+      
+      unreserved :: Char -> Bool
+      unreserved ch | ch >= 'A' && ch <= 'Z' = True 
+                    | ch >= 'a' && ch <= 'z' = True
+                    | ch >= '0' && ch <= '9' = True 
+      unreserved '-' = True
+      unreserved '_' = True
+      unreserved '.' = True
+      unreserved '~' = True
+      unreserved _   = False
+      
+      h2 :: Int -> [Char]
+      h2 v = let (a, b) = v `divMod` 16 in ['%', h a, h b]
+      
+      h :: Int -> Char
+      h i | i < 10    = chr $ ord '0' + i
+          | otherwise = chr $ ord 'A' + i - 10
