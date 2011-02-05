@@ -16,6 +16,7 @@ module Network.HTTP.Types
 , StdMethod(..)
 , parseMethod
 , renderMethod
+, renderStdMethod
   -- * Versions
 , HttpVersion(..)
 , http09
@@ -60,7 +61,7 @@ module Network.HTTP.Types
 )
 where
 
-import           Control.Arrow         (second)
+import           Control.Arrow         (second, (|||))
 import           Data.Array
 import           Data.Char
 import           Data.List
@@ -102,14 +103,14 @@ type Method = B.ByteString
 
 -- | HTTP Method constants.
 methodGet, methodPost, methodHead, methodPut, methodDelete, methodTrace, methodConnect, methodOptions :: Method
-methodGet     = renderMethod GET
-methodPost    = renderMethod POST
-methodHead    = renderMethod HEAD
-methodPut     = renderMethod PUT
-methodDelete  = renderMethod DELETE
-methodTrace   = renderMethod TRACE
-methodConnect = renderMethod CONNECT
-methodOptions = renderMethod OPTIONS
+methodGet     = renderStdMethod GET
+methodPost    = renderStdMethod POST
+methodHead    = renderStdMethod HEAD
+methodPut     = renderStdMethod PUT
+methodDelete  = renderStdMethod DELETE
+methodTrace   = renderStdMethod TRACE
+methodConnect = renderStdMethod CONNECT
+methodOptions = renderStdMethod OPTIONS
 
 -- | HTTP standard method (as defined by RFC 2616).
 -- 
@@ -140,9 +141,13 @@ methodList = map (\(a, b) -> (b, a)) (assocs methodArray)
 parseMethod :: Method -> Either B.ByteString StdMethod
 parseMethod bs = maybe (Left bs) Right $ lookup bs methodList
 
+-- | Convert an algebraic method to a 'ByteString'.
+renderMethod :: Either B.ByteString StdMethod -> Method
+renderMethod = id ||| renderStdMethod
+
 -- | Convert a 'StdMethod' to a 'ByteString'.
-renderMethod :: StdMethod -> Method
-renderMethod m = methodArray ! m
+renderStdMethod :: StdMethod -> Method
+renderStdMethod m = methodArray ! m
 
 -- | HTTP Version.
 -- 
