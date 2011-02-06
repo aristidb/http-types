@@ -78,6 +78,7 @@ data CIByteString
       , ciLowerCase :: !B.ByteString
       }
 
+-- | Make a case-insensitive ByteString from a normal ByteString.
 mkCIByteString :: B.ByteString -> CIByteString
 mkCIByteString orig = CIByteString {
                             ciOriginal = orig
@@ -113,10 +114,6 @@ methodConnect = renderStdMethod CONNECT
 methodOptions = renderStdMethod OPTIONS
 
 -- | HTTP standard method (as defined by RFC 2616).
--- 
--- Note that the Show instance is only for debugging and should NOT be used to generate HTTP method strings; use 'methodToByteString' instead.
--- 
--- The constructor 'OtherMethod' is not exported for forwards compatibility reasons.
 data StdMethod
     = GET
     | POST
