@@ -1,10 +1,8 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Network.HTTP.Types
 (
-  -- * Case insensitive HTTP ByteStrings
-  CIByteString(..)
-, mkCIByteString
   -- * Methods
-, Method
+  Method
 , methodGet
 , methodPost
 , methodHead
@@ -66,41 +64,13 @@ import           Data.Array
 import           Data.Char
 import           Data.List
 import           Data.Maybe
-import           Data.String
 import           Numeric
 import qualified Data.ByteString       as B
 import qualified Data.ByteString.Char8 as Ascii
-
--- | Case-insensitive HTTP ByteStrings, mostly for use in Header names.
-data CIByteString
-    = CIByteString {
-        ciOriginal :: !B.ByteString
-      , ciLowerCase :: !B.ByteString
-      }
-
--- | Make a case-insensitive ByteString from a normal ByteString.
-mkCIByteString :: B.ByteString -> CIByteString
-mkCIByteString orig = CIByteString {
-                            ciOriginal = orig
-                          , ciLowerCase = Ascii.map toLower orig
-                          }
-
-instance Eq CIByteString where
-    CIByteString { ciLowerCase = a } == CIByteString { ciLowerCase = b } 
-        = a == b
-
-instance Ord CIByteString where
-    compare CIByteString { ciLowerCase = a } CIByteString { ciLowerCase = b } 
-        = compare a b
-
-instance Show CIByteString where
-    show = show . ciOriginal
-
-instance IsString CIByteString where
-    fromString = mkCIByteString . Ascii.pack
+import qualified Data.Ascii            as A
 
 -- | HTTP method (flat string type).
-type Method = B.ByteString
+type Method = A.Ascii
 
 -- | HTTP Method constants.
 methodGet, methodPost, methodHead, methodPut, methodDelete, methodTrace, methodConnect, methodOptions :: Method
@@ -129,17 +99,17 @@ data StdMethod
 -- lookup is probably faster for these few cases than setting up an elaborate data structure.
 
 methodArray :: Array StdMethod Method
-methodArray = listArray (minBound, maxBound) $ map (Ascii.pack . show) [minBound :: StdMethod .. maxBound]
+methodArray = listArray (minBound, maxBound) $ map (A.unsafeFromString . show) [minBound :: StdMethod .. maxBound]
 
 methodList :: [(Method, StdMethod)]
 methodList = map (\(a, b) -> (b, a)) (assocs methodArray)
 
 -- | Convert a method 'ByteString' to a 'StdMethod' if possible.
-parseMethod :: Method -> Either B.ByteString StdMethod
+parseMethod :: Method -> Either A.Ascii StdMethod
 parseMethod bs = maybe (Left bs) Right $ lookup bs methodList
 
 -- | Convert an algebraic method to a 'ByteString'.
-renderMethod :: Either B.ByteString StdMethod -> Method
+renderMethod :: Either A.Ascii StdMethod -> Method
 renderMethod = id ||| renderStdMethod
 
 -- | Convert a 'StdMethod' to a 'ByteString'.
@@ -179,7 +149,7 @@ http11 = HttpVersion 1 1
 data Status
     = Status {
         statusCode :: Int
-      , statusMessage :: B.ByteString
+      , statusMessage :: A.Ascii
       }
     deriving (Show)
 
@@ -191,61 +161,61 @@ instance Ord Status where
 
 -- | OK
 status200, statusOK :: Status
-status200 = Status 200 $ Ascii.pack "OK"
+status200 = Status 200 "OK"
 statusOK = status200
 
 -- | Created
 status201, statusCreated :: Status
-status201 = Status 200 $ Ascii.pack "Created"
+status201 = Status 201 "Created"
 statusCreated = status201
 
 -- | Moved Permanently
 status301, statusMovedPermanently :: Status
-status301 = Status 301 $ Ascii.pack "Moved Permanently"
+status301 = Status 301 "Moved Permanently"
 statusMovedPermanently = status301
 
 -- | Found
 status302, statusFound :: Status
-status302 = Status 302 $ Ascii.pack "Found"
+status302 = Status 302 "Found"
 statusFound = status302
 
 -- | See Other
 status303, statusSeeOther :: Status
-status303 = Status 303 $ Ascii.pack "See Other"
+status303 = Status 303 "See Other"
 statusSeeOther = status303
 
 -- | Bad Request
 status400, statusBadRequest :: Status
-status400 = Status 400 $ Ascii.pack "Bad Request"
+status400 = Status 400 "Bad Request"
 statusBadRequest = status400
 
 -- | Unauthorized
 status401, statusUnauthorized :: Status
-status401 = Status 401 $ Ascii.pack "Unauthorized"
+status401 = Status 401 "Unauthorized"
 statusUnauthorized = status401
 
 -- | Forbidden
 status403, statusForbidden :: Status
-status403 = Status 403 $ Ascii.pack "Forbidden"
+status403 = Status 403 "Forbidden"
 statusForbidden = status403
 
 -- | Not Found
 status404, statusNotFound :: Status
-status404 = Status 404 $ Ascii.pack "Not Found"
+status404 = Status 404 "Not Found"
 statusNotFound = status404
 
 -- | Method Not Allowed
 status405, statusNotAllowed :: Status
-status405 = Status 405 $ Ascii.pack "Method Not Allowed"
+status405 = Status 405 "Method Not Allowed"
 statusNotAllowed = status405
 
 -- | Internal Server Error
 status500, statusServerError :: Status
-status500 = Status 500 $ Ascii.pack "Internal Server Error"
+status500 = Status 500 "Internal Server Error"
 statusServerError = status500
 
 -- | Header
-type Header = (CIByteString, B.ByteString)
+type Header = (A.CIAscii, A.Ascii)
 
 -- | Request Headers
 type RequestHeaders = [Header]
@@ -253,19 +223,15 @@ type RequestHeaders = [Header]
 -- | Response Headers
 type ResponseHeaders = [Header]
 
-makeHeader :: String -> B.ByteString -> Header
-makeHeader a = \b -> (a', b)
-    where a' = mkCIByteString $ Ascii.pack a
-
 -- | HTTP Headers
-headerAccept, headerCacheControl, headerConnection, headerContentLength, headerContentType, headerContentMD5, headerDate :: B.ByteString -> Header
-headerAccept        = makeHeader "Accept"
-headerCacheControl  = makeHeader "Cache-Control"
-headerConnection    = makeHeader "Connection"
-headerContentLength = makeHeader "Content-Length"
-headerContentType   = makeHeader "Content-Type"
-headerContentMD5    = makeHeader "Content-MD5"
-headerDate          = makeHeader "Date"
+headerAccept, headerCacheControl, headerConnection, headerContentLength, headerContentType, headerContentMD5, headerDate :: A.Ascii -> Header
+headerAccept        = (,) "Accept"
+headerCacheControl  = (,) "Cache-Control"
+headerConnection    = (,) "Connection"
+headerContentLength = (,) "Content-Length"
+headerContentType   = (,) "Content-Type"
+headerContentMD5    = (,) "Content-MD5"
+headerDate          = (,) "Date"
 
 -- | Query item
 type QueryItem = (B.ByteString, Maybe B.ByteString)
@@ -283,7 +249,8 @@ type SimpleQueryItem = (B.ByteString, B.ByteString)
 type SimpleQuery = [SimpleQueryItem]
 
 -- | Convert 'Query' to 'ByteString'.
-renderQuery :: Bool -> Query -> B.ByteString
+renderQuery :: Bool -- ^ prepend question mark?
+            -> Query -> B.ByteString
 renderQuery useQuestionMark = B.concat 
                               . addQuestionMark
                               . intercalate [Ascii.pack "&"] 
@@ -299,7 +266,8 @@ renderQuery useQuestionMark = B.concat
       showQueryItem (n, Just v) = [urlEncode n, Ascii.pack "=", urlEncode v]
 
 -- | Convert 'SimpleQuery' to 'ByteString'.
-renderSimpleQuery :: Bool -> SimpleQuery -> B.ByteString
+renderSimpleQuery :: Bool -- ^ prepend question mark?
+                  -> SimpleQuery -> B.ByteString
 renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . map (\(k, v) -> (k, Just v))
 
 -- | Parse 'Query' from a 'ByteString'.
