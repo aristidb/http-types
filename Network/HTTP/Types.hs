@@ -68,6 +68,8 @@ import           Numeric
 import qualified Data.ByteString       as B
 import qualified Data.ByteString.Char8 as Ascii
 import qualified Data.Ascii            as A
+import           Data.Word             (Word8)
+import           Data.Bits             (shiftL, (.|.))
 
 -- | HTTP method (flat string type).
 type Method = A.Ascii
@@ -270,20 +272,58 @@ renderSimpleQuery :: Bool -- ^ prepend question mark?
                   -> SimpleQuery -> B.ByteString
 renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . map (\(k, v) -> (k, Just v))
 
--- | Parse 'Query' from a 'ByteString'.
+-- | Split out the query string into a list of keys and values. A few
+-- importants points:
+--
+-- * The result returned is still bytestrings, since we perform no character
+-- decoding here. Most likely, you will want to use UTF-8 decoding, but this is
+-- left to the user of the library.
+--
+-- * Percent decoding errors are ignored. In particular, "%Q" will be output as
+-- "%Q".
 parseQuery :: B.ByteString -> Query
-parseQuery bs = case Ascii.uncons bs of
-                  Nothing         -> []
-                  Just ('?', bs') -> parseQuery' bs'
-                  _               -> parseQuery' bs
-    where
-      parseQuery' = map parseQueryItem . Ascii.split '&'
-      parseQueryItem q = (k, v)
-        where (k', v') = Ascii.break (== '=') q
-              k = urlDecode k'
-              v = if B.null v'
-                  then Nothing
-                  else Just $ urlDecode $ B.tail v'
+parseQuery = parseQueryString' . dropQuestion
+  where
+    dropQuestion q =
+        case B.uncons q of
+            Just (63, q') -> q'
+            _ -> q
+    parseQueryString' q | B.null q = []
+    parseQueryString' q =
+        let (x, xs) = breakDiscard 38 q -- ampersand
+         in parsePair x : parseQueryString' xs
+      where
+        parsePair x =
+            let (k, v) = breakDiscard 61 x -- equal sign
+             in (qsDecode k, if B.null v then Nothing else Just (qsDecode v))
+
+
+qsDecode :: B.ByteString -> B.ByteString
+qsDecode z = fst $ B.unfoldrN (B.length z) go z
+  where
+    go bs =
+        case B.uncons bs of
+            Nothing -> Nothing
+            Just (43, ws) -> Just (32, ws) -- plus to space
+            Just (37, ws) -> Just $ fromMaybe (37, ws) $ do -- percent
+                (x, xs) <- B.uncons ws
+                x' <- hexVal x
+                (y, ys) <- B.uncons xs
+                y' <- hexVal y
+                Just $ (combine x' y', ys)
+            Just (w, ws) -> Just (w, ws)
+    hexVal w
+        | 48 <= w && w <= 57  = Just $ w - 48 -- 0 - 9
+        | 65 <= w && w <= 70  = Just $ w - 55 -- A - F
+        | 97 <= w && w <= 102 = Just $ w - 87 -- a - f
+        | otherwise = Nothing
+    combine :: Word8 -> Word8 -> Word8
+    combine a b = shiftL a 4 .|. b
+
+breakDiscard :: Word8 -> B.ByteString -> (B.ByteString, B.ByteString)
+breakDiscard w s =
+    let (x, y) = B.breakByte w s
+     in (x, B.drop 1 y)
 
 -- | Parse 'SimpleQuery' from a 'ByteString'.
 parseSimpleQuery :: B.ByteString -> SimpleQuery
