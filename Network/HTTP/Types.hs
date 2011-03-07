@@ -79,7 +79,8 @@ import           Data.Bits                   (shiftL, (.|.))
 import qualified Blaze.ByteString.Builder as Blaze
 import           Data.Monoid                 (mempty, mappend, mconcat)
 import           Data.Text                   (Text)
-import           Data.Text.Encoding          (encodeUtf8)
+import           Data.Text.Encoding          (encodeUtf8, decodeUtf8With)
+import           Data.Text.Encoding.Error    (lenientDecode)
 
 -- | HTTP method (flat string type).
 type Method = A.Ascii
@@ -314,17 +315,22 @@ parseQuery = parseQueryString' . dropQuestion
          in parsePair x : parseQueryString' xs
       where
         parsePair x =
-            let (k, v) = breakDiscard 61 x -- equal sign
-             in (qsDecode k, if B.null v then Nothing else Just (qsDecode v))
+            let (k, v) = B.breakByte 61 x -- equal sign
+                v'' =
+                    case B.uncons v of
+                        Just (_, v') -> Just $ qsDecode 32 v'
+                        _ -> Nothing
+             in (qsDecode 32 k, v'')
 
 
-qsDecode :: B.ByteString -> B.ByteString
-qsDecode z = fst $ B.unfoldrN (B.length z) go z
+qsDecode :: Word8 -- Replacement char for plus
+         -> B.ByteString -> B.ByteString
+qsDecode plus z = fst $ B.unfoldrN (B.length z) go z
   where
     go bs =
         case B.uncons bs of
             Nothing -> Nothing
-            Just (43, ws) -> Just (32, ws) -- plus to space
+            Just (43, ws) -> Just (plus, ws) -- plus to space
             Just (37, ws) -> Just $ fromMaybe (37, ws) $ do -- percent
                 (x, xs) <- B.uncons ws
                 x' <- hexVal x
@@ -418,17 +424,33 @@ urlDecode bs = case Ascii.uncons bs of
 -- correct escaping procedures.
 encodePathSegments :: [Text] -> A.AsciiBuilder
 encodePathSegments [] = mempty
-encodePathSegments [x] = encodePathSegment x
 encodePathSegments (x:xs) =
-    encodePathSegment x
-    `mappend` A.unsafeFromBuilder (Blaze.copyByteString "/")
+    A.unsafeFromBuilder (Blaze.copyByteString "/")
+    `mappend` encodePathSegment x
     `mappend` encodePathSegments xs
 
 encodePathSegment :: Text -> A.AsciiBuilder
 encodePathSegment = A.unsafeFromBuilder . Blaze.fromByteString . urlEncode unreservedPI . encodeUtf8
 
 decodePathSegments :: B.ByteString -> [Text]
-decodePathSegments = undefined
+decodePathSegments "" = []
+decodePathSegments "/" = []
+decodePathSegments a =
+    go $ drop1Slash a
+  where
+    drop1Slash bs =
+        case B.uncons bs of
+            Just (47, bs') -> bs' -- 47 == /
+            _ -> bs
+    go bs =
+        let (x, y) = B.breakByte 47 bs
+         in decodePathSegment x :
+            if B.null y
+                then []
+                else go $ B.drop 1 y
+
+decodePathSegment :: B.ByteString -> Text
+decodePathSegment = decodeUtf8With lenientDecode . qsDecode 43
 
 encodePath :: [Text] -> Query -> A.AsciiBuilder
 encodePath x [] = encodePathSegments x
