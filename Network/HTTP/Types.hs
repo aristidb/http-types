@@ -54,6 +54,8 @@ module Network.HTTP.Types
 , renderSimpleQuery
 , parseQuery
 , parseSimpleQuery
+  -- * Path segments
+, encodePathSegments
   -- * URL encoding / decoding
 , urlEncode
 , urlDecode
@@ -72,6 +74,8 @@ import           Data.Word                   (Word8)
 import           Data.Bits                   (shiftL, (.|.))
 import qualified Blaze.ByteString.Builder as Blaze
 import           Data.Monoid                 (mempty, mappend, mconcat)
+import           Data.Text                   (Text)
+import           Data.Text.Encoding          (encodeUtf8)
 
 -- | HTTP method (flat string type).
 type Method = A.Ascii
@@ -264,12 +268,12 @@ renderQueryBuilder qmark (p:ps) = mconcat
   where
     go sep (k, mv) =
         Blaze.copyByteString sep
-        `mappend` Blaze.copyByteString (urlEncode k)
+        `mappend` Blaze.copyByteString (urlEncode unreservedQS k)
         `mappend`
             (case mv of
                 Nothing -> mempty
                 Just v -> Blaze.copyByteString "=" `mappend`
-                          Blaze.copyByteString (urlEncode v))
+                          Blaze.copyByteString (urlEncode unreservedQS v))
 
 -- | Convert 'Query' to 'ByteString'.
 renderQuery :: Bool -- ^ prepend question mark?
@@ -338,10 +342,14 @@ breakDiscard w s =
 parseSimpleQuery :: B.ByteString -> SimpleQuery
 parseSimpleQuery = map (second $ fromMaybe B.empty) . parseQuery
 
+unreservedQS, unreservedPI :: String
+unreservedQS = "-_.~"
+unreservedPI = ":@&=+$,"
+
 -- | Percent-encoding for URLs. Note that this is only valid for query string
 -- parameters, not other URL components.
-urlEncode :: B.ByteString -> B.ByteString -- FIXME more efficient, use Builder
-urlEncode = Ascii.concatMap (Ascii.pack . encodeChar)
+urlEncode :: String -> B.ByteString -> B.ByteString -- FIXME more efficient, use Builder
+urlEncode extraUnreserved = Ascii.concatMap (Ascii.pack . encodeChar)
     where
       encodeChar :: Char -> [Char]
       encodeChar ch | unreserved ch = [ch]
@@ -351,11 +359,7 @@ urlEncode = Ascii.concatMap (Ascii.pack . encodeChar)
       unreserved ch | ch >= 'A' && ch <= 'Z' = True 
                     | ch >= 'a' && ch <= 'z' = True
                     | ch >= '0' && ch <= '9' = True 
-      unreserved '-' = True
-      unreserved '_' = True
-      unreserved '.' = True
-      unreserved '~' = True
-      unreserved _   = False
+      unreserved c = c `elem` extraUnreserved
       
       h2 :: Int -> [Char]
       h2 v = let (a, b) = v `divMod` 16 in ['%', h a, h b]
@@ -363,6 +367,10 @@ urlEncode = Ascii.concatMap (Ascii.pack . encodeChar)
       h :: Int -> Char
       h i | i < 10    = chr $ ord '0' + i
           | otherwise = chr $ ord 'A' + i - 10
+
+-- FIXME Aristid, this doesn't handle converting plus signs to spaces. That's
+-- only relevant for query strings, but nonetheless I don't think this function
+-- should be exported.
 
 -- | Percent-decoding.
 urlDecode :: B.ByteString -> B.ByteString
@@ -373,3 +381,41 @@ urlDecode bs = case Ascii.uncons bs of
                                     _ -> Ascii.cons '%' $ urlDecode x
                      where (pc, bs') = Ascii.splitAt 2 x
                  Just (c, bs') -> Ascii.cons c $ urlDecode bs'
+
+-- | Encodes a list of path segments into a valid URL fragment.
+--
+-- This function takes the following three steps:
+--
+-- * UTF-8 encodes the characters.
+--
+-- * Performs percent encoding on all unreserved characters, as well as \:\@\=\+\$,
+--
+-- * Intercalates with a slash.
+--
+-- For example:
+--
+-- > encodePathInfo [\"foo\", \"bar\", \"baz\"]
+--
+-- \"foo\/bar\/baz\"
+--
+-- > encodePathInfo [\"foo bar\", \"baz\/bin\"]
+--
+-- \"foo\%20bar\/baz\%2Fbin\"
+--
+-- > encodePathInfo [\"שלום\"]
+--
+-- \"%D7%A9%D7%9C%D7%95%D7%9D\"
+--
+-- Huge thanks to Jeremy Shaw who created the original implementation of this
+-- function in web-routes and did such thorough research to determine all
+-- correct escaping procedures.
+encodePathSegments :: [Text] -> Blaze.Builder
+encodePathSegments [] = mempty
+encodePathSegments [x] = encodePathSegment x
+encodePathSegments (x:xs) =
+    encodePathSegment x
+    `mappend` Blaze.copyByteString "/"
+    `mappend` encodePathSegments xs
+
+encodePathSegment :: Text -> Blaze.Builder
+encodePathSegment = Blaze.fromByteString . urlEncode unreservedPI . encodeUtf8
