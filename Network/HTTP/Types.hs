@@ -50,6 +50,7 @@ module Network.HTTP.Types
 , SimpleQueryItem
 , SimpleQuery
 , renderQuery
+, renderQueryBuilder
 , renderSimpleQuery
 , parseQuery
 , parseSimpleQuery
@@ -62,14 +63,15 @@ where
 import           Control.Arrow         (second, (|||))
 import           Data.Array
 import           Data.Char
-import           Data.List
 import           Data.Maybe
 import           Numeric
-import qualified Data.ByteString       as B
-import qualified Data.ByteString.Char8 as Ascii
-import qualified Data.Ascii            as A
-import           Data.Word             (Word8)
-import           Data.Bits             (shiftL, (.|.))
+import qualified Data.ByteString          as B
+import qualified Data.ByteString.Char8    as Ascii
+import qualified Data.Ascii               as A
+import           Data.Word                   (Word8)
+import           Data.Bits                   (shiftL, (.|.))
+import qualified Blaze.ByteString.Builder as Blaze
+import           Data.Monoid                 (mempty, mappend, mconcat)
 
 -- | HTTP method (flat string type).
 type Method = A.Ascii
@@ -250,22 +252,29 @@ type SimpleQueryItem = (B.ByteString, B.ByteString)
 -- | Simplified Query type without support for parameter-less items.
 type SimpleQuery = [SimpleQueryItem]
 
+renderQueryBuilder :: Bool -- ^ prepend a question mark?
+                   -> Query
+                   -> Blaze.Builder
+renderQueryBuilder False [] = mempty
+renderQueryBuilder True [] = Blaze.copyByteString "="
+-- FIXME replace mconcat + map with foldr
+renderQueryBuilder qmark (p:ps) = mconcat
+    $ go (if qmark then "?" else "") p
+    : map (go "&") ps
+  where
+    go sep (k, mv) =
+        Blaze.copyByteString sep
+        `mappend` Blaze.copyByteString (urlEncode k)
+        `mappend`
+            (case mv of
+                Nothing -> mempty
+                Just v -> Blaze.copyByteString "=" `mappend`
+                          Blaze.copyByteString (urlEncode v))
+
 -- | Convert 'Query' to 'ByteString'.
 renderQuery :: Bool -- ^ prepend question mark?
             -> Query -> B.ByteString
-renderQuery useQuestionMark = B.concat 
-                              . addQuestionMark
-                              . intercalate [Ascii.pack "&"] 
-                              . map showQueryItem 
-    where
-      addQuestionMark :: [B.ByteString] -> [B.ByteString]
-      addQuestionMark [] = []
-      addQuestionMark xs | useQuestionMark = Ascii.pack "?" : xs
-                         | otherwise       = xs
-      
-      showQueryItem :: (B.ByteString, Maybe B.ByteString) -> [B.ByteString]
-      showQueryItem (n, Nothing) = [urlEncode n]
-      showQueryItem (n, Just v) = [urlEncode n, Ascii.pack "=", urlEncode v]
+renderQuery qm = Blaze.toByteString . renderQueryBuilder qm
 
 -- | Convert 'SimpleQuery' to 'ByteString'.
 renderSimpleQuery :: Bool -- ^ prepend question mark?
@@ -329,8 +338,9 @@ breakDiscard w s =
 parseSimpleQuery :: B.ByteString -> SimpleQuery
 parseSimpleQuery = map (second $ fromMaybe B.empty) . parseQuery
 
--- | Percent-encoding for URLs.
-urlEncode :: B.ByteString -> B.ByteString
+-- | Percent-encoding for URLs. Note that this is only valid for query string
+-- parameters, not other URL components.
+urlEncode :: B.ByteString -> B.ByteString -- FIXME more efficient, use Builder
 urlEncode = Ascii.concatMap (Ascii.pack . encodeChar)
     where
       encodeChar :: Char -> [Char]
