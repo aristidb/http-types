@@ -262,31 +262,34 @@ type SimpleQuery = [SimpleQueryItem]
 
 renderQueryBuilder :: Bool -- ^ prepend a question mark?
                    -> Query
-                   -> Blaze.Builder
+                   -> A.AsciiBuilder
 renderQueryBuilder False [] = mempty
-renderQueryBuilder True [] = Blaze.copyByteString "?"
+renderQueryBuilder True [] = A.unsafeFromBuilder $ Blaze.copyByteString "?"
 -- FIXME replace mconcat + map with foldr
-renderQueryBuilder qmark (p:ps) = mconcat
-    $ go (if qmark then "?" else "") p
-    : map (go "&") ps
+renderQueryBuilder qmark' (p:ps) = mconcat
+    $ go (if qmark' then qmark else mempty) p
+    : map (go amp) ps
   where
+    qmark = A.unsafeFromBuilder $ Blaze.copyByteString "?"
+    amp = A.unsafeFromBuilder $ Blaze.copyByteString "&"
+    equal = A.unsafeFromBuilder $ Blaze.copyByteString "="
     go sep (k, mv) =
-        Blaze.copyByteString sep
-        `mappend` Blaze.copyByteString (urlEncode unreservedQS k)
+        sep
+        `mappend` A.unsafeFromBuilder (Blaze.copyByteString (urlEncode unreservedQS k))
         `mappend`
             (case mv of
                 Nothing -> mempty
-                Just v -> Blaze.copyByteString "=" `mappend`
-                          Blaze.copyByteString (urlEncode unreservedQS v))
+                Just v -> equal `mappend`
+                          A.unsafeFromBuilder (Blaze.copyByteString (urlEncode unreservedQS v)))
 
 -- | Convert 'Query' to 'ByteString'.
 renderQuery :: Bool -- ^ prepend question mark?
-            -> Query -> B.ByteString
-renderQuery qm = Blaze.toByteString . renderQueryBuilder qm
+            -> Query -> A.Ascii
+renderQuery qm = A.fromAsciiBuilder . renderQueryBuilder qm
 
 -- | Convert 'SimpleQuery' to 'ByteString'.
 renderSimpleQuery :: Bool -- ^ prepend question mark?
-                  -> SimpleQuery -> B.ByteString
+                  -> SimpleQuery -> A.Ascii
 renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . map (\(k, v) -> (k, Just v))
 
 -- | Split out the query string into a list of keys and values. A few
@@ -413,21 +416,21 @@ urlDecode bs = case Ascii.uncons bs of
 -- Huge thanks to Jeremy Shaw who created the original implementation of this
 -- function in web-routes and did such thorough research to determine all
 -- correct escaping procedures.
-encodePathSegments :: [Text] -> Blaze.Builder
+encodePathSegments :: [Text] -> A.AsciiBuilder
 encodePathSegments [] = mempty
 encodePathSegments [x] = encodePathSegment x
 encodePathSegments (x:xs) =
     encodePathSegment x
-    `mappend` Blaze.copyByteString "/"
+    `mappend` A.unsafeFromBuilder (Blaze.copyByteString "/")
     `mappend` encodePathSegments xs
 
-encodePathSegment :: Text -> Blaze.Builder
-encodePathSegment = Blaze.fromByteString . urlEncode unreservedPI . encodeUtf8
+encodePathSegment :: Text -> A.AsciiBuilder
+encodePathSegment = A.unsafeFromBuilder . Blaze.fromByteString . urlEncode unreservedPI . encodeUtf8
 
 decodePathSegments :: B.ByteString -> [Text]
 decodePathSegments = undefined
 
-encodePath :: [Text] -> Query -> Blaze.Builder
+encodePath :: [Text] -> Query -> A.AsciiBuilder
 encodePath x [] = encodePathSegments x
 encodePath x y = encodePathSegments x `mappend` renderQueryBuilder True y
 
