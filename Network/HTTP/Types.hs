@@ -56,6 +56,10 @@ module Network.HTTP.Types
 , parseSimpleQuery
   -- * Path segments
 , encodePathSegments
+, decodePathSegments
+  -- * Path (segments + query string)
+, encodePath
+, decodePath
   -- * URL encoding / decoding
 , urlEncode
 , urlDecode
@@ -260,7 +264,7 @@ renderQueryBuilder :: Bool -- ^ prepend a question mark?
                    -> Query
                    -> Blaze.Builder
 renderQueryBuilder False [] = mempty
-renderQueryBuilder True [] = Blaze.copyByteString "="
+renderQueryBuilder True [] = Blaze.copyByteString "?"
 -- FIXME replace mconcat + map with foldr
 renderQueryBuilder qmark (p:ps) = mconcat
     $ go (if qmark then "?" else "") p
@@ -419,3 +423,15 @@ encodePathSegments (x:xs) =
 
 encodePathSegment :: Text -> Blaze.Builder
 encodePathSegment = Blaze.fromByteString . urlEncode unreservedPI . encodeUtf8
+
+decodePathSegments :: B.ByteString -> [Text]
+decodePathSegments = undefined
+
+encodePath :: [Text] -> Query -> Blaze.Builder
+encodePath x [] = encodePathSegments x
+encodePath x y = encodePathSegments x `mappend` renderQueryBuilder True y
+
+decodePath :: B.ByteString -> ([Text], Query)
+decodePath b =
+    let (x, y) = B.breakByte 63 b
+     in (decodePathSegments x, parseQuery y)
