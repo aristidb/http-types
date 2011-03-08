@@ -49,6 +49,7 @@ module Network.HTTP.Types
 , Query
 , SimpleQueryItem
 , SimpleQuery
+, simpleQueryToQuery
 , renderQuery
 , renderSimpleQuery
 , parseQuery
@@ -247,6 +248,10 @@ type SimpleQueryItem = (B.ByteString, B.ByteString)
 
 -- | Simplified Query type without support for parameter-less items.
 type SimpleQuery = [SimpleQueryItem]
+
+-- | Convert 'SimpleQuery' to 'Query'.
+simpleQueryToQuery :: SimpleQuery -> Query
+simpleQueryToQuery = map (\(a, b) -> (a, Just b))
 
 -- | Convert 'Query' to 'ByteString'.
 renderQuery :: Bool -- ^ prepend question mark?
