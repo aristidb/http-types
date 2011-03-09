@@ -323,33 +323,9 @@ parseQuery = parseQueryString' . dropQuestion
             let (k, v) = B.breakByte 61 x -- equal sign
                 v'' =
                     case B.uncons v of
-                        Just (_, v') -> Just $ qsDecode 32 v'
+                        Just (_, v') -> Just $ urlDecode True v'
                         _ -> Nothing
-             in (qsDecode 32 k, v'')
-
-
-qsDecode :: Word8 -- Replacement char for plus
-         -> B.ByteString -> B.ByteString
-qsDecode plus z = fst $ B.unfoldrN (B.length z) go z
-  where
-    go bs =
-        case B.uncons bs of
-            Nothing -> Nothing
-            Just (43, ws) -> Just (plus, ws) -- plus to space
-            Just (37, ws) -> Just $ fromMaybe (37, ws) $ do -- percent
-                (x, xs) <- B.uncons ws
-                x' <- hexVal x
-                (y, ys) <- B.uncons xs
-                y' <- hexVal y
-                Just $ (combine x' y', ys)
-            Just (w, ws) -> Just (w, ws)
-    hexVal w
-        | 48 <= w && w <= 57  = Just $ w - 48 -- 0 - 9
-        | 65 <= w && w <= 70  = Just $ w - 55 -- A - F
-        | 97 <= w && w <= 102 = Just $ w - 87 -- a - f
-        | otherwise = Nothing
-    combine :: Word8 -> Word8 -> Word8
-    combine a b = shiftL a 4 .|. b
+             in (urlDecode True k, v'')
 
 breakDiscard :: Word8 -> B.ByteString -> (B.ByteString, B.ByteString)
 breakDiscard w s =
@@ -386,19 +362,29 @@ urlEncode extraUnreserved = Ascii.concatMap (Ascii.pack . encodeChar)
       h i | i < 10    = chr $ ord '0' + i
           | otherwise = chr $ ord 'A' + i - 10
 
--- FIXME Aristid, this doesn't handle converting plus signs to spaces. That's
--- only relevant for query strings, but nonetheless I don't think this function
--- should be exported.
-
 -- | Percent-decoding.
-urlDecode :: B.ByteString -> B.ByteString
-urlDecode bs = case Ascii.uncons bs of
-                 Nothing -> B.empty
-                 Just ('%', x) -> case readHex $ Ascii.unpack pc of
-                                    [(v, "")] -> chr v `Ascii.cons` urlDecode bs'
-                                    _ -> Ascii.cons '%' $ urlDecode x
-                     where (pc, bs') = Ascii.splitAt 2 x
-                 Just (c, bs') -> Ascii.cons c $ urlDecode bs'
+urlDecode :: Bool -- ^ Whether to decode '+' to ' '
+         -> B.ByteString -> B.ByteString
+urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
+  where
+    go bs =
+        case B.uncons bs of
+            Nothing -> Nothing
+            Just (43, ws) | replacePlus -> Just (32, ws) -- plus to space
+            Just (37, ws) -> Just $ fromMaybe (37, ws) $ do -- percent
+                (x, xs) <- B.uncons ws
+                x' <- hexVal x
+                (y, ys) <- B.uncons xs
+                y' <- hexVal y
+                Just $ (combine x' y', ys)
+            Just (w, ws) -> Just (w, ws)
+    hexVal w
+        | 48 <= w && w <= 57  = Just $ w - 48 -- 0 - 9
+        | 65 <= w && w <= 70  = Just $ w - 55 -- A - F
+        | 97 <= w && w <= 102 = Just $ w - 87 -- a - f
+        | otherwise = Nothing
+    combine :: Word8 -> Word8 -> Word8
+    combine a b = shiftL a 4 .|. b
 
 -- | Encodes a list of path segments into a valid URL fragment.
 --
@@ -455,7 +441,7 @@ decodePathSegments a =
                 else go $ B.drop 1 y
 
 decodePathSegment :: B.ByteString -> Text
-decodePathSegment = decodeUtf8With lenientDecode . qsDecode 43
+decodePathSegment = decodeUtf8With lenientDecode . urlDecode False
 
 encodePath :: [Text] -> Query -> A.AsciiBuilder
 encodePath x [] = encodePathSegments x
