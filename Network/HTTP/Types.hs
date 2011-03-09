@@ -62,6 +62,7 @@ module Network.HTTP.Types
 , encodePath
 , decodePath
   -- * URL encoding / decoding
+, urlEncodeBuilder
 , urlEncode
 , urlDecode
 )
@@ -279,14 +280,13 @@ renderQueryBuilder qmark' (p:ps) = mconcat
     qmark = A.unsafeFromBuilder $ Blaze.copyByteString "?"
     amp = A.unsafeFromBuilder $ Blaze.copyByteString "&"
     equal = A.unsafeFromBuilder $ Blaze.copyByteString "="
-    go sep (k, mv) =
-        sep
-        `mappend` A.unsafeFromBuilder (Blaze.copyByteString (urlEncode unreservedQS k))
-        `mappend`
-            (case mv of
-                Nothing -> mempty
-                Just v -> equal `mappend`
-                          A.unsafeFromBuilder (Blaze.copyByteString (urlEncode unreservedQS v)))
+    go sep (k, mv) = mconcat [
+                      sep
+                     , urlEncodeBuilder True k
+                     , case mv of
+                         Nothing -> mempty
+                         Just v -> equal `mappend` urlEncodeBuilder True v
+                     ]
 
 -- | Convert 'Query' to 'ByteString'.
 renderQuery :: Bool -- ^ prepend question mark?
@@ -336,31 +336,38 @@ breakDiscard w s =
 parseSimpleQuery :: B.ByteString -> SimpleQuery
 parseSimpleQuery = map (second $ fromMaybe B.empty) . parseQuery
 
-unreservedQS, unreservedPI :: String
-unreservedQS = "-_.~"
-unreservedPI = ":@&=+$,"
+ord8 :: Char -> Word8
+ord8 = fromIntegral . ord
 
--- | Percent-encoding for URLs. Note that this is only valid for query string
--- parameters, not other URL components.
-urlEncode :: String -> B.ByteString -> B.ByteString -- FIXME more efficient, use Builder
-urlEncode extraUnreserved = Ascii.concatMap (Ascii.pack . encodeChar)
+unreservedQS, unreservedPI :: [Word8]
+unreservedQS = map ord8 "-_.~"
+unreservedPI = map ord8 ":@&=+$,"
+
+-- | Percent-encoding for URLs.
+urlEncodeBuilder' :: [Word8] -> B.ByteString -> A.AsciiBuilder
+urlEncodeBuilder' extraUnreserved = A.unsafeFromBuilder . mconcat . map encodeChar . B.unpack
     where
-      encodeChar :: Char -> [Char]
-      encodeChar ch | unreserved ch = [ch]
-                    | otherwise     = h2 $ ord ch
+      encodeChar ch | unreserved ch = Blaze.fromWord8 ch
+                    | otherwise     = h2 ch
       
-      unreserved :: Char -> Bool
-      unreserved ch | ch >= 'A' && ch <= 'Z' = True 
-                    | ch >= 'a' && ch <= 'z' = True
-                    | ch >= '0' && ch <= '9' = True 
+      unreserved ch | ch >= 65 && ch <= 90  = True -- A-Z
+                    | ch >= 97 && ch <= 122 = True -- a-z
+                    | ch >= 48 && ch <= 97  = True -- 0-9
       unreserved c = c `elem` extraUnreserved
       
-      h2 :: Int -> [Char]
-      h2 v = let (a, b) = v `divMod` 16 in ['%', h a, h b]
-      
-      h :: Int -> Char
-      h i | i < 10    = chr $ ord '0' + i
-          | otherwise = chr $ ord 'A' + i - 10
+      h2 v = let (a, b) = v `divMod` 16 in Blaze.fromWord8s [37, h a, h b] -- percent (%)
+      h i | i < 10    = 48 + i -- zero (0)
+          | otherwise = 65 + i - 10 -- 65: A
+
+urlEncodeBuilder
+    :: Bool -- ^ Whether input is in query string. True: Query string, False: Path element
+    -> B.ByteString
+    -> A.AsciiBuilder
+urlEncodeBuilder True  = urlEncodeBuilder' unreservedQS
+urlEncodeBuilder False = urlEncodeBuilder' unreservedPI
+
+urlEncode :: Bool -> Ascii.ByteString -> A.Ascii
+urlEncode q = A.fromAsciiBuilder . urlEncodeBuilder q
 
 -- | Percent-decoding.
 urlDecode :: Bool -- ^ Whether to decode '+' to ' '
@@ -421,7 +428,7 @@ encodePathSegments (x:xs) =
     `mappend` encodePathSegments xs
 
 encodePathSegment :: Text -> A.AsciiBuilder
-encodePathSegment = A.unsafeFromBuilder . Blaze.fromByteString . urlEncode unreservedPI . encodeUtf8
+encodePathSegment = urlEncodeBuilder False . encodeUtf8
 
 decodePathSegments :: B.ByteString -> [Text]
 decodePathSegments "" = []
