@@ -76,3 +76,5 @@ executable             runtests
     if flag(test)
         Buildable: True
         build-depends: text, bytestring, base, blaze-builder, ascii, array, QuickCheck, hspec >= 0.3 && < 0.4
+    else
+        Buildable: False
