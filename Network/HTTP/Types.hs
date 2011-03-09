@@ -352,7 +352,7 @@ urlEncodeBuilder' extraUnreserved = A.unsafeFromBuilder . mconcat . map encodeCh
       
       unreserved ch | ch >= 65 && ch <= 90  = True -- A-Z
                     | ch >= 97 && ch <= 122 = True -- a-z
-                    | ch >= 48 && ch <= 97  = True -- 0-9
+                    | ch >= 48 && ch <= 57  = True -- 0-9
       unreserved c = c `elem` extraUnreserved
       
       h2 v = let (a, b) = v `divMod` 16 in Blaze.fromWord8s [37, h a, h b] -- percent (%)
