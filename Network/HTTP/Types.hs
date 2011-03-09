@@ -78,7 +78,6 @@ import           Data.Text                (Text)
 import           Data.Text.Encoding       (encodeUtf8, decodeUtf8With)
 import           Data.Text.Encoding.Error (lenientDecode)
 import           Data.Word                (Word8)
-import           Numeric
 import qualified Blaze.ByteString.Builder as Blaze
 import qualified Data.Ascii               as A
 import qualified Data.ByteString          as B
