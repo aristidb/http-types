@@ -273,7 +273,7 @@ renderQuery useQuestionMark = B.concat
 -- | Convert 'SimpleQuery' to 'ByteString'.
 renderSimpleQuery :: Bool -- ^ prepend question mark?
                   -> SimpleQuery -> B.ByteString
-renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . map (\(k, v) -> (k, Just v))
+renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . simpleQueryToQuery
 
 -- | Parse 'Query' from a 'ByteString'.
 parseQuery :: B.ByteString -> Query
