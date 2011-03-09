@@ -1,10 +1,11 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 import Debug.Trace
-import Test.Framework (defaultMain, testGroup, Test)
-import Test.Framework.Providers.QuickCheck2
-import Test.QuickCheck
+import Test.Hspec
+import Test.Hspec.QuickCheck
+import Test.QuickCheck (Arbitrary (..))
 import qualified Data.Ascii               as A
 import Network.HTTP.Types
 import           Data.Text                   (Text)
@@ -12,13 +13,19 @@ import qualified Data.ByteString as S
 import qualified Data.Text as T
 
 main :: IO ()
-main = defaultMain [testSuite]
-
-testSuite :: Test
-testSuite = testGroup "http-types"
-    [ testProperty "encode/decode path" propEncodeDecodePath
-    , testProperty "encode/decode query" propEncodeDecodeQuery
-    , testProperty "encode/decode path segments" propEncodeDecodePathSegments
+main = hspec $ descriptions
+    [ describe "encode/decode path"
+        [ it "is identity to encode and then decode"
+            $ property propEncodeDecodePath
+        ]
+    , describe "encode/decode query"
+        [ it "is identity to encode and then decode"
+            $ property propEncodeDecodeQuery
+        ]
+    , describe "encode/decode path segments"
+        [ it "is identity to encode and then decode"
+            $ property propEncodeDecodePathSegments
+        ]
     ]
 
 propEncodeDecodePath :: ([Text], Query) -> Bool
