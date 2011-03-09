@@ -67,21 +67,21 @@ module Network.HTTP.Types
 )
 where
 
-import           Control.Arrow         (second, (|||))
+import           Control.Arrow            (second, (|||))
 import           Data.Array
+import           Data.Bits                (shiftL, (.|.))
 import           Data.Char
 import           Data.Maybe
+import           Data.Monoid              (mempty, mappend, mconcat)
+import           Data.Text                (Text)
+import           Data.Text.Encoding       (encodeUtf8, decodeUtf8With)
+import           Data.Text.Encoding.Error (lenientDecode)
+import           Data.Word                (Word8)
 import           Numeric
+import qualified Blaze.ByteString.Builder as Blaze
+import qualified Data.Ascii               as A
 import qualified Data.ByteString          as B
 import qualified Data.ByteString.Char8    as Ascii
-import qualified Data.Ascii               as A
-import           Data.Word                   (Word8)
-import           Data.Bits                   (shiftL, (.|.))
-import qualified Blaze.ByteString.Builder as Blaze
-import           Data.Monoid                 (mempty, mappend, mconcat)
-import           Data.Text                   (Text)
-import           Data.Text.Encoding          (encodeUtf8, decodeUtf8With)
-import           Data.Text.Encoding.Error    (lenientDecode)
 
 -- | HTTP method (flat string type).
 type Method = A.Ascii
