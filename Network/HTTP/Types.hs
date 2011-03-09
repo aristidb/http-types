@@ -51,9 +51,16 @@ module Network.HTTP.Types
 , SimpleQuery
 , simpleQueryToQuery
 , renderQuery
+, renderQueryBuilder
 , renderSimpleQuery
 , parseQuery
 , parseSimpleQuery
+  -- * Path segments
+, encodePathSegments
+, decodePathSegments
+  -- * Path (segments + query string)
+, encodePath
+, decodePath
   -- * URL encoding / decoding
 , urlEncode
 , urlDecode
@@ -63,12 +70,18 @@ where
 import           Control.Arrow         (second, (|||))
 import           Data.Array
 import           Data.Char
-import           Data.List
 import           Data.Maybe
 import           Numeric
-import qualified Data.ByteString       as B
-import qualified Data.ByteString.Char8 as Ascii
-import qualified Data.Ascii            as A
+import qualified Data.ByteString          as B
+import qualified Data.ByteString.Char8    as Ascii
+import qualified Data.Ascii               as A
+import           Data.Word                   (Word8)
+import           Data.Bits                   (shiftL, (.|.))
+import qualified Blaze.ByteString.Builder as Blaze
+import           Data.Monoid                 (mempty, mappend, mconcat)
+import           Data.Text                   (Text)
+import           Data.Text.Encoding          (encodeUtf8, decodeUtf8With)
+import           Data.Text.Encoding.Error    (lenientDecode)
 
 -- | HTTP method (flat string type).
 type Method = A.Ascii
@@ -253,50 +266,108 @@ type SimpleQuery = [SimpleQueryItem]
 simpleQueryToQuery :: SimpleQuery -> Query
 simpleQueryToQuery = map (\(a, b) -> (a, Just b))
 
+renderQueryBuilder :: Bool -- ^ prepend a question mark?
+                   -> Query
+                   -> A.AsciiBuilder
+renderQueryBuilder False [] = mempty
+renderQueryBuilder True [] = A.unsafeFromBuilder $ Blaze.copyByteString "?"
+-- FIXME replace mconcat + map with foldr
+renderQueryBuilder qmark' (p:ps) = mconcat
+    $ go (if qmark' then qmark else mempty) p
+    : map (go amp) ps
+  where
+    qmark = A.unsafeFromBuilder $ Blaze.copyByteString "?"
+    amp = A.unsafeFromBuilder $ Blaze.copyByteString "&"
+    equal = A.unsafeFromBuilder $ Blaze.copyByteString "="
+    go sep (k, mv) =
+        sep
+        `mappend` A.unsafeFromBuilder (Blaze.copyByteString (urlEncode unreservedQS k))
+        `mappend`
+            (case mv of
+                Nothing -> mempty
+                Just v -> equal `mappend`
+                          A.unsafeFromBuilder (Blaze.copyByteString (urlEncode unreservedQS v)))
+
 -- | Convert 'Query' to 'ByteString'.
 renderQuery :: Bool -- ^ prepend question mark?
-            -> Query -> B.ByteString
-renderQuery useQuestionMark = B.concat 
-                              . addQuestionMark
-                              . intercalate [Ascii.pack "&"] 
-                              . map showQueryItem 
-    where
-      addQuestionMark :: [B.ByteString] -> [B.ByteString]
-      addQuestionMark [] = []
-      addQuestionMark xs | useQuestionMark = Ascii.pack "?" : xs
-                         | otherwise       = xs
-      
-      showQueryItem :: (B.ByteString, Maybe B.ByteString) -> [B.ByteString]
-      showQueryItem (n, Nothing) = [urlEncode n]
-      showQueryItem (n, Just v) = [urlEncode n, Ascii.pack "=", urlEncode v]
+            -> Query -> A.Ascii
+renderQuery qm = A.fromAsciiBuilder . renderQueryBuilder qm
 
 -- | Convert 'SimpleQuery' to 'ByteString'.
 renderSimpleQuery :: Bool -- ^ prepend question mark?
-                  -> SimpleQuery -> B.ByteString
+                  -> SimpleQuery -> A.Ascii
 renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . simpleQueryToQuery
 
--- | Parse 'Query' from a 'ByteString'.
+-- | Split out the query string into a list of keys and values. A few
+-- importants points:
+--
+-- * The result returned is still bytestrings, since we perform no character
+-- decoding here. Most likely, you will want to use UTF-8 decoding, but this is
+-- left to the user of the library.
+--
+-- * Percent decoding errors are ignored. In particular, "%Q" will be output as
+-- "%Q".
 parseQuery :: B.ByteString -> Query
-parseQuery bs = case Ascii.uncons bs of
-                  Nothing         -> []
-                  Just ('?', bs') -> parseQuery' bs'
-                  _               -> parseQuery' bs
-    where
-      parseQuery' = map parseQueryItem . Ascii.split '&'
-      parseQueryItem q = (k, v)
-        where (k', v') = Ascii.break (== '=') q
-              k = urlDecode k'
-              v = if B.null v'
-                  then Nothing
-                  else Just $ urlDecode $ B.tail v'
+parseQuery = parseQueryString' . dropQuestion
+  where
+    dropQuestion q =
+        case B.uncons q of
+            Just (63, q') -> q'
+            _ -> q
+    parseQueryString' q | B.null q = []
+    parseQueryString' q =
+        let (x, xs) = breakDiscard 38 q -- ampersand
+         in parsePair x : parseQueryString' xs
+      where
+        parsePair x =
+            let (k, v) = B.breakByte 61 x -- equal sign
+                v'' =
+                    case B.uncons v of
+                        Just (_, v') -> Just $ qsDecode 32 v'
+                        _ -> Nothing
+             in (qsDecode 32 k, v'')
+
+
+qsDecode :: Word8 -- Replacement char for plus
+         -> B.ByteString -> B.ByteString
+qsDecode plus z = fst $ B.unfoldrN (B.length z) go z
+  where
+    go bs =
+        case B.uncons bs of
+            Nothing -> Nothing
+            Just (43, ws) -> Just (plus, ws) -- plus to space
+            Just (37, ws) -> Just $ fromMaybe (37, ws) $ do -- percent
+                (x, xs) <- B.uncons ws
+                x' <- hexVal x
+                (y, ys) <- B.uncons xs
+                y' <- hexVal y
+                Just $ (combine x' y', ys)
+            Just (w, ws) -> Just (w, ws)
+    hexVal w
+        | 48 <= w && w <= 57  = Just $ w - 48 -- 0 - 9
+        | 65 <= w && w <= 70  = Just $ w - 55 -- A - F
+        | 97 <= w && w <= 102 = Just $ w - 87 -- a - f
+        | otherwise = Nothing
+    combine :: Word8 -> Word8 -> Word8
+    combine a b = shiftL a 4 .|. b
+
+breakDiscard :: Word8 -> B.ByteString -> (B.ByteString, B.ByteString)
+breakDiscard w s =
+    let (x, y) = B.breakByte w s
+     in (x, B.drop 1 y)
 
 -- | Parse 'SimpleQuery' from a 'ByteString'.
 parseSimpleQuery :: B.ByteString -> SimpleQuery
 parseSimpleQuery = map (second $ fromMaybe B.empty) . parseQuery
 
--- | Percent-encoding for URLs.
-urlEncode :: B.ByteString -> B.ByteString
-urlEncode = Ascii.concatMap (Ascii.pack . encodeChar)
+unreservedQS, unreservedPI :: String
+unreservedQS = "-_.~"
+unreservedPI = ":@&=+$,"
+
+-- | Percent-encoding for URLs. Note that this is only valid for query string
+-- parameters, not other URL components.
+urlEncode :: String -> B.ByteString -> B.ByteString -- FIXME more efficient, use Builder
+urlEncode extraUnreserved = Ascii.concatMap (Ascii.pack . encodeChar)
     where
       encodeChar :: Char -> [Char]
       encodeChar ch | unreserved ch = [ch]
@@ -306,11 +377,7 @@ urlEncode = Ascii.concatMap (Ascii.pack . encodeChar)
       unreserved ch | ch >= 'A' && ch <= 'Z' = True 
                     | ch >= 'a' && ch <= 'z' = True
                     | ch >= '0' && ch <= '9' = True 
-      unreserved '-' = True
-      unreserved '_' = True
-      unreserved '.' = True
-      unreserved '~' = True
-      unreserved _   = False
+      unreserved c = c `elem` extraUnreserved
       
       h2 :: Int -> [Char]
       h2 v = let (a, b) = v `divMod` 16 in ['%', h a, h b]
@@ -318,6 +385,10 @@ urlEncode = Ascii.concatMap (Ascii.pack . encodeChar)
       h :: Int -> Char
       h i | i < 10    = chr $ ord '0' + i
           | otherwise = chr $ ord 'A' + i - 10
+
+-- FIXME Aristid, this doesn't handle converting plus signs to spaces. That's
+-- only relevant for query strings, but nonetheless I don't think this function
+-- should be exported.
 
 -- | Percent-decoding.
 urlDecode :: B.ByteString -> B.ByteString
@@ -328,3 +399,69 @@ urlDecode bs = case Ascii.uncons bs of
                                     _ -> Ascii.cons '%' $ urlDecode x
                      where (pc, bs') = Ascii.splitAt 2 x
                  Just (c, bs') -> Ascii.cons c $ urlDecode bs'
+
+-- | Encodes a list of path segments into a valid URL fragment.
+--
+-- This function takes the following three steps:
+--
+-- * UTF-8 encodes the characters.
+--
+-- * Performs percent encoding on all unreserved characters, as well as \:\@\=\+\$,
+--
+-- * Intercalates with a slash.
+--
+-- For example:
+--
+-- > encodePathInfo [\"foo\", \"bar\", \"baz\"]
+--
+-- \"foo\/bar\/baz\"
+--
+-- > encodePathInfo [\"foo bar\", \"baz\/bin\"]
+--
+-- \"foo\%20bar\/baz\%2Fbin\"
+--
+-- > encodePathInfo [\"שלום\"]
+--
+-- \"%D7%A9%D7%9C%D7%95%D7%9D\"
+--
+-- Huge thanks to Jeremy Shaw who created the original implementation of this
+-- function in web-routes and did such thorough research to determine all
+-- correct escaping procedures.
+encodePathSegments :: [Text] -> A.AsciiBuilder
+encodePathSegments [] = mempty
+encodePathSegments (x:xs) =
+    A.unsafeFromBuilder (Blaze.copyByteString "/")
+    `mappend` encodePathSegment x
+    `mappend` encodePathSegments xs
+
+encodePathSegment :: Text -> A.AsciiBuilder
+encodePathSegment = A.unsafeFromBuilder . Blaze.fromByteString . urlEncode unreservedPI . encodeUtf8
+
+decodePathSegments :: B.ByteString -> [Text]
+decodePathSegments "" = []
+decodePathSegments "/" = []
+decodePathSegments a =
+    go $ drop1Slash a
+  where
+    drop1Slash bs =
+        case B.uncons bs of
+            Just (47, bs') -> bs' -- 47 == /
+            _ -> bs
+    go bs =
+        let (x, y) = B.breakByte 47 bs
+         in decodePathSegment x :
+            if B.null y
+                then []
+                else go $ B.drop 1 y
+
+decodePathSegment :: B.ByteString -> Text
+decodePathSegment = decodeUtf8With lenientDecode . qsDecode 43
+
+encodePath :: [Text] -> Query -> A.AsciiBuilder
+encodePath x [] = encodePathSegments x
+encodePath x y = encodePathSegments x `mappend` renderQueryBuilder True y
+
+decodePath :: B.ByteString -> ([Text], Query)
+decodePath b =
+    let (x, y) = B.breakByte 63 b
+     in (decodePathSegments x, parseQuery y)

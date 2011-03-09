@@ -45,6 +45,9 @@ Extra-source-files:  README
 -- Constraint on the version of Cabal needed to build this package.
 Cabal-version:       >=1.8
 
+flag test
+  description: Build the executable to run unit tests
+  default: False
 
 Library
   -- Modules exported by the library.
@@ -57,7 +60,9 @@ Library
   Build-depends:       base >= 4 && < 5,
                        bytestring >=0.9.1.5 && <0.10,
                        array >=0.3 && <0.4,
-                       ascii >= 0.0 && < 0.1
+                       ascii >= 0.0.1.1 && < 0.1,
+                       blaze-builder >= 0.2.1.4 && < 0.3,
+                       text >= 0.11.0.2 && < 0.12
   
   -- Modules not exported by this package.
   -- Other-modules:       
@@ -65,3 +70,11 @@ Library
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   -- Build-tools:         
   
+
+executable             runtests
+    main-is:           runtests.hs
+    if flag(test)
+        Buildable: True
+        build-depends: text, bytestring, base, blaze-builder, ascii, array, QuickCheck, hspec >= 0.3 && < 0.4
+    else
+        Buildable: False
