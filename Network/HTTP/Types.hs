@@ -24,6 +24,7 @@ module Network.HTTP.Types
 , Status(..)
 , status200, statusOK
 , status201, statusCreated
+, status206, statusPartialContent
 , status301, statusMovedPermanently
 , status302, statusFound
 , status303, statusSeeOther
@@ -182,6 +183,11 @@ statusOK = status200
 status201, statusCreated :: Status
 status201 = Status 201 "Created"
 statusCreated = status201
+
+-- | PartialContent
+status206, statusPartialContent :: Status
+status206 = Status 206 "PartialContent"
+statusPartialContent = status206
 
 -- | Moved Permanently
 status301, statusMovedPermanently :: Status
