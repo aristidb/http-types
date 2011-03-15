@@ -56,6 +56,12 @@ module Network.HTTP.Types
 , renderSimpleQuery
 , parseQuery
 , parseSimpleQuery
+  -- ** Text query string (UTF8 encoded)
+, QueryText
+, queryTextToQuery
+, queryToQueryText
+, renderQueryText
+, parseQueryText
   -- * Path segments
 , encodePathSegments
 , decodePathSegments
@@ -69,7 +75,7 @@ module Network.HTTP.Types
 )
 where
 
-import           Control.Arrow            (second, (|||))
+import           Control.Arrow            (second, (|||), (***))
 import           Data.Array
 import           Data.Bits                (shiftL, (.|.))
 import           Data.Char
@@ -261,6 +267,25 @@ type QueryItem = (B.ByteString, Maybe B.ByteString)
 -- General form: a=b&c=d, but if the value is Nothing, it becomes
 -- a&c=d.
 type Query = [QueryItem]
+
+type QueryText = [(Text, Maybe Text)]
+
+queryTextToQuery :: QueryText -> Query
+queryTextToQuery = map $ encodeUtf8 *** fmap encodeUtf8
+
+renderQueryText :: Bool -- ^ prepend a question mark?
+                -> QueryText
+                -> A.AsciiBuilder
+renderQueryText b = renderQueryBuilder b . queryTextToQuery
+
+queryToQueryText :: Query -> QueryText
+queryToQueryText =
+    map $ go *** fmap go
+  where
+    go = decodeUtf8With lenientDecode
+
+parseQueryText :: B.ByteString -> QueryText
+parseQueryText = queryToQueryText . parseQuery
 
 -- | Simplified Query item type without support for parameter-less items.
 type SimpleQueryItem = (B.ByteString, B.ByteString)
