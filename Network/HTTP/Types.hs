@@ -300,8 +300,7 @@ simpleQueryToQuery = map (\(a, b) -> (a, Just b))
 renderQueryBuilder :: Bool -- ^ prepend a question mark?
                    -> Query
                    -> A.AsciiBuilder
-renderQueryBuilder False [] = mempty
-renderQueryBuilder True [] = A.unsafeFromBuilder $ Blaze.copyByteString "?"
+renderQueryBuilder _ [] = mempty
 -- FIXME replace mconcat + map with foldr
 renderQueryBuilder qmark' (p:ps) = mconcat
     $ go (if qmark' then qmark else mempty) p
