@@ -2,16 +2,16 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-import           Data.Text             (Text)
+import           Data.Text                (Text)
 import           Debug.Trace
 import           Network.HTTP.Types
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
-import           Test.QuickCheck       (Arbitrary (..))
-import qualified Data.Ascii            as A
-import qualified Data.ByteString       as S
-import qualified Data.ByteString.Char8 as S8
-import qualified Data.Text             as T
+import           Test.QuickCheck          (Arbitrary (..))
+import qualified Blaze.ByteString.Builder as Blaze
+import qualified Data.ByteString          as S
+import qualified Data.ByteString.Char8    as S8
+import qualified Data.Text                as T
 
 main :: IO ()
 main = hspec $ descriptions
@@ -33,7 +33,7 @@ main = hspec $ descriptions
 
 propEncodeDecodePath :: ([Text], Query) -> Bool
 propEncodeDecodePath (p', q') =
-    let x = A.toByteString $ A.fromAsciiBuilder $ encodePath a b
+    let x = Blaze.toByteString $ encodePath a b
         y = decodePath x
         z = y == (a, b)
      in if z then z else traceShow (a, b, x, y) z
@@ -43,14 +43,14 @@ propEncodeDecodePath (p', q') =
 
 propEncodeDecodeQuery :: Query -> Bool
 propEncodeDecodeQuery q' =
-    q == parseQuery (A.toByteString $ renderQuery True q)
+    q == parseQuery (renderQuery True q)
   where
     q = filter (\(x, _) -> not (S.null x)) q'
 
 propQueryQuestionMark :: (Bool, Query) -> Bool
 propQueryQuestionMark (useQuestionMark, query) = actual == expected
     where
-      actual = case S8.uncons . A.toByteString $ renderQuery useQuestionMark query of
+      actual = case S8.uncons $ renderQuery useQuestionMark query of
                  Nothing       -> False
                  Just ('?', _) -> True
                  _             -> False
@@ -61,7 +61,7 @@ propQueryQuestionMark (useQuestionMark, query) = actual == expected
           
 propEncodeDecodePathSegments :: [Text] -> Bool
 propEncodeDecodePathSegments p' =
-    p == decodePathSegments (A.toByteString $ A.fromAsciiBuilder $ encodePathSegments p)
+    p == decodePathSegments (Blaze.toByteString $ encodePathSegments p)
   where
     p = if p' == [""] then [] else p'
 

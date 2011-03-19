@@ -1,8 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Network.HTTP.Types
 (
+  -- * General
+  Ascii
   -- * Methods
-  Method
+, Method
 , methodGet
 , methodPost
 , methodHead
@@ -86,12 +88,14 @@ import           Data.Text.Encoding       (encodeUtf8, decodeUtf8With)
 import           Data.Text.Encoding.Error (lenientDecode)
 import           Data.Word                (Word8)
 import qualified Blaze.ByteString.Builder as Blaze
-import qualified Data.Ascii               as A
 import qualified Data.ByteString          as B
-import qualified Data.ByteString.Char8    as Ascii
+import qualified Data.ByteString.Char8    as B8
+import qualified Data.CaseInsensitive     as CI
+
+type Ascii = B.ByteString
 
 -- | HTTP method (flat string type).
-type Method = A.Ascii
+type Method = Ascii
 
 -- | HTTP Method constants.
 methodGet, methodPost, methodHead, methodPut, methodDelete, methodTrace, methodConnect, methodOptions :: Method
@@ -120,17 +124,17 @@ data StdMethod
 -- lookup is probably faster for these few cases than setting up an elaborate data structure.
 
 methodArray :: Array StdMethod Method
-methodArray = listArray (minBound, maxBound) $ map (A.unsafeFromString . show) [minBound :: StdMethod .. maxBound]
+methodArray = listArray (minBound, maxBound) $ map (B8.pack . show) [minBound :: StdMethod .. maxBound]
 
 methodList :: [(Method, StdMethod)]
 methodList = map (\(a, b) -> (b, a)) (assocs methodArray)
 
 -- | Convert a method 'ByteString' to a 'StdMethod' if possible.
-parseMethod :: Method -> Either A.Ascii StdMethod
+parseMethod :: Method -> Either Ascii StdMethod
 parseMethod bs = maybe (Left bs) Right $ lookup bs methodList
 
 -- | Convert an algebraic method to a 'ByteString'.
-renderMethod :: Either A.Ascii StdMethod -> Method
+renderMethod :: Either Ascii StdMethod -> Method
 renderMethod = id ||| renderStdMethod
 
 -- | Convert a 'StdMethod' to a 'ByteString'.
@@ -170,7 +174,7 @@ http11 = HttpVersion 1 1
 data Status
     = Status {
         statusCode :: Int
-      , statusMessage :: A.Ascii
+      , statusMessage :: Ascii
       }
     deriving (Show)
 
@@ -241,7 +245,7 @@ status500 = Status 500 "Internal Server Error"
 statusServerError = status500
 
 -- | Header
-type Header = (A.CIAscii, A.Ascii)
+type Header = (CI.CI Ascii, Ascii)
 
 -- | Request Headers
 type RequestHeaders = [Header]
@@ -250,7 +254,7 @@ type RequestHeaders = [Header]
 type ResponseHeaders = [Header]
 
 -- | HTTP Headers
-headerAccept, headerCacheControl, headerConnection, headerContentLength, headerContentType, headerContentMD5, headerDate :: A.Ascii -> Header
+headerAccept, headerCacheControl, headerConnection, headerContentLength, headerContentType, headerContentMD5, headerDate :: Ascii -> Header
 headerAccept        = (,) "Accept"
 headerCacheControl  = (,) "Cache-Control"
 headerConnection    = (,) "Connection"
@@ -275,7 +279,7 @@ queryTextToQuery = map $ encodeUtf8 *** fmap encodeUtf8
 
 renderQueryText :: Bool -- ^ prepend a question mark?
                 -> QueryText
-                -> A.AsciiBuilder
+                -> Blaze.Builder
 renderQueryText b = renderQueryBuilder b . queryTextToQuery
 
 queryToQueryText :: Query -> QueryText
@@ -299,16 +303,16 @@ simpleQueryToQuery = map (\(a, b) -> (a, Just b))
 
 renderQueryBuilder :: Bool -- ^ prepend a question mark?
                    -> Query
-                   -> A.AsciiBuilder
+                   -> Blaze.Builder
 renderQueryBuilder _ [] = mempty
 -- FIXME replace mconcat + map with foldr
 renderQueryBuilder qmark' (p:ps) = mconcat
     $ go (if qmark' then qmark else mempty) p
     : map (go amp) ps
   where
-    qmark = A.unsafeFromBuilder $ Blaze.copyByteString "?"
-    amp = A.unsafeFromBuilder $ Blaze.copyByteString "&"
-    equal = A.unsafeFromBuilder $ Blaze.copyByteString "="
+    qmark = Blaze.copyByteString "?"
+    amp = Blaze.copyByteString "&"
+    equal = Blaze.copyByteString "="
     go sep (k, mv) = mconcat [
                       sep
                      , urlEncodeBuilder True k
@@ -319,12 +323,12 @@ renderQueryBuilder qmark' (p:ps) = mconcat
 
 -- | Convert 'Query' to 'ByteString'.
 renderQuery :: Bool -- ^ prepend question mark?
-            -> Query -> A.Ascii
-renderQuery qm = A.fromAsciiBuilder . renderQueryBuilder qm
+            -> Query -> Ascii
+renderQuery qm = Blaze.toByteString . renderQueryBuilder qm
 
 -- | Convert 'SimpleQuery' to 'ByteString'.
 renderSimpleQuery :: Bool -- ^ prepend question mark?
-                  -> SimpleQuery -> A.Ascii
+                  -> SimpleQuery -> Ascii
 renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . simpleQueryToQuery
 
 -- | Split out the query string into a list of keys and values. A few
@@ -373,8 +377,8 @@ unreservedQS = map ord8 "-_.~"
 unreservedPI = map ord8 ":@&=+$,"
 
 -- | Percent-encoding for URLs.
-urlEncodeBuilder' :: [Word8] -> B.ByteString -> A.AsciiBuilder
-urlEncodeBuilder' extraUnreserved = A.unsafeFromBuilder . mconcat . map encodeChar . B.unpack
+urlEncodeBuilder' :: [Word8] -> B.ByteString -> Blaze.Builder
+urlEncodeBuilder' extraUnreserved = mconcat . map encodeChar . B.unpack
     where
       encodeChar ch | unreserved ch = Blaze.fromWord8 ch
                     | otherwise     = h2 ch
@@ -391,16 +395,16 @@ urlEncodeBuilder' extraUnreserved = A.unsafeFromBuilder . mconcat . map encodeCh
 urlEncodeBuilder
     :: Bool -- ^ Whether input is in query string. True: Query string, False: Path element
     -> B.ByteString
-    -> A.AsciiBuilder
+    -> Blaze.Builder
 urlEncodeBuilder True  = urlEncodeBuilder' unreservedQS
 urlEncodeBuilder False = urlEncodeBuilder' unreservedPI
 
-urlEncode :: Bool -> Ascii.ByteString -> A.Ascii
-urlEncode q = A.fromAsciiBuilder . urlEncodeBuilder q
+urlEncode :: Bool -> B.ByteString -> Ascii
+urlEncode q = Blaze.toByteString . urlEncodeBuilder q
 
 -- | Percent-decoding.
 urlDecode :: Bool -- ^ Whether to decode '+' to ' '
-         -> B.ByteString -> B.ByteString
+          -> B.ByteString -> B.ByteString
 urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
   where
     go bs =
@@ -449,14 +453,14 @@ urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
 -- Huge thanks to Jeremy Shaw who created the original implementation of this
 -- function in web-routes and did such thorough research to determine all
 -- correct escaping procedures.
-encodePathSegments :: [Text] -> A.AsciiBuilder
+encodePathSegments :: [Text] -> Blaze.Builder
 encodePathSegments [] = mempty
 encodePathSegments (x:xs) =
-    A.unsafeFromBuilder (Blaze.copyByteString "/")
+    Blaze.copyByteString "/"
     `mappend` encodePathSegment x
     `mappend` encodePathSegments xs
 
-encodePathSegment :: Text -> A.AsciiBuilder
+encodePathSegment :: Text -> Blaze.Builder
 encodePathSegment = urlEncodeBuilder False . encodeUtf8
 
 decodePathSegments :: B.ByteString -> [Text]
@@ -479,7 +483,7 @@ decodePathSegments a =
 decodePathSegment :: B.ByteString -> Text
 decodePathSegment = decodeUtf8With lenientDecode . urlDecode False
 
-encodePath :: [Text] -> Query -> A.AsciiBuilder
+encodePath :: [Text] -> Query -> Blaze.Builder
 encodePath x [] = encodePathSegments x
 encodePath x y = encodePathSegments x `mappend` renderQueryBuilder True y
 
