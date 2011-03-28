@@ -30,12 +30,16 @@ module Network.HTTP.Types
 , status301, statusMovedPermanently
 , status302, statusFound
 , status303, statusSeeOther
+, status304, statusNotModified
 , status400, statusBadRequest
 , status401, statusUnauthorized
 , status403, statusForbidden
 , status404, statusNotFound
 , status405, statusNotAllowed
+, status412, statusPreconditionFailed
+, status416, statusRequestedRangeNotSatisfiable
 , status500, statusServerError
+, status501, statusNotImplemented
   -- * Headers
 , Header
 , RequestHeaders
@@ -214,6 +218,11 @@ status303, statusSeeOther :: Status
 status303 = Status 303 "See Other"
 statusSeeOther = status303
 
+-- | Not Modified
+status304, statusNotModified :: Status
+status304 = Status 304 "Not Modified"
+statusNotModified = status304
+
 -- | Bad Request
 status400, statusBadRequest :: Status
 status400 = Status 400 "Bad Request"
@@ -239,10 +248,25 @@ status405, statusNotAllowed :: Status
 status405 = Status 405 "Method Not Allowed"
 statusNotAllowed = status405
 
+-- | Precondition Failed
+status412, statusPreconditionFailed :: Status
+status412 = Status 412 "Precondition Failed"
+statusPreconditionFailed = status412
+
+-- | Requested Range Not Satisfiable
+status416, statusRequestedRangeNotSatisfiable :: Status
+status416 = Status 416 "Requested Range Not Satisfiable"
+statusRequestedRangeNotSatisfiable = status416
+
 -- | Internal Server Error
 status500, statusServerError :: Status
 status500 = Status 500 "Internal Server Error"
 statusServerError = status500
+
+-- | Not Implemented
+status501, statusNotImplemented :: Status
+status501 = Status 501 "Not Implemented"
+statusNotImplemented = status501
 
 -- | Header
 type Header = (CI.CI Ascii, Ascii)
