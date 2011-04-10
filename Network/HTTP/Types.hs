@@ -45,6 +45,7 @@ module Network.HTTP.Types
 , RequestHeaders
 , ResponseHeaders
 , headerAccept
+, headerAuthorization
 , headerCacheControl
 , headerConnection
 , headerContentLength
@@ -278,8 +279,9 @@ type RequestHeaders = [Header]
 type ResponseHeaders = [Header]
 
 -- | HTTP Headers
-headerAccept, headerCacheControl, headerConnection, headerContentLength, headerContentType, headerContentMD5, headerDate :: Ascii -> Header
+headerAccept, headerAuthorization, headerCacheControl, headerConnection, headerContentLength, headerContentType, headerContentMD5, headerDate :: Ascii -> Header
 headerAccept        = (,) "Accept"
+headerAuthorization = (,) "Authorization"
 headerCacheControl  = (,) "Cache-Control"
 headerConnection    = (,) "Connection"
 headerContentLength = (,) "Content-Length"
