@@ -40,6 +40,7 @@ module Network.HTTP.Types
 , status416, statusRequestedRangeNotSatisfiable
 , status500, statusServerError
 , status501, statusNotImplemented
+, mkStatus
   -- * Headers
 , Header
 , RequestHeaders
@@ -268,6 +269,26 @@ statusServerError = status500
 status501, statusNotImplemented :: Status
 status501 = Status 501 "Not Implemented"
 statusNotImplemented = status501
+
+-- | Generate a Status from an Int.
+mkStatus :: Int -> Status
+mkStatus sc
+ = case sc of
+	200 -> statusOK
+	301 -> status301
+	302 -> status302
+	303 -> status303
+	304 -> status304
+	400 -> status400
+	401 -> status401
+	403 -> status403
+	404 -> status404
+	405 -> status405
+	412 -> status412
+	416 -> status416
+	500 -> status500
+	501 -> status501
+	_ -> statusNotImplemented
 
 -- | Header
 type Header = (CI.CI Ascii, Ascii)
