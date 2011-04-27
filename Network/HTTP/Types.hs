@@ -375,7 +375,7 @@ parseQuery = parseQueryString' . dropQuestion
             _ -> q
     parseQueryString' q | B.null q = []
     parseQueryString' q =
-        let (x, xs) = breakDiscard 38 q -- ampersand
+        let (x, xs) = breakDiscard queryStringSeparators q
          in parsePair x : parseQueryString' xs
       where
         parsePair x =
@@ -386,9 +386,14 @@ parseQuery = parseQueryString' . dropQuestion
                         _ -> Nothing
              in (urlDecode True k, v'')
 
-breakDiscard :: Word8 -> B.ByteString -> (B.ByteString, B.ByteString)
-breakDiscard w s =
-    let (x, y) = B.breakByte w s
+queryStringSeparators :: B.ByteString
+queryStringSeparators = B.pack [38,59] -- ampersand, semicolon
+
+-- | Break the second bytestring at the first occurence of any bytes from
+-- the first bytestring, discarding that byte.
+breakDiscard :: B.ByteString -> B.ByteString -> (B.ByteString, B.ByteString)
+breakDiscard seps s =
+    let (x, y) = B.break (`B.elem` seps) s
      in (x, B.drop 1 y)
 
 -- | Parse 'SimpleQuery' from a 'ByteString'.
