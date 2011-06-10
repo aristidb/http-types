@@ -405,7 +405,7 @@ ord8 = fromIntegral . ord
 
 unreservedQS, unreservedPI :: [Word8]
 unreservedQS = map ord8 "-_.~"
-unreservedPI = map ord8 ":@&=+$,"
+unreservedPI = map ord8 "-_.~:@&=+$,"
 
 -- | Percent-encoding for URLs.
 urlEncodeBuilder' :: [Word8] -> B.ByteString -> Blaze.Builder
