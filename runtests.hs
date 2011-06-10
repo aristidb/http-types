@@ -7,17 +7,21 @@ import           Debug.Trace
 import           Network.HTTP.Types
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
+import           Test.Hspec.HUnit
 import           Test.QuickCheck          (Arbitrary (..))
+import           Test.HUnit
 import qualified Blaze.ByteString.Builder as Blaze
 import qualified Data.ByteString          as S
 import qualified Data.ByteString.Char8    as S8
 import qualified Data.Text                as T
 
-main :: IO ()
+--main :: IO ()
 main = hspec $ descriptions
     [ describe "encode/decode path"
         [ it "is identity to encode and then decode"
             $ property propEncodeDecodePath
+        , it "does not escape period and dash" $
+            Blaze.toByteString (encodePath ["foo-bar.baz"] []) @?= "/foo-bar.baz"
         ]
     , describe "encode/decode query"
         [ it "is identity to encode and then decode"
