@@ -58,6 +58,7 @@ module Network.HTTP.Types
 , status415, statusUnsupportedMediaType
 , status416, statusRequestedRangeNotSatisfiable
 , status417, statusExpectationFailed
+, status418, statusImATeapot
 , status500, statusServerError
 , status501, statusNotImplemented
 , status502, statusBadGateway
@@ -383,6 +384,11 @@ statusRequestedRangeNotSatisfiable = status416
 status417, statusExpectationFailed :: Status
 status417 = Status 417 "Expectation Failed"
 statusExpectationFailed = status417
+
+-- | I'm a teapot
+status418, statusImATeapot :: Status
+status418 = Status 418 "I'm a teapot"
+statusImATeapot = status418
 
 -- | Internal Server Error
 status500, statusServerError :: Status
