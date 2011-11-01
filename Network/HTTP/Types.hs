@@ -24,22 +24,47 @@ module Network.HTTP.Types
 , http11
   -- * Status
 , Status(..)
+, status100, statusContinue
+, status101, statusSwitchingProtocols
 , status200, statusOK
 , status201, statusCreated
+, status202, statusAccepted
+, status203, statusNonAuthoritative
+, status204, statusNoContent
+, status205, statusResetContent
 , status206, statusPartialContent
+, status300, statusMultipleChoices
 , status301, statusMovedPermanently
 , status302, statusFound
 , status303, statusSeeOther
 , status304, statusNotModified
+, status305, statusUseProxy
+, status307, statusTemporaryRedirect
 , status400, statusBadRequest
 , status401, statusUnauthorized
+, status402, statusPaymentRequired
 , status403, statusForbidden
 , status404, statusNotFound
 , status405, statusNotAllowed
+, status406, statusNotAcceptable
+, status407, statusProxyAuthenticationRequired
+, status408, statusRequestTimeout
+, status409, statusConflict
+, status410, statusGone
+, status411, statusLengthRequired
 , status412, statusPreconditionFailed
+, status413, statusRequestEntityTooLarge
+, status414, statusRequestURITooLong
+, status415, statusUnsupportedMediaType
 , status416, statusRequestedRangeNotSatisfiable
+, status417, statusExpectationFailed
+, status418, statusImATeapot
 , status500, statusServerError
 , status501, statusNotImplemented
+, status502, statusBadGateway
+, status503, statusServiceUnavailable
+, status504, statusGatewayTimeout
+, status505, statusHTTPVersionNotSupported
   -- * Headers
 , Header
 , RequestHeaders
@@ -189,6 +214,16 @@ instance Eq Status where
 instance Ord Status where
     compare Status { statusCode = a } Status { statusCode = b } = a `compare` b
 
+-- | Continue
+status100, statusContinue :: Status
+status100 = Status 100 "Continue"
+statusContinue = status100
+
+-- | Switching Protocols
+status101, statusSwitchingProtocols :: Status
+status101 = Status 101 "Switching Protocols"
+statusSwitchingProtocols = status101
+
 -- | OK
 status200, statusOK :: Status
 status200 = Status 200 "OK"
@@ -199,10 +234,35 @@ status201, statusCreated :: Status
 status201 = Status 201 "Created"
 statusCreated = status201
 
+-- | Accepted
+status202, statusAccepted :: Status
+status202 = Status 202 "Accepted"
+statusAccepted = status202
+
+-- | Non-Authoritative Information
+status203, statusNonAuthoritative :: Status
+status203 = Status 203 "Non-Authoritative Information"
+statusNonAuthoritative = status203
+
+-- | No Content
+status204, statusNoContent :: Status
+status204 = Status 204 "No Content"
+statusNoContent = status204
+
+-- | Reset Content
+status205, statusResetContent :: Status
+status205 = Status 205 "Reset Content"
+statusResetContent = status205
+
 -- | PartialContent
 status206, statusPartialContent :: Status
 status206 = Status 206 "PartialContent"
 statusPartialContent = status206
+
+-- | Multiple Choices
+status300, statusMultipleChoices :: Status
+status300 = Status 300 "Multiple Choices"
+statusMultipleChoices = status300
 
 -- | Moved Permanently
 status301, statusMovedPermanently :: Status
@@ -224,6 +284,16 @@ status304, statusNotModified :: Status
 status304 = Status 304 "Not Modified"
 statusNotModified = status304
 
+-- | Use Proxy
+status305, statusUseProxy :: Status
+status305 = Status 305 "Use Proxy"
+statusUseProxy = status305
+
+-- | Temporary Redirect
+status307, statusTemporaryRedirect :: Status
+status307 = Status 307 "Temporary Redirect"
+statusTemporaryRedirect = status307
+
 -- | Bad Request
 status400, statusBadRequest :: Status
 status400 = Status 400 "Bad Request"
@@ -233,6 +303,11 @@ statusBadRequest = status400
 status401, statusUnauthorized :: Status
 status401 = Status 401 "Unauthorized"
 statusUnauthorized = status401
+
+-- | Payment Required
+status402, statusPaymentRequired :: Status
+status402 = Status 402 "Payment Required"
+statusPaymentRequired = status402
 
 -- | Forbidden
 status403, statusForbidden :: Status
@@ -249,15 +324,71 @@ status405, statusNotAllowed :: Status
 status405 = Status 405 "Method Not Allowed"
 statusNotAllowed = status405
 
+-- | Not Acceptable
+status406, statusNotAcceptable :: Status
+status406 = Status 406 "Not Acceptable"
+statusNotAcceptable = status406
+
+-- | Proxy Authentication Required
+status407, statusProxyAuthenticationRequired :: Status
+status407 = Status 407 "Proxy Authentication Required"
+statusProxyAuthenticationRequired = status407
+
+-- | Request Timeout
+status408, statusRequestTimeout :: Status
+status408 = Status 408 "Request Timeout"
+statusRequestTimeout = status408
+
+-- | Conflict
+status409, statusConflict :: Status
+status409 = Status 409 "Conflict"
+statusConflict = status409
+
+-- | Gone
+status410, statusGone :: Status
+status410 = Status 410 "Gone"
+statusGone = status410
+
+-- | Length Required
+status411, statusLengthRequired :: Status
+status411 = Status 411 "Length Required"
+statusLengthRequired = status411
+
 -- | Precondition Failed
 status412, statusPreconditionFailed :: Status
 status412 = Status 412 "Precondition Failed"
 statusPreconditionFailed = status412
 
+-- | Request Entity Too Large
+status413, statusRequestEntityTooLarge :: Status
+status413 = Status 413 "Request Entity Too Large"
+statusRequestEntityTooLarge = status413
+
+-- | Request-URI Too Long
+status414, statusRequestURITooLong :: Status
+status414 = Status 414 "Request-URI Too Long"
+statusRequestURITooLong = status414
+
+
+-- | Unsupported Media Type
+status415, statusUnsupportedMediaType :: Status
+status415 = Status 415 "Unsupported Media Type"
+statusUnsupportedMediaType = status415
+
 -- | Requested Range Not Satisfiable
 status416, statusRequestedRangeNotSatisfiable :: Status
 status416 = Status 416 "Requested Range Not Satisfiable"
 statusRequestedRangeNotSatisfiable = status416
+
+-- | Expectation Failed
+status417, statusExpectationFailed :: Status
+status417 = Status 417 "Expectation Failed"
+statusExpectationFailed = status417
+
+-- | I'm a teapot
+status418, statusImATeapot :: Status
+status418 = Status 418 "I'm a teapot"
+statusImATeapot = status418
 
 -- | Internal Server Error
 status500, statusServerError :: Status
@@ -268,6 +399,26 @@ statusServerError = status500
 status501, statusNotImplemented :: Status
 status501 = Status 501 "Not Implemented"
 statusNotImplemented = status501
+
+-- | Bad Gateway
+status502, statusBadGateway :: Status
+status502 = Status 502 "Bad Gateway"
+statusBadGateway = status502
+
+-- | Service Unavailable
+status503, statusServiceUnavailable :: Status
+status503 = Status 503 "Service Unavailable"
+statusServiceUnavailable = status503
+
+-- | Gateway Timeout
+status504, statusGatewayTimeout :: Status
+status504 = Status 504 "Gateway Timeout"
+statusGatewayTimeout = status504
+
+-- | HTTP Version Not Supported
+status505, statusHTTPVersionNotSupported :: Status
+status505 = Status 505 "HTTP Version Not Supported"
+statusHTTPVersionNotSupported = status505
 
 -- | Header
 type Header = (CI.CI Ascii, Ascii)
@@ -293,7 +444,7 @@ headerDate          = (,) "Date"
 type QueryItem = (B.ByteString, Maybe B.ByteString)
 
 -- | Query.
--- 
+--
 -- General form: a=b&c=d, but if the value is Nothing, it becomes
 -- a&c=d.
 type Query = [QueryItem]
