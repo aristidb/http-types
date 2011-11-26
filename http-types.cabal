@@ -7,7 +7,7 @@ Name:                http-types
 -- The package version. See the Haskell package versioning policy
 -- (http://www.haskell.org/haskellwiki/Package_versioning_policy) for
 -- standards guiding when and how versions should be incremented.
-Version:             0.6.6
+Version:             0.6.7
 
 -- A short (one-line) description of the package.
 Synopsis:            Generic HTTP types for Haskell (for both client and server code).
@@ -60,7 +60,7 @@ Library
   Build-depends:       base >= 4 && < 5,
                        bytestring >=0.9.1.5 && <0.10,
                        array >=0.2 && <0.4,
-                       case-insensitive >=0.2 && <0.4,
+                       case-insensitive >=0.2 && <0.5,
                        blaze-builder >= 0.2.1.4 && < 0.4,
                        text >= 0.11.0.2 && < 0.12
   
