@@ -45,7 +45,7 @@ module Network.HTTP.Types
 , status402, statusPaymentRequired
 , status403, statusForbidden
 , status404, statusNotFound
-, status405, statusNotAllowed
+, status405, statusMethodNotAllowed
 , status406, statusNotAcceptable
 , status407, statusProxyAuthenticationRequired
 , status408, statusRequestTimeout
@@ -104,6 +104,8 @@ module Network.HTTP.Types
 , urlEncodeBuilder
 , urlEncode
 , urlDecode
+  -- * Deprecated functions
+, statusNotAllowed
 )
 where
 
@@ -320,9 +322,14 @@ status404 = Status 404 "Not Found"
 statusNotFound = status404
 
 -- | Method Not Allowed
-status405, statusNotAllowed :: Status
+status405, statusMethodNotAllowed :: Status
 status405 = Status 405 "Method Not Allowed"
+statusMethodNotAllowed = status405
+
+-- | Method Not Allowed (DEPRECATED!)
+statusNotAllowed :: Status
 statusNotAllowed = status405
+{-# DEPRECATED statusNotAllowed "Use status405 or statusMethodNotAllowed instead" #-}
 
 -- | Not Acceptable
 status406, statusNotAcceptable :: Status
