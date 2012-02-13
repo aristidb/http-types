@@ -1081,5 +1081,5 @@ encodePath x y = encodePathSegments x `mappend` renderQueryBuilder True y
 
 decodePath :: B.ByteString -> ([Text], Query)
 decodePath b =
-    let (x, y) = B.breakByte 63 b -- slash
+    let (x, y) = B.breakByte 63 b -- question mark
     in (decodePathSegments x, parseQuery y)
