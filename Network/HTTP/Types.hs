@@ -24,48 +24,89 @@ module Network.HTTP.Types
 , http11
   -- * Status
 , Status(..)
-, status100, statusContinue
-, status101, statusSwitchingProtocols
-, status200, statusOK
-, status201, statusCreated
-, status202, statusAccepted
-, status203, statusNonAuthoritative
-, status204, statusNoContent
-, status205, statusResetContent
-, status206, statusPartialContent
-, status300, statusMultipleChoices
-, status301, statusMovedPermanently
-, status302, statusFound
-, status303, statusSeeOther
-, status304, statusNotModified
-, status305, statusUseProxy
-, status307, statusTemporaryRedirect
-, status400, statusBadRequest
-, status401, statusUnauthorized
-, status402, statusPaymentRequired
-, status403, statusForbidden
-, status404, statusNotFound
-, status405, statusMethodNotAllowed
-, status406, statusNotAcceptable
-, status407, statusProxyAuthenticationRequired
-, status408, statusRequestTimeout
-, status409, statusConflict
-, status410, statusGone
-, status411, statusLengthRequired
-, status412, statusPreconditionFailed
-, status413, statusRequestEntityTooLarge
-, status414, statusRequestURITooLong
-, status415, statusUnsupportedMediaType
-, status416, statusRequestedRangeNotSatisfiable
-, status417, statusExpectationFailed
-, status418, statusImATeapot
-, status500, statusServerError
-, status501, statusNotImplemented
-, status502, statusBadGateway
-, status503, statusServiceUnavailable
-, status504, statusGatewayTimeout
-, status505, statusHTTPVersionNotSupported
-  -- * Headers
+, status100
+, continue100
+, status101
+, switchingProtocols101
+, status200
+, ok200
+, status201
+, created201
+, status202
+, accepted202
+, status203
+, nonAuthoritative203
+, status204
+, noContent204
+, status205
+, resetContent205
+, status206
+, partialContent206
+, status300
+, multipleChoices300
+, status301
+, movedPermanently301
+, status302
+, found302
+, status303
+, seeOther303
+, status304
+, notModified304
+, status305
+, useProxy305
+, status307
+, temporaryRedirect307
+, status400
+, badRequest400
+, status401
+, unauthorized401
+, status402
+, paymentRequired402
+, status403
+, forbidden403
+, status404
+, notFound404
+, status405
+, methodNotAllowed405
+, status406
+, notAcceptable406
+, status407
+, proxyAuthenticationRequired407
+, status408
+, requestTimeout408
+, status409
+, conflict409
+, status410
+, gone410
+, status411
+, lengthRequired411
+, status412
+, preconditionFailed412
+, status413
+, requestEntityTooLarge413
+, status414
+, requestURITooLong414
+, status415
+, unsupportedMediaType415
+, status416
+, requestedRangeNotSatisfiable416
+, status417
+, expectationFailed417
+, status418
+, imATeaPot418
+, status500
+, internalServerError500
+, status501
+, notImplemented501
+, status502
+, badGateway502
+, status503
+, serviceUnavailable503
+, status504
+, gatewayTimeout504
+, status505
+, httpVersionNotSupported505
+-- * Headers
 , Header
 , RequestHeaders
 , ResponseHeaders
@@ -106,6 +147,46 @@ module Network.HTTP.Types
 , urlDecode
   -- * Deprecated functions
 , statusNotAllowed
+, statusContinue
+, statusSwitchingProtocols
+, statusOK
+, statusCreated
+, statusAccepted
+, statusNonAuthoritative
+, statusNoContent
+, statusResetContent
+, statusPartialContent
+, statusMultipleChoices
+, statusMovedPermanently
+, statusFound
+, statusSeeOther
+, statusNotModified
+, statusUseProxy
+, statusTemporaryRedirect
+, statusBadRequest
+, statusUnauthorized
+, statusPaymentRequired
+, statusForbidden
+, statusNotFound
+, statusNotAcceptable
+, statusProxyAuthenticationRequired
+, statusRequestTimeout
+, statusConflict
+, statusGone
+, statusLengthRequired
+, statusPreconditionFailed
+, statusRequestEntityTooLarge
+, statusRequestURITooLong
+, statusUnsupportedMediaType
+, statusRequestedRangeNotSatisfiable
+, statusExpectationFailed
+, statusImATeapot
+, statusServerError
+, statusNotImplemented
+, statusBadGateway
+, statusServiceUnavailable
+, statusGatewayTimeout
+, statusHTTPVersionNotSupported
 )
 where
 
@@ -216,216 +297,538 @@ instance Eq Status where
 instance Ord Status where
     compare Status { statusCode = a } Status { statusCode = b } = a `compare` b
 
--- | Continue
-status100, statusContinue :: Status
+-- | Continue 100
+status100 :: Status
 status100 = Status 100 "Continue"
+
+-- | Continue 100
+continue100 :: Status
+continue100 = status100
+
+-- | Continue 100 (DEPRECATED)
+statusContinue :: Status
 statusContinue = status100
+{-# DEPRECATED statusContinue "Deprecated" #-}
 
--- | Switching Protocols
-status101, statusSwitchingProtocols :: Status
+-- | Switching Protocols 101
+status101 :: Status
 status101 = Status 101 "Switching Protocols"
+
+-- | Switching Protocols 101
+switchingProtocols101 :: Status
+switchingProtocols101 = status101
+
+-- | Switching Protocols 101 (DEPRECATED)
+statusSwitchingProtocols :: Status
 statusSwitchingProtocols = status101
+{-# DEPRECATED statusSwitchingProtocols "Deprecated" #-}
 
--- | OK
-status200, statusOK :: Status
+-- | OK 200
+status200 :: Status
 status200 = Status 200 "OK"
+
+-- | OK 200
+ok200 :: Status
+ok200 = status200
+
+-- | OK 200 (DEPRECATED)
+statusOK :: Status
 statusOK = status200
+{-# DEPRECATED statusOK "Deprecated" #-}
 
--- | Created
-status201, statusCreated :: Status
+-- | Created 201
+status201 :: Status
 status201 = Status 201 "Created"
+
+-- | Created 201
+created201 :: Status
+created201 = status201
+
+-- | Created 201 (DEPRECATED)
+statusCreated :: Status
 statusCreated = status201
+{-# DEPRECATED statusCreated "Deprecated" #-}
 
--- | Accepted
-status202, statusAccepted :: Status
+-- | Accepted 202
+status202 :: Status
 status202 = Status 202 "Accepted"
+
+-- | Accepted 202
+accepted202 :: Status
+accepted202 = status202
+
+-- | Accepted 202 (DEPRECATED)
+statusAccepted :: Status
 statusAccepted = status202
+{-# DEPRECATED statusAccepted "Deprecated" #-}
 
--- | Non-Authoritative Information
-status203, statusNonAuthoritative :: Status
+-- | Non-Authoritative Information 203
+status203 :: Status
 status203 = Status 203 "Non-Authoritative Information"
+
+-- | Non-Authoritative Information 203
+nonAuthoritative203 :: Status
+nonAuthoritative203 = status203
+
+-- | Non-Authoritative Information 203 (DEPRECATED)
+statusNonAuthoritative :: Status
 statusNonAuthoritative = status203
+{-# DEPRECATED statusNonAuthoritative "Deprecated" #-}
 
--- | No Content
-status204, statusNoContent :: Status
+-- | No Content 204
+status204 :: Status
 status204 = Status 204 "No Content"
+
+-- | No Content 204
+noContent204 :: Status
+noContent204 = status204
+
+-- | No Content 204 (DEPRECATED)
+statusNoContent :: Status
 statusNoContent = status204
+{-# DEPRECATED statusNoContent "Deprecated" #-}
 
--- | Reset Content
-status205, statusResetContent :: Status
+-- | Reset Content 205
+status205 :: Status
 status205 = Status 205 "Reset Content"
+
+-- | Reset Content 205
+resetContent205 :: Status
+resetContent205 = status205
+
+-- | Reset Content 205 (DEPRECATED)
+statusResetContent :: Status
 statusResetContent = status205
+{-# DEPRECATED statusResetContent "Deprecated" #-}
 
--- | PartialContent
-status206, statusPartialContent :: Status
-status206 = Status 206 "PartialContent"
+-- | Partial Content 206
+status206 :: Status
+status206 = Status 206 "Partial Content"
+
+-- | Partial Content 206
+partialContent206 :: Status
+partialContent206 = status206
+
+-- | Partial Content 206 (DEPRECATED)
+statusPartialContent :: Status
 statusPartialContent = status206
+{-# DEPRECATED statusPartialContent "Deprecated" #-}
 
--- | Multiple Choices
-status300, statusMultipleChoices :: Status
+-- | Multiple Choices 300
+status300 :: Status
 status300 = Status 300 "Multiple Choices"
+
+-- | Multiple Choices 300
+multipleChoices300 :: Status
+multipleChoices300 = status300
+
+-- | Multiple Choices 300 (DEPRECATED)
+statusMultipleChoices :: Status
 statusMultipleChoices = status300
+{-# DEPRECATED statusMultipleChoices "Deprecated" #-}
 
--- | Moved Permanently
-status301, statusMovedPermanently :: Status
+-- | Moved Permanently 301
+status301 :: Status
 status301 = Status 301 "Moved Permanently"
+
+-- | Moved Permanently 301
+movedPermanently301 :: Status
+movedPermanently301 = status301
+
+-- | Moved Permanently 301 (DEPRECATED)
+statusMovedPermanently :: Status
 statusMovedPermanently = status301
+{-# DEPRECATED statusMovedPermanently "Deprecated" #-}
 
--- | Found
-status302, statusFound :: Status
+-- | Found 302
+status302 :: Status
 status302 = Status 302 "Found"
+
+-- | Found 302
+found302 :: Status
+found302 = status302
+
+-- | Found 302 (DEPRECATED)
+statusFound :: Status
 statusFound = status302
+{-# DEPRECATED statusFound "Deprecated" #-}
 
--- | See Other
-status303, statusSeeOther :: Status
+-- | See Other 303
+status303 :: Status
 status303 = Status 303 "See Other"
+
+-- | See Other 303
+seeOther303 :: Status
+seeOther303 = status303
+
+-- | See Other 303 (DEPRECATED)
+statusSeeOther :: Status
 statusSeeOther = status303
+{-# DEPRECATED statusSeeOther "Deprecated" #-}
 
--- | Not Modified
-status304, statusNotModified :: Status
+-- | Not Modified 304
+status304 :: Status
 status304 = Status 304 "Not Modified"
+
+-- | Not Modified 304
+notModified304 :: Status
+notModified304 = status304
+
+-- | Not Modified 304 (DEPRECATED)
+statusNotModified :: Status
 statusNotModified = status304
+{-# DEPRECATED statusNotModified "Deprecated" #-}
 
--- | Use Proxy
-status305, statusUseProxy :: Status
+-- | Use Proxy 305
+status305 :: Status
 status305 = Status 305 "Use Proxy"
+
+-- | Use Proxy 305
+useProxy305 :: Status
+useProxy305 = status305
+
+-- | Use Proxy 305 (DEPRECATED)
+statusUseProxy :: Status
 statusUseProxy = status305
+{-# DEPRECATED statusUseProxy "Deprecated" #-}
 
--- | Temporary Redirect
-status307, statusTemporaryRedirect :: Status
+-- | Temporary Redirect 307
+status307 :: Status
 status307 = Status 307 "Temporary Redirect"
+
+-- | Temporary Redirect 307
+temporaryRedirect307 :: Status
+temporaryRedirect307 = status307
+
+-- | Temporary Redirect 307 (DEPRECATED)
+statusTemporaryRedirect :: Status
 statusTemporaryRedirect = status307
+{-# DEPRECATED statusTemporaryRedirect "Deprecated" #-}
 
--- | Bad Request
-status400, statusBadRequest :: Status
+-- | Bad Request 400
+status400 :: Status
 status400 = Status 400 "Bad Request"
+
+-- | Bad Request 400
+badRequest400 :: Status
+badRequest400 = status400
+
+-- | Bad Request 400 (DEPRECATED)
+statusBadRequest :: Status
 statusBadRequest = status400
+{-# DEPRECATED statusBadRequest "Deprecated" #-}
 
--- | Unauthorized
-status401, statusUnauthorized :: Status
+-- | Unauthorized 401
+status401 :: Status
 status401 = Status 401 "Unauthorized"
+
+-- | Unauthorized 401
+unauthorized401 :: Status
+unauthorized401 = status401
+
+-- | Unauthorized 401 (DEPRECATED)
+statusUnauthorized :: Status
 statusUnauthorized = status401
+{-# DEPRECATED statusUnauthorized "Deprecated" #-}
 
--- | Payment Required
-status402, statusPaymentRequired :: Status
+-- | Payment Required 402
+status402 :: Status
 status402 = Status 402 "Payment Required"
+
+-- | Payment Required 402
+paymentRequired402 :: Status
+paymentRequired402 = status402
+
+-- | Payment Required 402 (DEPRECATED)
+statusPaymentRequired :: Status
 statusPaymentRequired = status402
+{-# DEPRECATED statusPaymentRequired "Deprecated" #-}
 
--- | Forbidden
-status403, statusForbidden :: Status
+-- | Forbidden 403
+status403 :: Status
 status403 = Status 403 "Forbidden"
+
+-- | Forbidden 403
+forbidden403 :: Status
+forbidden403 = status403
+
+-- | Forbidden 403 (DEPRECATED)
+statusForbidden :: Status
 statusForbidden = status403
+{-# DEPRECATED statusForbidden "Deprecated" #-}
 
--- | Not Found
-status404, statusNotFound :: Status
+-- | Not Found 404
+status404 :: Status
 status404 = Status 404 "Not Found"
+
+-- | Not Found 404
+notFound404 :: Status
+notFound404 = status404
+
+-- | Not Found 404 (DEPRECATED)
+statusNotFound :: Status
 statusNotFound = status404
+{-# DEPRECATED statusNotFound "Deprecated" #-}
 
--- | Method Not Allowed
-status405, statusMethodNotAllowed :: Status
+-- | Method Not Allowed 405
+status405 :: Status
 status405 = Status 405 "Method Not Allowed"
-statusMethodNotAllowed = status405
 
--- | Method Not Allowed (DEPRECATED!)
+-- | Method Not Allowed 405
+methodNotAllowed405 :: Status
+methodNotAllowed405 = status405
+
+-- | Method Not Allowed 405 (DEPRECATED!)
 statusNotAllowed :: Status
 statusNotAllowed = status405
-{-# DEPRECATED statusNotAllowed "Use status405 or statusMethodNotAllowed instead" #-}
+{-# DEPRECATED statusNotAllowed "Use status405 or methodNotAllowed405 instead" #-}
 
--- | Not Acceptable
-status406, statusNotAcceptable :: Status
+-- | Not Acceptable 406
+status406 :: Status
 status406 = Status 406 "Not Acceptable"
+
+-- | Not Acceptable 406
+notAcceptable406 :: Status
+notAcceptable406 = status406
+
+-- | Not Acceptable 406 (DEPRECATED)
+statusNotAcceptable :: Status
 statusNotAcceptable = status406
+{-# DEPRECATED statusNotAcceptable "Deprecated" #-}
 
--- | Proxy Authentication Required
-status407, statusProxyAuthenticationRequired :: Status
+-- | Proxy Authentication Required 407
+status407 :: Status
 status407 = Status 407 "Proxy Authentication Required"
+
+-- | Proxy Authentication Required 407
+proxyAuthenticationRequired407 :: Status
+proxyAuthenticationRequired407 = status407
+
+-- | Proxy Authentication Required 407
+statusProxyAuthenticationRequired :: Status
 statusProxyAuthenticationRequired = status407
+{-# DEPRECATED statusProxyAuthenticationRequired "Deprecated" #-}
 
--- | Request Timeout
-status408, statusRequestTimeout :: Status
+-- | Request Timeout 408
+status408 :: Status
 status408 = Status 408 "Request Timeout"
+
+-- | Request Timeout 408
+requestTimeout408 :: Status
+requestTimeout408 = status408
+
+-- | Request Timeout 408 (DEPRECATED)
+statusRequestTimeout :: Status
 statusRequestTimeout = status408
+{-# DEPRECATED statusRequestTimeout "Deprecated" #-}
 
--- | Conflict
-status409, statusConflict :: Status
+-- | Conflict 409
+status409 :: Status
 status409 = Status 409 "Conflict"
+
+-- | Conflict 409
+conflict409 :: Status
+conflict409 = status409
+
+-- | Conflict 409 (DEPRECATED)
+statusConflict :: Status
 statusConflict = status409
+{-# DEPRECATED statusConflict "Deprecated" #-}
 
--- | Gone
-status410, statusGone :: Status
+-- | Gone 410
+status410 :: Status
 status410 = Status 410 "Gone"
+
+-- | Gone 410
+gone410 :: Status
+gone410 = status410
+
+-- | Gone 410 (DEPRECATED)
+statusGone :: Status
 statusGone = status410
+{-# DEPRECATED #-}
 
--- | Length Required
-status411, statusLengthRequired :: Status
+-- | Length Required 411
+status411 :: Status
 status411 = Status 411 "Length Required"
+
+-- | Length Required 411
+lengthRequired411 :: Status
+lengthRequired411 = status411
+
+-- | Length Required 411 (DEPRECATED)
+statusLengthRequired :: Status
 statusLengthRequired = status411
+{-# DEPRECATED statusLengthRequired "Deprecated" #-}
 
--- | Precondition Failed
-status412, statusPreconditionFailed :: Status
+-- | Precondition Failed 412
+status412 :: Status
 status412 = Status 412 "Precondition Failed"
+
+-- | Precondition Failed 412
+preconditionFailed412 :: Status
+preconditionFailed412 = status412
+
+-- | Precondition Failed 412 (DEPRECATED)
+statusPreconditionFailed :: Status
 statusPreconditionFailed = status412
+{-# DEPRECATED statusPreconditionFailed "Deprecated" #-}
 
--- | Request Entity Too Large
-status413, statusRequestEntityTooLarge :: Status
+-- | Request Entity Too Large 413
+status413 :: Status
 status413 = Status 413 "Request Entity Too Large"
+
+-- | Request Entity Too Large 413
+requestEntityTooLarge413 :: Status
+requestEntityTooLarge413 = status413
+
+-- | Request Entity Too Large 413 (DEPRECATED)
+statusRequestEntityTooLarge :: Status
 statusRequestEntityTooLarge = status413
+{-# DEPRECATED statusRequestEntityTooLarge "Deprecated" #-}
 
--- | Request-URI Too Long
-status414, statusRequestURITooLong :: Status
+-- | Request-URI Too Long 414
+status414 :: Status
 status414 = Status 414 "Request-URI Too Long"
+
+-- | Request-URI Too Long 414
+requestURITooLong414 :: Status
+requestURITooLong414 = status414
+
+-- | Request-URI Too Long 414 (DEPRECATED)
+statusRequestURITooLong :: Status
 statusRequestURITooLong = status414
+{-# DEPRECATED statusRequestURITooLong "Deprecated" #-}
 
-
--- | Unsupported Media Type
-status415, statusUnsupportedMediaType :: Status
+-- | Unsupported Media Type 415
+status415 :: Status
 status415 = Status 415 "Unsupported Media Type"
+
+-- | Unsupported Media Type 415
+unsupportedMediaType415 :: Status
+unsupportedMediaType415 = status415
+
+-- | Unsupported Media Type 415 (DEPRECATED)
+statusUnsupportedMediaType :: Status
 statusUnsupportedMediaType = status415
+{-# DEPRECATED statusUnsupportedMediaType "Deprecated" #-}
 
--- | Requested Range Not Satisfiable
-status416, statusRequestedRangeNotSatisfiable :: Status
+-- | Requested Range Not Satisfiable 416
+status416 :: Status
 status416 = Status 416 "Requested Range Not Satisfiable"
+
+-- | Requested Range Not Satisfiable 416
+requestedRangeNotSatisfiable416 :: Status
+requestedRangeNotSatisfiable416 = status416
+
+-- | Requested Range Not Satisfiable 416 (DEPRECATED)
+statusRequestedRangeNotSatisfiable :: Status
 statusRequestedRangeNotSatisfiable = status416
+{-# DEPRECATED statusRequestedRangeNotSatisfiable "Deprecated" #-}
 
--- | Expectation Failed
-status417, statusExpectationFailed :: Status
+-- | Expectation Failed 417
+status417 :: Status
 status417 = Status 417 "Expectation Failed"
+
+-- | Expectation Failed 417
+expectationFailed417 :: Status
+expectationFailed417 = status417
+
+-- | Expectation Failed 417 (DEPRECATED)
+statusExpectationFailed :: Status
 statusExpectationFailed = status417
+{-# DEPRECATED statusExpectationFailed "Deprecated" #-}
 
--- | I'm a teapot
-status418, statusImATeapot :: Status
+-- | I'm a teapot 418
+status418 :: Status
 status418 = Status 418 "I'm a teapot"
+
+-- | I'm a teapot 418
+imATeaPot418 :: Status
+imATeaPot418 = status418
+
+-- | I'm a teapot 418 (DEPRECATED)
+statusImATeapot :: Status
 statusImATeapot = status418
+{-# DEPRECATED statusImATeapot "Deprecated" #-}
 
--- | Internal Server Error
-status500, statusServerError :: Status
+-- | Internal Server Error 500
+status500 :: Status
 status500 = Status 500 "Internal Server Error"
+
+-- | Internal Server Error 500
+internalServerError500 :: Status
+internalServerError500 = status500
+
+-- | Internal Server Error 500 (DEPRECATED)
+statusServerError :: Status
 statusServerError = status500
+{-# DEPRECATED statusServerError "Deprecated" #-}
 
--- | Not Implemented
-status501, statusNotImplemented :: Status
+-- | Not Implemented 501
+status501 :: Status
 status501 = Status 501 "Not Implemented"
+
+-- | Not Implemented 501
+notImplemented501 :: Status
+notImplemented501 = status501
+
+-- | Not Implemented 501 (DEPRECATED)
+statusNotImplemented :: Status
 statusNotImplemented = status501
+{-# DEPRECATED statusNotImplemented "Deprecated" #-}
 
--- | Bad Gateway
-status502, statusBadGateway :: Status
+-- | Bad Gateway 502
+status502 :: Status
 status502 = Status 502 "Bad Gateway"
+
+-- | Bad Gateway 502
+badGateway502 :: Status
+badGateway502 = status502
+
+-- | Bad Gateway 502 (DEPRECATED)
+statusBadGateway :: Status
 statusBadGateway = status502
+{-# DEPRECATED statusBadGateway "Deprecated" #-}
 
--- | Service Unavailable
-status503, statusServiceUnavailable :: Status
+-- | Service Unavailable 503
+status503 :: Status
 status503 = Status 503 "Service Unavailable"
+
+-- | Service Unavailable 503
+serviceUnavailable503 :: Status
+serviceUnavailable503 = status503
+
+-- | Service Unavailable 503 (DEPRECATED)
+statusServiceUnavailable :: Status
 statusServiceUnavailable = status503
+{-# DEPRECATED statusServiceUnavailable "Deprecated" #-}
 
--- | Gateway Timeout
-status504, statusGatewayTimeout :: Status
+-- | Gateway Timeout 504
+status504 :: Status
 status504 = Status 504 "Gateway Timeout"
-statusGatewayTimeout = status504
 
--- | HTTP Version Not Supported
-status505, statusHTTPVersionNotSupported :: Status
+-- | Gateway Timeout 504
+gatewayTimeout504 :: Status
+gatewayTimeout504 = status504
+
+-- | Gateway Timeout 504 (DEPRECATED)
+statusGatewayTimeout :: Status
+statusGatewayTimeout = status504
+{-# DEPRECATED statusGatewayTimeout "Deprecated" #-}
+
+-- | HTTP Version Not Supported 505
+status505 :: Status
 status505 = Status 505 "HTTP Version Not Supported"
+
+-- | HTTP Version Not Supported 505
+httpVersionNotSupported505 :: Status
+httpVersionNotSupported505 = status505
+
+-- | HTTP Version Not Supported 505 (DEPRECATED)
+statusHTTPVersionNotSupported :: Status
 statusHTTPVersionNotSupported = status505
+{-# DEPRECATED statusHTTPVersionNotSupported "Deprecated" #-}
 
 -- | Header
 type Header = (CI.CI Ascii, Ascii)
