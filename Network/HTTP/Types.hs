@@ -138,6 +138,7 @@ module Network.HTTP.Types
   -- * Path segments
 , encodePathSegments
 , decodePathSegments
+, encodePathSegmentsRelative
   -- * Path (segments + query string)
 , encodePath
 , decodePath
@@ -200,6 +201,7 @@ import           Data.Text                (Text)
 import           Data.Text.Encoding       (encodeUtf8, decodeUtf8With)
 import           Data.Text.Encoding.Error (lenientDecode)
 import           Data.Word                (Word8)
+import           Data.List                (intersperse)
 import qualified Blaze.ByteString.Builder as Blaze
 import qualified Data.ByteString          as B
 import qualified Data.ByteString.Char8    as B8
@@ -1026,21 +1028,21 @@ urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
 --
 -- * Performs percent encoding on all unreserved characters, as well as \:\@\=\+\$,
 --
--- * Intercalates with a slash.
+-- * Prepends each segment with a slash.
 --
 -- For example:
 --
--- > encodePathInfo [\"foo\", \"bar\", \"baz\"]
+-- > encodePathSegments [\"foo\", \"bar\", \"baz\"]
 --
--- \"foo\/bar\/baz\"
+-- \"\/foo\/bar\/baz\"
 --
--- > encodePathInfo [\"foo bar\", \"baz\/bin\"]
+-- > encodePathSegments [\"foo bar\", \"baz\/bin\"]
 --
--- \"foo\%20bar\/baz\%2Fbin\"
+-- \"\/foo\%20bar\/baz\%2Fbin\"
 --
--- > encodePathInfo [\"שלום\"]
+-- > encodePathSegments [\"שלום\"]
 --
--- \"%D7%A9%D7%9C%D7%95%D7%9D\"
+-- \"\/%D7%A9%D7%9C%D7%95%D7%9D\"
 --
 -- Huge thanks to Jeremy Shaw who created the original implementation of this
 -- function in web-routes and did such thorough research to determine all
@@ -1051,6 +1053,10 @@ encodePathSegments (x:xs) =
     Blaze.copyByteString "/"
     `mappend` encodePathSegment x
     `mappend` encodePathSegments xs
+
+-- | Like encodePathSegments, but without the initial slash.
+encodePathSegmentsRelative :: [Text] -> Blaze.Builder
+encodePathSegmentsRelative xs = mconcat $ intersperse (Blaze.copyByteString "/") (map encodePathSegment xs)
 
 encodePathSegment :: Text -> Blaze.Builder
 encodePathSegment = urlEncodeBuilder False . encodeUtf8
