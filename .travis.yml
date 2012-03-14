@@ -1,4 +1,4 @@
 language: haskell
 install:
   - cabal install
-  - cabal install hspec-0.8.1 HUnit
+  - cabal install hspec-0.6.1 HUnit
