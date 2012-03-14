@@ -45,10 +45,6 @@ Extra-source-files:  README
 -- Constraint on the version of Cabal needed to build this package.
 Cabal-version:       >=1.8
 
-flag test
-  description: Build the executable to run unit tests
-  default: False
-
 Library
   -- Modules exported by the library.
   Exposed-modules:     Network.HTTP.Types
@@ -71,10 +67,7 @@ Library
   -- Build-tools:         
   
 
-executable             runtests
+Test-suite runtests
     main-is:           runtests.hs
-    if flag(test)
-        Buildable: True
-        build-depends: text, bytestring, base, blaze-builder, ascii, array, QuickCheck, hspec >= 0.3 && < 0.4
-    else
-        Buildable: False
+    type:              exitcode-stdio-1.0
+    build-depends:     text, bytestring, base, blaze-builder, array, case-insensitive, QuickCheck, HUnit, hspec
