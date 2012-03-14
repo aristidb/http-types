@@ -1,2 +1,4 @@
 language: haskell
-install: cabal install --enable-tests
+install:
+  - cabal install
+  - cabal install hspec HUnit
