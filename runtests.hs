@@ -16,7 +16,7 @@ import qualified Data.ByteString.Char8    as S8
 import qualified Data.Text                as T
 
 --main :: IO ()
-main = hspec
+main = hspecX
     [ describe "encode/decode path"
         [ it "is identity to encode and then decode"
             $ property propEncodeDecodePath
