@@ -33,6 +33,15 @@ main = hspecX
         [ it "is identity to encode and then decode"
             $ property propEncodeDecodePathSegments
         ]
+    , describe "encode ByteRanges"
+        [ it "first 500 bytes" $ renderByteRanges [ByteRangeFromTo 0 499] @?= "bytes=0-499"
+        , it "second 500 bytes" $ renderByteRanges [ByteRangeFromTo 500 999] @?= "bytes=500-999"
+        , it "final 500 bytes" $ renderByteRanges [ByteRangeSuffix 500] @?= "bytes=-500"
+        , it "final 500 bytes (of 1000, absolute)" $ renderByteRanges [ByteRangeFrom 9500] @?= "bytes=9500-"
+        , it "first and last bytes only" $ renderByteRanges [ByteRangeFromTo 0 0, ByteRangeSuffix 1] @?= "bytes=0-0,-1"
+        , it "non-canonical second 500 bytes (1)" $ renderByteRanges [ByteRangeFromTo 500 600, ByteRangeFromTo 601 999] @?= "bytes=500-600,601-999"
+        , it "non-canonical second 500 bytes (2)" $ renderByteRanges [ByteRangeFromTo 500 700, ByteRangeFromTo 601 999] @?= "bytes=500-700,601-999"          
+        ]
     ]
 
 propEncodeDecodePath :: ([Text], Query) -> Bool

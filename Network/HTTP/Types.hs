@@ -106,10 +106,12 @@ module Network.HTTP.Types
 , gatewayTimeout504
 , status505
 , httpVersionNotSupported505
--- * Headers
+  -- * Headers
+  -- ** Types
 , Header
 , RequestHeaders
 , ResponseHeaders
+  -- ** Common headers
 , headerAccept
 , headerAuthorization
 , headerCacheControl
@@ -118,6 +120,13 @@ module Network.HTTP.Types
 , headerContentType
 , headerContentMD5
 , headerDate
+  -- ** Byte ranges
+, ByteRange(..)
+, renderByteRangeBuilder
+, renderByteRange
+, ByteRanges
+, renderByteRangesBuilder
+, renderByteRanges
   -- * Query string
 , QueryItem
 , Query
@@ -191,21 +200,22 @@ module Network.HTTP.Types
 )
 where
 
-import           Control.Arrow            (second, (|||), (***))
+import           Control.Arrow                  (second, (|||), (***))
 import           Data.Array
-import           Data.Bits                (shiftL, (.|.))
+import           Data.Bits                      (shiftL, (.|.))
 import           Data.Char
 import           Data.Maybe
-import           Data.Monoid              (mempty, mappend, mconcat)
-import           Data.Text                (Text)
-import           Data.Text.Encoding       (encodeUtf8, decodeUtf8With)
-import           Data.Text.Encoding.Error (lenientDecode)
-import           Data.Word                (Word8)
-import           Data.List                (intersperse)
-import qualified Blaze.ByteString.Builder as Blaze
-import qualified Data.ByteString          as B
-import qualified Data.ByteString.Char8    as B8
-import qualified Data.CaseInsensitive     as CI
+import           Data.Monoid                    (mempty, mappend, mconcat)
+import           Data.Text                      (Text)
+import           Data.Text.Encoding             (encodeUtf8, decodeUtf8With)
+import           Data.Text.Encoding.Error       (lenientDecode)
+import           Data.Word                      (Word8)
+import           Data.List                      (intersperse)
+import qualified Blaze.ByteString.Builder       as Blaze
+import qualified Blaze.ByteString.Builder.Char8 as Blaze
+import qualified Data.ByteString                as B
+import qualified Data.ByteString.Char8          as B8
+import qualified Data.CaseInsensitive           as CI
 
 type Ascii = B.ByteString
 
@@ -852,11 +862,37 @@ headerContentType   = (,) "Content-Type"
 headerContentMD5    = (,) "Content-MD5"
 headerDate          = (,) "Date"
 
+-- | RFC 2616 Byte range (individual). 
+-- 
+-- Negative indices are not allowed!
+data ByteRange 
+  = ByteRangeFrom !Integer
+  | ByteRangeFromTo !Integer !Integer
+  | ByteRangeSuffix !Integer
+
+renderByteRangeBuilder :: ByteRange -> Blaze.Builder
+renderByteRangeBuilder (ByteRangeFrom from) = Blaze.fromShow from `mappend` Blaze.fromChar '-'
+renderByteRangeBuilder (ByteRangeFromTo from to) = Blaze.fromShow from `mappend` Blaze.fromChar '-' `mappend` Blaze.fromShow to
+renderByteRangeBuilder (ByteRangeSuffix suffix) = Blaze.fromChar '-' `mappend` Blaze.fromShow suffix
+
+renderByteRange :: ByteRange -> Ascii
+renderByteRange = Blaze.toByteString . renderByteRangeBuilder
+
+-- | RFC 2616 Byte ranges (set).
+type ByteRanges = [ByteRange]
+
+renderByteRangesBuilder :: ByteRanges -> Blaze.Builder
+renderByteRangesBuilder xs = Blaze.copyByteString "bytes=" `mappend` 
+                             mconcat (intersperse (Blaze.fromChar ',') (map renderByteRangeBuilder xs))
+
+renderByteRanges :: ByteRanges -> Ascii
+renderByteRanges = Blaze.toByteString . renderByteRangesBuilder
+
 -- | Query item
 type QueryItem = (B.ByteString, Maybe B.ByteString)
 
 -- | Query.
---
+-- 
 -- General form: a=b&c=d, but if the value is Nothing, it becomes
 -- a&c=d.
 type Query = [QueryItem]
