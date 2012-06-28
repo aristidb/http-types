@@ -5,7 +5,7 @@
 import           Data.Text                (Text)
 import           Debug.Trace
 import           Network.HTTP.Types
-import           Test.Hspec
+import           Test.Hspec.Core
 import           Test.Hspec.QuickCheck
 import           Test.Hspec.HUnit
 import           Test.QuickCheck          (Arbitrary (..))
@@ -15,8 +15,8 @@ import qualified Data.ByteString          as S
 import qualified Data.ByteString.Char8    as S8
 import qualified Data.Text                as T
 
---main :: IO ()
-main = hspecX
+main :: IO ()
+main = hspec
     [ describe "encode/decode path"
         [ it "is identity to encode and then decode"
             $ property propEncodeDecodePath
