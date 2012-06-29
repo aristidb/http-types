@@ -1,5 +1,9 @@
 {-# LANGUAGE FlexibleInstances #-}
-module Network.HTTP.Types.QueryLike where
+module Network.HTTP.Types.QueryLike
+(
+  QueryLike(toQuery)
+)
+where
 
 import           Network.HTTP.Types
 import           Data.Maybe
@@ -27,12 +31,12 @@ instance (QueryKeyLike k, QueryValueLike v) => QueryLike [Maybe (k, v)] where
 instance QueryKeyLike B.ByteString where toQueryKey = id
 instance QueryKeyLike L.ByteString where toQueryKey = B.concat . L.toChunks
 instance QueryKeyLike T.Text where toQueryKey = T.encodeUtf8
-instance QueryKeyLike String where toQueryKey = T.encodeUtf8 . T.pack
+instance QueryKeyLike [Char] where toQueryKey = T.encodeUtf8 . T.pack
 
 instance QueryValueLike B.ByteString where toQueryValue = Just
 instance QueryValueLike L.ByteString where toQueryValue = Just . B.concat . L.toChunks
 instance QueryValueLike T.Text where toQueryValue = Just . T.encodeUtf8
-instance QueryValueLike String where toQueryValue = Just . T.encodeUtf8 . T.pack
+instance QueryValueLike [Char] where toQueryValue = Just . T.encodeUtf8 . T.pack
 
 instance QueryValueLike a => QueryValueLike (Maybe a) where
   toQueryValue = maybe Nothing toQueryValue
