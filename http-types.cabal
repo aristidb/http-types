@@ -48,6 +48,7 @@ Cabal-version:       >=1.8
 Library
   -- Modules exported by the library.
   Exposed-modules:     Network.HTTP.Types
+                       Network.HTTP.Types.QueryLike
 
   -- GHC Options.
   GHC-Options:         -Wall
