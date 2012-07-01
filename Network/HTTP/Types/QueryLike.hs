@@ -5,15 +5,17 @@ module Network.HTTP.Types.QueryLike
 )
 where
 
-import           Network.HTTP.Types
+import           Network.HTTP.Types.URI
 import           Data.Maybe
-import qualified Data.ByteString      as B
-import qualified Data.ByteString.Lazy as L
-import qualified Data.Text            as T
-import qualified Data.Text.Encoding   as T
+import qualified Data.ByteString        as B
+import qualified Data.ByteString.Lazy   as L
+import qualified Data.Text              as T
+import qualified Data.Text.Encoding     as T
 import           Control.Arrow
 
+-- | Types which can, and commonly are, converted to 'Query' are in this class.
 class QueryLike a where
+  -- | Convert to 'Query'.
   toQuery :: a -> Query
 
 class QueryKeyLike a where

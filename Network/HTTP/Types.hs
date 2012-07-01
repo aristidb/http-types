@@ -145,6 +145,8 @@ module Network.HTTP.Types
 , queryToQueryText
 , renderQueryText
 , parseQueryText
+  -- ** Generalized query types
+, QueryLike(toQuery)
   -- ** Path segments
 , encodePathSegments
 , decodePathSegments
@@ -164,7 +166,8 @@ import           Network.HTTP.Types.Version
 import           Network.HTTP.Types.Status
 import           Network.HTTP.Types.Header
 import           Network.HTTP.Types.URI
-import qualified Data.ByteString            as B
+import           Network.HTTP.Types.QueryLike
+import qualified Data.ByteString              as B
 
 -- | Type synonym for ASCII ByteStrings (deprecated).
 type Ascii = B.ByteString
