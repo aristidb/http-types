@@ -55,22 +55,27 @@ type QueryItem = (B.ByteString, Maybe B.ByteString)
 -- a&c=d.
 type Query = [QueryItem]
 
+-- | Like Query, but with 'Text' instead of 'B.ByteString' (UTF8-encoded).
 type QueryText = [(Text, Maybe Text)]
 
+-- | Convert 'QueryText' to 'Query'.
 queryTextToQuery :: QueryText -> Query
 queryTextToQuery = map $ encodeUtf8 *** fmap encodeUtf8
 
+-- | Convert 'QueryText' to a 'Blaze.Builder'.
 renderQueryText :: Bool -- ^ prepend a question mark?
                 -> QueryText
                 -> Blaze.Builder
 renderQueryText b = renderQueryBuilder b . queryTextToQuery
 
+-- | Convert 'Query' to 'QueryText' (leniently decoding the UTF-8).
 queryToQueryText :: Query -> QueryText
 queryToQueryText =
     map $ go *** fmap go
   where
     go = decodeUtf8With lenientDecode
 
+-- | Parse 'QueryText' from a 'B.ByteString'. See 'parseQuery' for details.
 parseQueryText :: B.ByteString -> QueryText
 parseQueryText = queryToQueryText . parseQuery
 
@@ -84,6 +89,7 @@ type SimpleQuery = [SimpleQueryItem]
 simpleQueryToQuery :: SimpleQuery -> Query
 simpleQueryToQuery = map (\(a, b) -> (a, Just b))
 
+-- | Convert 'Query' to a 'Builder'.
 renderQueryBuilder :: Bool -- ^ prepend a question mark?
                    -> Query
                    -> Blaze.Builder
@@ -116,11 +122,11 @@ renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . simpleQueryToQ
 
 -- | Split out the query string into a list of keys and values. A few
 -- importants points:
---
+-- 
 -- * The result returned is still bytestrings, since we perform no character
 -- decoding here. Most likely, you will want to use UTF-8 decoding, but this is
 -- left to the user of the library.
---
+-- 
 -- * Percent decoding errors are ignored. In particular, "%Q" will be output as
 -- "%Q".
 parseQuery :: B.ByteString -> Query
@@ -180,6 +186,7 @@ urlEncodeBuilder' extraUnreserved = mconcat . map encodeChar . B.unpack
       h i | i < 10    = 48 + i -- zero (0)
           | otherwise = 65 + i - 10 -- 65: A
 
+-- | Percent-encoding for URLs (using 'Blaze.Builder').
 urlEncodeBuilder
     :: Bool -- ^ Whether input is in query string. True: Query string, False: Path element
     -> B.ByteString
@@ -187,6 +194,7 @@ urlEncodeBuilder
 urlEncodeBuilder True  = urlEncodeBuilder' unreservedQS
 urlEncodeBuilder False = urlEncodeBuilder' unreservedPI
 
+-- | Percent-encoding for URLs.
 urlEncode :: Bool -> B.ByteString -> B.ByteString
 urlEncode q = Blaze.toByteString . urlEncodeBuilder q
 
@@ -215,29 +223,29 @@ urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
     combine a b = shiftL a 4 .|. b
 
 -- | Encodes a list of path segments into a valid URL fragment.
---
+-- 
 -- This function takes the following three steps:
---
+-- 
 -- * UTF-8 encodes the characters.
---
+-- 
 -- * Performs percent encoding on all unreserved characters, as well as \:\@\=\+\$,
---
+-- 
 -- * Prepends each segment with a slash.
---
+-- 
 -- For example:
---
+-- 
 -- > encodePathSegments [\"foo\", \"bar\", \"baz\"]
---
+-- 
 -- \"\/foo\/bar\/baz\"
---
+-- 
 -- > encodePathSegments [\"foo bar\", \"baz\/bin\"]
---
+-- 
 -- \"\/foo\%20bar\/baz\%2Fbin\"
---
+-- 
 -- > encodePathSegments [\"שלום\"]
---
+-- 
 -- \"\/%D7%A9%D7%9C%D7%95%D7%9D\"
---
+-- 
 -- Huge thanks to Jeremy Shaw who created the original implementation of this
 -- function in web-routes and did such thorough research to determine all
 -- correct escaping procedures.
@@ -255,6 +263,7 @@ encodePathSegmentsRelative xs = mconcat $ intersperse (Blaze.copyByteString "/")
 encodePathSegment :: Text -> Blaze.Builder
 encodePathSegment = urlEncodeBuilder False . encodeUtf8
 
+-- | Parse a list of path segments from a valid URL fragment.
 decodePathSegments :: B.ByteString -> [Text]
 decodePathSegments "" = []
 decodePathSegments "/" = []
@@ -275,10 +284,12 @@ decodePathSegments a =
 decodePathSegment :: B.ByteString -> Text
 decodePathSegment = decodeUtf8With lenientDecode . urlDecode False
 
+-- | Encode a whole path (path segments + query).
 encodePath :: [Text] -> Query -> Blaze.Builder
 encodePath x [] = encodePathSegments x
 encodePath x y = encodePathSegments x `mappend` renderQueryBuilder True y
 
+-- | Decode a whole path (path segments + query).
 decodePath :: B.ByteString -> ([Text], Query)
 decodePath b =
     let (x, y) = B.breakByte 63 b -- question mark
