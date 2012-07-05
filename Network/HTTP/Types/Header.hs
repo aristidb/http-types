@@ -3,18 +3,24 @@ module Network.HTTP.Types.Header
 (
   -- ** Types
   Header
+, HeaderName
 , RequestHeaders
 , ResponseHeaders
   -- ** Common headers
 , hAccept
+, hAcceptLanguage
 , hAuthorization
 , hCacheControl
+, hCookie
 , hConnection
 , hContentLength
 , hContentMD5
 , hContentType
 , hDate
+, hIfModifiedSince
+, hIfRange
 , hLastModified
+, hRange
   -- ** Byte ranges
 , ByteRange(..)
 , renderByteRangeBuilder
@@ -54,16 +60,22 @@ type RequestHeaders = [Header]
 -- | Response Headers
 type ResponseHeaders = [Header]
 
-hAccept, hAuthorization, hCacheControl, hConnection, hContentLength, hContentMD5, hContentType, hDate, hLastModified :: HeaderName
-hAccept        = "Accept"
-hAuthorization = "Authorization"
-hCacheControl  = "Cache-Control"
-hConnection    = "Connection"
-hContentLength = "Content-Length"
-hContentMD5    = "Content-MD5"
-hContentType   = "Content-Type"
-hDate          = "Date"
-hLastModified  = "Last-Modified"
+-- | HTTP Header names
+hAccept, hAcceptLanguage, hAuthorization, hCacheControl, hCookie, hConnection, hContentLength, hContentMD5, hContentType, hDate, hIfModifiedSince, hIfRange, hLastModified, hRange :: HeaderName
+hAccept          = "Accept"
+hAcceptLanguage  = "Accept-Language"
+hAuthorization   = "Authorization"
+hCacheControl    = "Cache-Control"
+hConnection      = "Connection"
+hContentLength   = "Content-Length"
+hContentMD5      = "Content-MD5"
+hContentType     = "Content-Type"
+hCookie          = "Cookie"
+hDate            = "Date"
+hIfModifiedSince = "If-Modified-Since"
+hIfRange         = "If-Range"
+hLastModified    = "Last-Modified"
+hRange           = "Range"
 
 -- | HTTP Headers
 headerAccept, headerAuthorization, headerCacheControl, headerConnection, headerContentLength, headerContentType, headerContentMD5, headerDate :: B.ByteString -> Header
