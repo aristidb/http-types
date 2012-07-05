@@ -113,14 +113,22 @@ module Network.HTTP.Types
 , ResponseHeaders
   -- ** Common headers
 , hAccept
+, hAcceptLanguage
 , hAuthorization
 , hCacheControl
+, hCookie
 , hConnection
+, hContentEncoding
 , hContentLength
 , hContentMD5
 , hContentType
 , hDate
+, hIfModifiedSince
+, hIfRange
 , hLastModified
+, hRange
+, hReferer
+, hUserAgent
   -- ** Byte ranges
 , ByteRange(..)
 , renderByteRangeBuilder
