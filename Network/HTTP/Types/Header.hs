@@ -13,6 +13,7 @@ module Network.HTTP.Types.Header
 , hCacheControl
 , hCookie
 , hConnection
+, hContentEncoding
 , hContentLength
 , hContentMD5
 , hContentType
@@ -21,6 +22,8 @@ module Network.HTTP.Types.Header
 , hIfRange
 , hLastModified
 , hRange
+, hReferer
+, hUserAgent
   -- ** Byte ranges
 , ByteRange(..)
 , renderByteRangeBuilder
@@ -61,12 +64,13 @@ type RequestHeaders = [Header]
 type ResponseHeaders = [Header]
 
 -- | HTTP Header names
-hAccept, hAcceptLanguage, hAuthorization, hCacheControl, hCookie, hConnection, hContentLength, hContentMD5, hContentType, hDate, hIfModifiedSince, hIfRange, hLastModified, hRange :: HeaderName
+hAccept, hAcceptLanguage, hAuthorization, hCacheControl, hConnection, hContentEncoding, hContentLength, hContentMD5, hContentType, hCookie, hDate, hIfModifiedSince, hIfRange, hLastModified, hRange, hReferer, hUserAgent :: HeaderName
 hAccept          = "Accept"
 hAcceptLanguage  = "Accept-Language"
 hAuthorization   = "Authorization"
 hCacheControl    = "Cache-Control"
 hConnection      = "Connection"
+hContentEncoding = "Content-Encoding"
 hContentLength   = "Content-Length"
 hContentMD5      = "Content-MD5"
 hContentType     = "Content-Type"
@@ -76,6 +80,8 @@ hIfModifiedSince = "If-Modified-Since"
 hIfRange         = "If-Range"
 hLastModified    = "Last-Modified"
 hRange           = "Range"
+hReferer         = "Referer"
+hUserAgent       = "User-Agent"
 
 -- | HTTP Headers
 headerAccept, headerAuthorization, headerCacheControl, headerConnection, headerContentLength, headerContentType, headerContentMD5, headerDate :: B.ByteString -> Header
