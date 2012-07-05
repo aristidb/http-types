@@ -112,14 +112,15 @@ module Network.HTTP.Types
 , RequestHeaders
 , ResponseHeaders
   -- ** Common headers
-, headerAccept
-, headerAuthorization
-, headerCacheControl
-, headerConnection
-, headerContentLength
-, headerContentType
-, headerContentMD5
-, headerDate
+, hAccept
+, hAuthorization
+, hCacheControl
+, hConnection
+, hContentLength
+, hContentMD5
+, hContentType
+, hDate
+, hLastModified
   -- ** Byte ranges
 , ByteRange(..)
 , renderByteRangeBuilder
@@ -158,6 +159,16 @@ module Network.HTTP.Types
 , urlEncodeBuilder
 , urlEncode
 , urlDecode
+  -- * Deprecated functions
+  -- ** as of 0.7.0
+, headerAccept
+, headerAuthorization
+, headerCacheControl
+, headerConnection
+, headerContentLength
+, headerContentType
+, headerContentMD5
+, headerDate
 )
 where
 

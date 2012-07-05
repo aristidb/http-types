@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies #-}
 module Network.HTTP.Types.Header
 (
   -- ** Types
@@ -6,6 +6,23 @@ module Network.HTTP.Types.Header
 , RequestHeaders
 , ResponseHeaders
   -- ** Common headers
+, hAccept
+, hAuthorization
+, hCacheControl
+, hConnection
+, hContentLength
+, hContentMD5
+, hContentType
+, hDate
+, hLastModified
+  -- ** Byte ranges
+, ByteRange(..)
+, renderByteRangeBuilder
+, renderByteRange
+, ByteRanges
+, renderByteRangesBuilder
+, renderByteRanges
+  -- ** Deprecated
 , headerAccept
 , headerAuthorization
 , headerCacheControl
@@ -14,13 +31,6 @@ module Network.HTTP.Types.Header
 , headerContentType
 , headerContentMD5
 , headerDate
-  -- ** Byte ranges
-, ByteRange(..)
-, renderByteRangeBuilder
-, renderByteRange
-, ByteRanges
-, renderByteRangesBuilder
-, renderByteRanges
 )
 where
 
@@ -33,7 +43,10 @@ import qualified Data.CaseInsensitive           as CI
 import           Data.ByteString.Char8          () {-IsString-}
 
 -- | Header
-type Header = (CI.CI B.ByteString, B.ByteString)
+type Header = (HeaderName, B.ByteString)
+
+-- | Header name
+type HeaderName = CI.CI B.ByteString
 
 -- | Request Headers
 type RequestHeaders = [Header]
@@ -41,16 +54,35 @@ type RequestHeaders = [Header]
 -- | Response Headers
 type ResponseHeaders = [Header]
 
+hAccept, hAuthorization, hCacheControl, hConnection, hContentLength, hContentMD5, hContentType, hDate, hLastModified :: HeaderName
+hAccept        = "Accept"
+hAuthorization = "Authorization"
+hCacheControl  = "Cache-Control"
+hConnection    = "Connection"
+hContentLength = "Content-Length"
+hContentMD5    = "Content-MD5"
+hContentType   = "Content-Type"
+hDate          = "Date"
+hLastModified  = "Last-Modified"
+
 -- | HTTP Headers
 headerAccept, headerAuthorization, headerCacheControl, headerConnection, headerContentLength, headerContentType, headerContentMD5, headerDate :: B.ByteString -> Header
-headerAccept        = (,) "Accept"
-headerAuthorization = (,) "Authorization"
-headerCacheControl  = (,) "Cache-Control"
-headerConnection    = (,) "Connection"
-headerContentLength = (,) "Content-Length"
-headerContentType   = (,) "Content-Type"
-headerContentMD5    = (,) "Content-MD5"
-headerDate          = (,) "Date"
+headerAccept        = (,) hAccept
+{-# DEPRECATED headerAccept "Use hAccept instead" #-}
+headerAuthorization = (,) hAuthorization
+{-# DEPRECATED headerAuthorization "Use hAuthorization instead" #-}
+headerCacheControl  = (,) hCacheControl
+{-# DEPRECATED headerCacheControl "Use hCacheControl instead" #-}
+headerConnection    = (,) hConnection
+{-# DEPRECATED headerConnection "Use hConnection instead" #-}
+headerContentLength = (,) hContentLength
+{-# DEPRECATED headerContentLength "Use hContentLength instead" #-}
+headerContentMD5    = (,) hContentMD5
+{-# DEPRECATED headerContentMD5 "Use hContentMD5 instead" #-}
+headerContentType   = (,) hContentType
+{-# DEPRECATED headerContentType "Use hContentType instead" #-}
+headerDate          = (,) hDate
+{-# DEPRECATED headerDate "Use hDate instead" #-}
 
 -- | RFC 2616 Byte range (individual). 
 -- 
