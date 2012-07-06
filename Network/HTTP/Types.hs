@@ -126,8 +126,10 @@ module Network.HTTP.Types
 , hIfModifiedSince
 , hIfRange
 , hLastModified
+, hLocation
 , hRange
 , hReferer
+, hServer
 , hUserAgent
   -- ** Byte ranges
 , ByteRange(..)
