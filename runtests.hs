@@ -5,10 +5,8 @@
 import           Data.Text                (Text)
 import           Debug.Trace
 import           Network.HTTP.Types
-import           Test.Hspec.Core
-import           Test.Hspec.QuickCheck
-import           Test.Hspec.HUnit
-import           Test.QuickCheck          (Arbitrary (..))
+import           Test.Hspec
+import           Test.QuickCheck
 import           Test.HUnit
 import qualified Blaze.ByteString.Builder as Blaze
 import qualified Data.ByteString          as S
@@ -16,33 +14,31 @@ import qualified Data.ByteString.Char8    as S8
 import qualified Data.Text                as T
 
 main :: IO ()
-main = hspec
-    [ describe "encode/decode path"
-        [ it "is identity to encode and then decode"
-            $ property propEncodeDecodePath
-        , it "does not escape period and dash" $
-            Blaze.toByteString (encodePath ["foo-bar.baz"] []) @?= "/foo-bar.baz"
-        ]
-    , describe "encode/decode query"
-        [ it "is identity to encode and then decode"
-            $ property propEncodeDecodeQuery
-        , it "add ? in front of Query if and only if necessary"
-            $ property propQueryQuestionMark
-        ]
-    , describe "encode/decode path segments"
-        [ it "is identity to encode and then decode"
-            $ property propEncodeDecodePathSegments
-        ]
-    , describe "encode ByteRanges"
-        [ it "first 500 bytes" $ renderByteRanges [ByteRangeFromTo 0 499] @?= "bytes=0-499"
-        , it "second 500 bytes" $ renderByteRanges [ByteRangeFromTo 500 999] @?= "bytes=500-999"
-        , it "final 500 bytes" $ renderByteRanges [ByteRangeSuffix 500] @?= "bytes=-500"
-        , it "final 500 bytes (of 1000, absolute)" $ renderByteRanges [ByteRangeFrom 9500] @?= "bytes=9500-"
-        , it "first and last bytes only" $ renderByteRanges [ByteRangeFromTo 0 0, ByteRangeSuffix 1] @?= "bytes=0-0,-1"
-        , it "non-canonical second 500 bytes (1)" $ renderByteRanges [ByteRangeFromTo 500 600, ByteRangeFromTo 601 999] @?= "bytes=500-600,601-999"
-        , it "non-canonical second 500 bytes (2)" $ renderByteRanges [ByteRangeFromTo 500 700, ByteRangeFromTo 601 999] @?= "bytes=500-700,601-999"
-        ]
-    ]
+main = hspec $ do
+    describe "encode/decode path" $ do
+      it "is identity to encode and then decode"
+        $ property propEncodeDecodePath
+      it "does not escape period and dash" $
+        Blaze.toByteString (encodePath ["foo-bar.baz"] []) @?= "/foo-bar.baz"
+
+    describe "encode/decode query" $ do
+      it "is identity to encode and then decode"
+        $ property propEncodeDecodeQuery
+      it "add ? in front of Query if and only if necessary"
+        $ property propQueryQuestionMark
+
+    describe "encode/decode path segments" $ do
+      it "is identity to encode and then decode"
+        $ property propEncodeDecodePathSegments
+
+    describe "encode ByteRanges" $ do
+      it "first 500 bytes" $ renderByteRanges [ByteRangeFromTo 0 499] @?= "bytes=0-499"
+      it "second 500 bytes" $ renderByteRanges [ByteRangeFromTo 500 999] @?= "bytes=500-999"
+      it "final 500 bytes" $ renderByteRanges [ByteRangeSuffix 500] @?= "bytes=-500"
+      it "final 500 bytes (of 1000, absolute)" $ renderByteRanges [ByteRangeFrom 9500] @?= "bytes=9500-"
+      it "first and last bytes only" $ renderByteRanges [ByteRangeFromTo 0 0, ByteRangeSuffix 1] @?= "bytes=0-0,-1"
+      it "non-canonical second 500 bytes (1)" $ renderByteRanges [ByteRangeFromTo 500 600, ByteRangeFromTo 601 999] @?= "bytes=500-600,601-999"
+      it "non-canonical second 500 bytes (2)" $ renderByteRanges [ByteRangeFromTo 500 700, ByteRangeFromTo 601 999] @?= "bytes=500-700,601-999"
 
 propEncodeDecodePath :: ([Text], Query) -> Bool
 propEncodeDecodePath (p', q') =
