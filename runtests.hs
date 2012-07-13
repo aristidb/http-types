@@ -40,7 +40,7 @@ main = hspec
         , it "final 500 bytes (of 1000, absolute)" $ renderByteRanges [ByteRangeFrom 9500] @?= "bytes=9500-"
         , it "first and last bytes only" $ renderByteRanges [ByteRangeFromTo 0 0, ByteRangeSuffix 1] @?= "bytes=0-0,-1"
         , it "non-canonical second 500 bytes (1)" $ renderByteRanges [ByteRangeFromTo 500 600, ByteRangeFromTo 601 999] @?= "bytes=500-600,601-999"
-        , it "non-canonical second 500 bytes (2)" $ renderByteRanges [ByteRangeFromTo 500 700, ByteRangeFromTo 601 999] @?= "bytes=500-700,601-999"          
+        , it "non-canonical second 500 bytes (2)" $ renderByteRanges [ByteRangeFromTo 500 700, ByteRangeFromTo 601 999] @?= "bytes=500-700,601-999"
         ]
     ]
 
@@ -71,7 +71,7 @@ propQueryQuestionMark (useQuestionMark, query) = actual == expected
                    (False, _)    -> False
                    (True, True)  -> False
                    (True, False) -> True
-          
+
 propEncodeDecodePathSegments :: [Text] -> Bool
 propEncodeDecodePathSegments p' =
     p == decodePathSegments (Blaze.toByteString $ encodePathSegments p)
