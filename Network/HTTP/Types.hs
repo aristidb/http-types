@@ -106,6 +106,11 @@ module Network.HTTP.Types
 , gatewayTimeout504
 , status505
 , httpVersionNotSupported505
+, statusIsInformational
+, statusIsSuccessful
+, statusIsRedirection
+, statusIsClientError
+, statusIsServerError
   -- * Headers
   -- ** Types
 , Header
@@ -193,5 +198,3 @@ import qualified Data.ByteString              as B
 -- | Type synonym for ASCII ByteStrings (deprecated).
 type Ascii = B.ByteString
 {-# DEPRECATED Ascii "Deprecated Ascii type" #-}
-
-
