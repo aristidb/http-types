@@ -84,6 +84,11 @@ module Network.HTTP.Types.Status
 , gatewayTimeout504
 , status505
 , httpVersionNotSupported505
+, statusIsInformational
+, statusIsSuccessful
+, statusIsRedirection
+, statusIsClientError
+, statusIsServerError
 )
 where
 
@@ -435,3 +440,23 @@ status505 = Status 505 "HTTP Version Not Supported"
 -- | HTTP Version Not Supported 505
 httpVersionNotSupported505 :: Status
 httpVersionNotSupported505 = status505
+
+-- | Informational class
+statusIsInformational :: Status -> Bool
+statusIsInformational (Status {statusCode=code}) = code >= 100 && code < 200
+
+-- | Successful class
+statusIsSuccessful :: Status -> Bool
+statusIsSuccessful (Status {statusCode=code}) = code >= 200 && code < 300
+
+-- | Redirection class
+statusIsRedirection :: Status -> Bool
+statusIsRedirection (Status {statusCode=code}) = code >= 300 && code < 400
+
+-- | Client Error class
+statusIsClientError :: Status -> Bool
+statusIsClientError (Status {statusCode=code}) = code >= 400 && code < 500
+
+-- | Server Error class
+statusIsServerError :: Status -> Bool
+statusIsServerError (Status {statusCode=code}) = code >= 500 && code < 600
