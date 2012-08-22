@@ -24,6 +24,7 @@ module Network.HTTP.Types
 , http11
   -- * Status
 , Status(..)
+, mkStatus
 , status100
 , continue100
 , status101
