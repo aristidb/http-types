@@ -1,10 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Network.HTTP.Types
 (
-  -- * General
-  Ascii
   -- * Methods
-, Method
+  Method
 , methodGet
 , methodPost
 , methodHead
@@ -175,16 +173,6 @@ module Network.HTTP.Types
 , urlEncodeBuilder
 , urlEncode
 , urlDecode
-  -- * Deprecated functions
-  -- ** as of 0.7.0
-, headerAccept
-, headerAuthorization
-, headerCacheControl
-, headerConnection
-, headerContentLength
-, headerContentType
-, headerContentMD5
-, headerDate
 )
 where
 
