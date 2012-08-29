@@ -33,15 +33,6 @@ module Network.HTTP.Types.Header
 , ByteRanges
 , renderByteRangesBuilder
 , renderByteRanges
-  -- ** Deprecated
-, headerAccept
-, headerAuthorization
-, headerCacheControl
-, headerConnection
-, headerContentLength
-, headerContentType
-, headerContentMD5
-, headerDate
 )
 where
 
@@ -86,25 +77,6 @@ hRange           = "Range"
 hReferer         = "Referer"
 hServer          = "Server"
 hUserAgent       = "User-Agent"
-
--- | HTTP Headers
-headerAccept, headerAuthorization, headerCacheControl, headerConnection, headerContentLength, headerContentType, headerContentMD5, headerDate :: B.ByteString -> Header
-headerAccept        = (,) hAccept
-{-# DEPRECATED headerAccept "Use hAccept instead" #-}
-headerAuthorization = (,) hAuthorization
-{-# DEPRECATED headerAuthorization "Use hAuthorization instead" #-}
-headerCacheControl  = (,) hCacheControl
-{-# DEPRECATED headerCacheControl "Use hCacheControl instead" #-}
-headerConnection    = (,) hConnection
-{-# DEPRECATED headerConnection "Use hConnection instead" #-}
-headerContentLength = (,) hContentLength
-{-# DEPRECATED headerContentLength "Use hContentLength instead" #-}
-headerContentMD5    = (,) hContentMD5
-{-# DEPRECATED headerContentMD5 "Use hContentMD5 instead" #-}
-headerContentType   = (,) hContentType
-{-# DEPRECATED headerContentType "Use hContentType instead" #-}
-headerDate          = (,) hDate
-{-# DEPRECATED headerDate "Use hDate instead" #-}
 
 -- | RFC 2616 Byte range (individual). 
 -- 

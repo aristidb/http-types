@@ -188,14 +188,9 @@ module Network.HTTP.Types
 )
 where
 
-import           Network.HTTP.Types.Method
-import           Network.HTTP.Types.Version
-import           Network.HTTP.Types.Status
-import           Network.HTTP.Types.Header
-import           Network.HTTP.Types.URI
-import           Network.HTTP.Types.QueryLike
-import qualified Data.ByteString              as B
-
--- | Type synonym for ASCII ByteStrings (deprecated).
-type Ascii = B.ByteString
-{-# DEPRECATED Ascii "Deprecated Ascii type" #-}
+import Network.HTTP.Types.Header
+import Network.HTTP.Types.Method
+import Network.HTTP.Types.QueryLike
+import Network.HTTP.Types.Status
+import Network.HTTP.Types.URI
+import Network.HTTP.Types.Version
