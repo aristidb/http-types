@@ -93,8 +93,7 @@ module Network.HTTP.Types.Status
 )
 where
 
-import qualified Data.ByteString       as B
-import           Data.ByteString.Char8 as B8
+import qualified Data.ByteString as B
 
 -- | HTTP Status.
 -- 
@@ -107,7 +106,6 @@ import           Data.ByteString.Char8 as B8
 data Status
     = Status {
         statusCode :: Int
-      , statusAsciiCode :: B.ByteString
       , statusMessage :: B.ByteString
       }
     deriving (Show)
@@ -164,7 +162,7 @@ instance Enum Status where
 
 -- | Create a Status from status code and message.
 mkStatus :: Int -> B.ByteString -> Status
-mkStatus i m = Status i (B8.pack (show i)) m
+mkStatus i m = Status i m
 
 -- | Continue 100
 status100 :: Status
