@@ -5,6 +5,7 @@ module Network.HTTP.Types.Method
 , methodPost
 , methodHead
 , methodPut
+, methodPatch
 , methodDelete
 , methodTrace
 , methodConnect
@@ -25,9 +26,10 @@ import qualified Data.ByteString.Char8 as B8
 type Method = B.ByteString
 
 -- | HTTP Method constants.
-methodGet, methodPost, methodHead, methodPut, methodDelete, methodTrace, methodConnect, methodOptions :: Method
+methodGet, methodPost, methodHead, methodPut, methodPatch, methodDelete, methodTrace, methodConnect, methodOptions :: Method
 methodGet     = renderStdMethod GET
 methodPost    = renderStdMethod POST
+methodPatch   = renderStdMethod PATCH
 methodHead    = renderStdMethod HEAD
 methodPut     = renderStdMethod PUT
 methodDelete  = renderStdMethod DELETE
@@ -39,8 +41,9 @@ methodOptions = renderStdMethod OPTIONS
 data StdMethod
     = GET
     | POST
-    | HEAD  
+    | HEAD
     | PUT
+    | PATCH
     | DELETE
     | TRACE
     | CONNECT
