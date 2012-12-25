@@ -9,6 +9,7 @@ module Network.HTTP.Types.Method
 , methodTrace
 , methodConnect
 , methodOptions
+, methodPatch
 , StdMethod(..)
 , parseMethod
 , renderMethod
@@ -25,7 +26,7 @@ import qualified Data.ByteString.Char8 as B8
 type Method = B.ByteString
 
 -- | HTTP Method constants.
-methodGet, methodPost, methodHead, methodPut, methodDelete, methodTrace, methodConnect, methodOptions :: Method
+methodGet, methodPost, methodHead, methodPut, methodDelete, methodTrace, methodConnect, methodOptions, methodPatch :: Method
 methodGet     = renderStdMethod GET
 methodPost    = renderStdMethod POST
 methodHead    = renderStdMethod HEAD
@@ -34,17 +35,20 @@ methodDelete  = renderStdMethod DELETE
 methodTrace   = renderStdMethod TRACE
 methodConnect = renderStdMethod CONNECT
 methodOptions = renderStdMethod OPTIONS
+methodPatch   = renderStdMethod PATCH
 
--- | HTTP standard method (as defined by RFC 2616).
+-- | HTTP standard method (as defined by RFC 2616, and PATCH which is defined
+--   by RFC 5789).
 data StdMethod
     = GET
     | POST
-    | HEAD  
+    | HEAD
     | PUT
     | DELETE
     | TRACE
     | CONNECT
     | OPTIONS
+    | PATCH
     deriving (Read, Show, Eq, Ord, Enum, Bounded, Ix)
 -- These are ordered by suspected frequency. More popular methods should go first.
 -- The reason is that methodList is used with lookup.
