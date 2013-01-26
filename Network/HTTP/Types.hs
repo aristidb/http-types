@@ -113,6 +113,7 @@ module Network.HTTP.Types
   -- * Headers
   -- ** Types
 , Header
+, HeaderName
 , RequestHeaders
 , ResponseHeaders
   -- ** Common headers
