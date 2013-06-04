@@ -33,6 +33,7 @@ module Network.HTTP.Types.Header
 , ByteRanges
 , renderByteRangesBuilder
 , renderByteRanges
+, parseByteRanges
 )
 where
 
@@ -43,7 +44,9 @@ import qualified Blaze.ByteString.Builder.Char8 as Blaze
 import qualified Data.ByteString                as B
 import qualified Data.CaseInsensitive           as CI
 import           Data.ByteString.Char8          () {-IsString-}
-
+import qualified Data.Attoparsec                as A
+import qualified Data.Attoparsec.ByteString.Char8  as A8
+import           Control.Applicative ((<|>), (<$>))
 -- | Header
 type Header = (HeaderName, B.ByteString)
 
@@ -85,6 +88,7 @@ data ByteRange
   = ByteRangeFrom !Integer
   | ByteRangeFromTo !Integer !Integer
   | ByteRangeSuffix !Integer
+  deriving (Show)
 
 renderByteRangeBuilder :: ByteRange -> Blaze.Builder
 renderByteRangeBuilder (ByteRangeFrom from) = Blaze.fromShow from `mappend` Blaze.fromChar '-'
@@ -103,3 +107,36 @@ renderByteRangesBuilder xs = Blaze.copyByteString "bytes=" `mappend`
 
 renderByteRanges :: ByteRanges -> B.ByteString
 renderByteRanges = Blaze.toByteString . renderByteRangesBuilder
+
+
+byteRangesParser :: A8.Parser ByteRanges
+byteRangesParser = do
+    _ <- A8.string "bytes="
+    br <- range
+    rest <- maybeMoreRanges 
+    return $ br:rest
+    where
+        range = rangeFromTo <|> rangeSuffix
+        rangeFromTo = do
+            f <- A8.decimal
+            _ <- A8.char '-'
+            mt <- Just <$> A8.decimal <|> return Nothing
+            
+            return $ case mt of
+                Just t -> ByteRangeFromTo f t
+                Nothing -> ByteRangeFrom f
+        rangeSuffix = do
+            _ <- A8.char '-'
+            s <- A8.decimal
+            return $ ByteRangeSuffix s
+        maybeMoreRanges = moreRanges <|> return []
+        moreRanges = do
+            _ <- A8.char ','
+            r <- range
+            rest <- maybeMoreRanges
+            return $ r:rest
+       
+parseByteRanges :: B.ByteString -> Maybe ByteRanges
+parseByteRanges bs = case A8.parseOnly byteRangesParser bs of
+    Left _ -> Nothing
+    Right br -> Just br
