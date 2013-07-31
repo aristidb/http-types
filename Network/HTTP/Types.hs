@@ -11,6 +11,7 @@ module Network.HTTP.Types
 , methodTrace
 , methodConnect
 , methodOptions
+, methodPatch
 , StdMethod(..)
 , parseMethod
 , renderMethod
