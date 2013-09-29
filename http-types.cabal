@@ -47,12 +47,12 @@ Cabal-version:       >=1.8
 
 Source-repository this
   type: git
-  location: https://github.com/aristidb/aws.git
+  location: https://github.com/aristidb/http-types.git
   tag: 0.8.1
 
 Source-repository head
   type: git
-  location: https://github.com/aristidb/aws.git
+  location: https://github.com/aristidb/http-types.git
 
 Library
   -- Modules exported by the library.
