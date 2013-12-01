@@ -5,10 +5,11 @@ import           Debug.Trace
 import           Network.HTTP.Types
 import           Test.Hspec
 import           Test.QuickCheck
-import qualified Blaze.ByteString.Builder as Blaze
-import qualified Data.ByteString          as S
-import qualified Data.ByteString.Char8    as S8
-import qualified Data.Text                as T
+import qualified Data.ByteString.Lazy.Builder as B
+import qualified Data.ByteString              as S
+import qualified Data.ByteString.Char8        as S8
+import qualified Data.ByteString.Lazy         as L
+import qualified Data.Text                    as T
 
 main :: IO ()
 main = hspec $ do
@@ -16,7 +17,7 @@ main = hspec $ do
       it "is identity to encode and then decode" $
         property propEncodeDecodePath
       it "does not escape period and dash" $
-        Blaze.toByteString (encodePath ["foo-bar.baz"] []) `shouldBe` "/foo-bar.baz"
+        (L.toStrict . B.toLazyByteString) (encodePath ["foo-bar.baz"] []) `shouldBe` "/foo-bar.baz"
 
     describe "encode/decode query" $ do
       it "is identity to encode and then decode" $
@@ -46,7 +47,7 @@ main = hspec $ do
 
 propEncodeDecodePath :: ([Text], Query) -> Bool
 propEncodeDecodePath (p', q') =
-    let x = Blaze.toByteString $ encodePath a b
+    let x = L.toStrict . B.toLazyByteString $ encodePath a b
         y = decodePath x
         z = y == (a, b)
      in if z then z else traceShow (a, b, x, y) z
@@ -74,7 +75,7 @@ propQueryQuestionMark (useQuestionMark, query) = actual == expected
 
 propEncodeDecodePathSegments :: [Text] -> Bool
 propEncodeDecodePathSegments p' =
-    p == decodePathSegments (Blaze.toByteString $ encodePathSegments p)
+    p == decodePathSegments (L.toStrict . B.toLazyByteString $ encodePathSegments p)
   where
     p = if p' == [""] then [] else p'
 
