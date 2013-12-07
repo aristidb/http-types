@@ -73,7 +73,7 @@ Library
                        array >=0.2 && <0.6,
                        case-insensitive >=0.2 && <1.2,
                        blaze-builder >= 0.2.1.4 && < 0.4,
-                       text >= 0.11.0.2 && < 0.12
+                       text >= 0.11.0.2
   
   -- Modules not exported by this package.
   -- Other-modules:       
