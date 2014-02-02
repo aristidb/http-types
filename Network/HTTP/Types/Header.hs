@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies #-}
+{-# LANGUAGE OverloadedStrings, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies, DeriveDataTypeable #-}
 module Network.HTTP.Types.Header
 (
   -- ** Types
@@ -43,6 +43,8 @@ import qualified Blaze.ByteString.Builder.Char8 as Blaze
 import qualified Data.ByteString                as B
 import qualified Data.CaseInsensitive           as CI
 import           Data.ByteString.Char8          () {-IsString-}
+import           Data.Typeable                  (Typeable)
+import           Data.Data                      (Data)
 
 -- | Header
 type Header = (HeaderName, B.ByteString)
@@ -85,6 +87,7 @@ data ByteRange
   = ByteRangeFrom !Integer
   | ByteRangeFromTo !Integer !Integer
   | ByteRangeSuffix !Integer
+  deriving (Show, Eq, Ord, Typeable, Data)
 
 renderByteRangeBuilder :: ByteRange -> Blaze.Builder
 renderByteRangeBuilder (ByteRangeFrom from) = Blaze.fromShow from `mappend` Blaze.fromChar '-'
