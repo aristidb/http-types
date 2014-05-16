@@ -73,6 +73,12 @@ module Network.HTTP.Types.Status
 , expectationFailed417
 , status418
 , imATeaPot418
+, status428
+, preconditionRequired428
+, status429
+, tooManyRequests429
+, status431
+, requestHeaderFieldsTooLarge431
 , status500
 , internalServerError500
 , status501
@@ -84,6 +90,8 @@ module Network.HTTP.Types.Status
 , status504
 , gatewayTimeout504
 , status505
+, status511
+, networkAuthenticationRequired511
 , httpVersionNotSupported505
 , statusIsInformational
 , statusIsSuccessful
@@ -444,6 +452,36 @@ status418 = mkStatus 418 "I'm a teapot"
 imATeaPot418 :: Status
 imATeaPot418 = status418
 
+-- | Precondition Required 428
+-- (<https://tools.ietf.org/html/rfc6585 RFC 6585>)
+status428 :: Status
+status428 = mkStatus 428 "Precondition Required"
+
+-- | Precondition Required 428
+-- (<https://tools.ietf.org/html/rfc6585 RFC 6585>)
+preconditionRequired428 :: Status
+preconditionRequired428 = status428
+
+-- | Too Many Requests 429
+-- (<https://tools.ietf.org/html/rfc6585 RFC 6585>)
+status429 :: Status
+status429 = mkStatus 429 "Too Many Requests"
+
+-- | Too Many Requests 429
+-- (<https://tools.ietf.org/html/rfc6585 RFC 6585>)
+tooManyRequests429 :: Status
+tooManyRequests429 = status429
+
+-- | Request Header Fields Too Large 431
+-- (<https://tools.ietf.org/html/rfc6585 RFC 6585>)
+status431 :: Status
+status431 = mkStatus 431 "Request Header Fields Too Large"
+
+-- | Request Header Fields Too Large 431
+-- (<https://tools.ietf.org/html/rfc6585 RFC 6585>)
+requestHeaderFieldsTooLarge431 :: Status
+requestHeaderFieldsTooLarge431 = status431
+
 -- | Internal Server Error 500
 status500 :: Status
 status500 = mkStatus 500 "Internal Server Error"
@@ -491,6 +529,16 @@ status505 = mkStatus 505 "HTTP Version Not Supported"
 -- | HTTP Version Not Supported 505
 httpVersionNotSupported505 :: Status
 httpVersionNotSupported505 = status505
+
+-- | Network Authentication Required 511
+-- (<https://tools.ietf.org/html/rfc6585 RFC 6585>)
+status511 :: Status
+status511 = mkStatus 511 "Network Authentication Required"
+
+-- | Network Authentication Required 511
+-- (<https://tools.ietf.org/html/rfc6585 RFC 6585>)
+networkAuthenticationRequired511 :: Status
+networkAuthenticationRequired511 = status511
 
 -- | Informational class
 statusIsInformational :: Status -> Bool
