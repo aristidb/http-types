@@ -96,12 +96,12 @@ where
 import qualified Data.ByteString as B
 
 -- | HTTP Status.
--- 
+--
 -- Only the 'statusCode' is used for comparisons.
--- 
+--
 -- Please use 'mkStatus' to create status codes from code and message, or the 'Enum' instance or the
 -- status code constants (like 'ok200'). There might be additional record members in the future.
--- 
+--
 -- Note that the Show instance is only for debugging.
 data Status
     = Status {
