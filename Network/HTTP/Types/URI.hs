@@ -296,11 +296,13 @@ decodePathSegment = decodeUtf8With lenientDecode . urlDecode False
 -- >>> extractPath "/path"
 -- "/path"
 extractPath :: B.ByteString -> B.ByteString
-extractPath path
-  | "http://" `B.isPrefixOf` path = ensureNonEmpty $ extractPath_ path
-  | otherwise                     = ensureNonEmpty path
+extractPath = ensureNonEmpty . extract
   where
-    extractPath_ = snd . B.breakByte 47 . B.drop 7 -- 47 is '/'.
+    extract path
+      | "http://"  `B.isPrefixOf` path = (snd . breakOnSlash . B.drop 7) path
+      | "https://" `B.isPrefixOf` path = (snd . breakOnSlash . B.drop 8) path
+      | otherwise                      = path
+    breakOnSlash = B.breakByte 47
     ensureNonEmpty "" = "/"
     ensureNonEmpty p  = p
 
