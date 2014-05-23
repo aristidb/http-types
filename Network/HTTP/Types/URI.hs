@@ -23,6 +23,7 @@ module Network.HTTP.Types.URI
 , decodePathSegments
 , encodePathSegmentsRelative
   -- * Path (segments + query string)
+, extractPath
 , encodePath
 , decodePath
   -- * URL encoding / decoding
@@ -283,6 +284,25 @@ decodePathSegments a =
 
 decodePathSegment :: B.ByteString -> Text
 decodePathSegment = decodeUtf8With lenientDecode . urlDecode False
+
+-- |
+--
+-- >>> extractPath ""
+-- "/"
+-- >>> extractPath "http://example.com:8080/path"
+-- "/path"
+-- >>> extractPath "http://example.com"
+-- "/"
+-- >>> extractPath "/path"
+-- "/path"
+extractPath :: B.ByteString -> B.ByteString
+extractPath path
+  | "http://" `B.isPrefixOf` path = ensureNonEmpty $ extractPath_ path
+  | otherwise                     = ensureNonEmpty path
+  where
+    extractPath_ = snd . B.breakByte 47 . B.drop 7 -- 47 is '/'.
+    ensureNonEmpty "" = "/"
+    ensureNonEmpty p  = p
 
 -- | Encode a whole path (path segments + query).
 encodePath :: [Text] -> Query -> Blaze.Builder
