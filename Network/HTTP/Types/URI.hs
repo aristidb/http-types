@@ -285,16 +285,20 @@ decodePathSegments a =
 decodePathSegment :: B.ByteString -> Text
 decodePathSegment = decodeUtf8With lenientDecode . urlDecode False
 
--- |
+-- | Extract whole path (path segments + query) from a
+-- <http://tools.ietf.org/html/rfc2616#section-5.1.2 RFC 2616 Request-URI>.
+--
+-- >>> extractPath "/path"
+-- "/path"
+--
+-- >>> extractPath "http://example.com:8080/path"
+-- "/path"
+--
+-- >>> extractPath "http://example.com"
+-- "/"
 --
 -- >>> extractPath ""
 -- "/"
--- >>> extractPath "http://example.com:8080/path"
--- "/path"
--- >>> extractPath "http://example.com"
--- "/"
--- >>> extractPath "/path"
--- "/path"
 extractPath :: B.ByteString -> B.ByteString
 extractPath = ensureNonEmpty . extract
   where
