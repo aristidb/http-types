@@ -1,5 +1,5 @@
 Name:                http-types
-Version:             0.8.4
+Version:             0.8.5
 Synopsis:            Generic HTTP types for Haskell (for both client and server code).
 Description:         Generic HTTP types for Haskell (for both client and server code).
 Homepage:            https://github.com/aristidb/http-types
