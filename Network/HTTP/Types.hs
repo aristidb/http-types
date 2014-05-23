@@ -169,6 +169,7 @@ module Network.HTTP.Types
 , decodePathSegments
 , encodePathSegmentsRelative
   -- ** Path (segments + query string)
+, extractPath
 , encodePath
 , decodePath
   -- ** URL encoding / decoding
