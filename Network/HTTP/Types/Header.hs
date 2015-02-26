@@ -38,9 +38,9 @@ where
 
 import           Data.List
 import           Data.Monoid
-import qualified Blaze.ByteString.Builder       as Blaze
-import qualified Blaze.ByteString.Builder.Char8 as Blaze
 import qualified Data.ByteString                as B
+import qualified Data.ByteString.Builder        as BSB
+import qualified Data.ByteString.Lazy           as BSL
 import qualified Data.CaseInsensitive           as CI
 import           Data.ByteString.Char8          () {-IsString-}
 import           Data.Typeable                  (Typeable)
@@ -89,20 +89,20 @@ data ByteRange
   | ByteRangeSuffix !Integer
   deriving (Show, Eq, Ord, Typeable, Data)
 
-renderByteRangeBuilder :: ByteRange -> Blaze.Builder
-renderByteRangeBuilder (ByteRangeFrom from) = Blaze.fromShow from `mappend` Blaze.fromChar '-'
-renderByteRangeBuilder (ByteRangeFromTo from to) = Blaze.fromShow from `mappend` Blaze.fromChar '-' `mappend` Blaze.fromShow to
-renderByteRangeBuilder (ByteRangeSuffix suffix) = Blaze.fromChar '-' `mappend` Blaze.fromShow suffix
+renderByteRangeBuilder :: ByteRange -> BSB.Builder
+renderByteRangeBuilder (ByteRangeFrom from) = BSB.integerDec from `mappend` BSB.char8 '-'
+renderByteRangeBuilder (ByteRangeFromTo from to) = BSB.integerDec from `mappend` BSB.char8 '-' `mappend` BSB.integerDec to
+renderByteRangeBuilder (ByteRangeSuffix suffix) = BSB.char8 '-' `mappend` BSB.integerDec suffix
 
 renderByteRange :: ByteRange -> B.ByteString
-renderByteRange = Blaze.toByteString . renderByteRangeBuilder
+renderByteRange = BSL.toStrict . BSB.toLazyByteString . renderByteRangeBuilder
 
 -- | RFC 2616 Byte ranges (set).
 type ByteRanges = [ByteRange]
 
-renderByteRangesBuilder :: ByteRanges -> Blaze.Builder
-renderByteRangesBuilder xs = Blaze.copyByteString "bytes=" `mappend` 
-                             mconcat (intersperse (Blaze.fromChar ',') (map renderByteRangeBuilder xs))
+renderByteRangesBuilder :: ByteRanges -> BSB.Builder
+renderByteRangesBuilder xs = BSB.byteString "bytes=" `mappend` 
+                             mconcat (intersperse (BSB.char8 ',') (map renderByteRangeBuilder xs))
 
 renderByteRanges :: ByteRanges -> B.ByteString
-renderByteRanges = Blaze.toByteString . renderByteRangesBuilder
+renderByteRanges = BSL.toStrict . BSB.toLazyByteString . renderByteRangesBuilder

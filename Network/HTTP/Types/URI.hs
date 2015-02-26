@@ -43,8 +43,9 @@ import           Data.Text                      (Text)
 import           Data.Text.Encoding             (encodeUtf8, decodeUtf8With)
 import           Data.Text.Encoding.Error       (lenientDecode)
 import           Data.Word
-import qualified Blaze.ByteString.Builder       as Blaze
 import qualified Data.ByteString                as B
+import qualified Data.ByteString.Lazy           as BSL
+import qualified Data.ByteString.Builder        as BSB
 import           Data.ByteString.Char8          () {-IsString-}
 
 -- | Query item
@@ -63,10 +64,10 @@ type QueryText = [(Text, Maybe Text)]
 queryTextToQuery :: QueryText -> Query
 queryTextToQuery = map $ encodeUtf8 *** fmap encodeUtf8
 
--- | Convert 'QueryText' to a 'Blaze.Builder'.
+-- | Convert 'QueryText' to a 'BSB.Builder'.
 renderQueryText :: Bool -- ^ prepend a question mark?
                 -> QueryText
-                -> Blaze.Builder
+                -> BSB.Builder
 renderQueryText b = renderQueryBuilder b . queryTextToQuery
 
 -- | Convert 'Query' to 'QueryText' (leniently decoding the UTF-8).
@@ -93,16 +94,16 @@ simpleQueryToQuery = map (\(a, b) -> (a, Just b))
 -- | Convert 'Query' to a 'Builder'.
 renderQueryBuilder :: Bool -- ^ prepend a question mark?
                    -> Query
-                   -> Blaze.Builder
+                   -> BSB.Builder
 renderQueryBuilder _ [] = mempty
 -- FIXME replace mconcat + map with foldr
 renderQueryBuilder qmark' (p:ps) = mconcat
     $ go (if qmark' then qmark else mempty) p
     : map (go amp) ps
   where
-    qmark = Blaze.copyByteString "?"
-    amp = Blaze.copyByteString "&"
-    equal = Blaze.copyByteString "="
+    qmark = BSB.char8 '?'
+    amp = BSB.char8 '&'
+    equal = BSB.char8 '='
     go sep (k, mv) = mconcat [
                       sep
                      , urlEncodeBuilder True k
@@ -114,7 +115,7 @@ renderQueryBuilder qmark' (p:ps) = mconcat
 -- | Convert 'Query' to 'ByteString'.
 renderQuery :: Bool -- ^ prepend question mark?
             -> Query -> B.ByteString
-renderQuery qm = Blaze.toByteString . renderQueryBuilder qm
+renderQuery qm = BSL.toStrict . BSB.toLazyByteString . renderQueryBuilder qm
 
 -- | Convert 'SimpleQuery' to 'ByteString'.
 renderSimpleQuery :: Bool -- ^ prepend question mark?
@@ -172,10 +173,10 @@ unreservedQS = map ord8 "-_.~"
 unreservedPI = map ord8 "-_.~:@&=+$,"
 
 -- | Percent-encoding for URLs.
-urlEncodeBuilder' :: [Word8] -> B.ByteString -> Blaze.Builder
+urlEncodeBuilder' :: [Word8] -> B.ByteString -> BSB.Builder
 urlEncodeBuilder' extraUnreserved = mconcat . map encodeChar . B.unpack
     where
-      encodeChar ch | unreserved ch = Blaze.fromWord8 ch
+      encodeChar ch | unreserved ch = BSB.word8 ch
                     | otherwise     = h2 ch
       
       unreserved ch | ch >= 65 && ch <= 90  = True -- A-Z
@@ -183,15 +184,15 @@ urlEncodeBuilder' extraUnreserved = mconcat . map encodeChar . B.unpack
                     | ch >= 48 && ch <= 57  = True -- 0-9
       unreserved c = c `elem` extraUnreserved
       
-      h2 v = let (a, b) = v `divMod` 16 in Blaze.fromWord8s [37, h a, h b] -- percent (%)
+      h2 v = let (a, b) = v `divMod` 16 in foldMap BSB.word8 [37, h a, h b] -- percent (%)
       h i | i < 10    = 48 + i -- zero (0)
           | otherwise = 65 + i - 10 -- 65: A
 
--- | Percent-encoding for URLs (using 'Blaze.Builder').
+-- | Percent-encoding for URLs (using 'BSB.Builder').
 urlEncodeBuilder
     :: Bool -- ^ Whether input is in query string. True: Query string, False: Path element
     -> B.ByteString
-    -> Blaze.Builder
+    -> BSB.Builder
 urlEncodeBuilder True  = urlEncodeBuilder' unreservedQS
 urlEncodeBuilder False = urlEncodeBuilder' unreservedPI
 
@@ -199,7 +200,7 @@ urlEncodeBuilder False = urlEncodeBuilder' unreservedPI
 urlEncode :: Bool -- ^ Whether to decode '+' to ' '
           -> B.ByteString -- ^ The ByteString to encode as URL
           -> B.ByteString -- ^ The encoded URL
-urlEncode q = Blaze.toByteString . urlEncodeBuilder q
+urlEncode q = BSL.toStrict . BSB.toLazyByteString . urlEncodeBuilder q
 
 -- | Percent-decoding.
 urlDecode :: Bool -- ^ Whether to decode '+' to ' '
@@ -252,18 +253,18 @@ urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
 -- Huge thanks to Jeremy Shaw who created the original implementation of this
 -- function in web-routes and did such thorough research to determine all
 -- correct escaping procedures.
-encodePathSegments :: [Text] -> Blaze.Builder
+encodePathSegments :: [Text] -> BSB.Builder
 encodePathSegments [] = mempty
 encodePathSegments (x:xs) =
-    Blaze.copyByteString "/"
+    BSB.byteString "/"
     `mappend` encodePathSegment x
     `mappend` encodePathSegments xs
 
 -- | Like encodePathSegments, but without the initial slash.
-encodePathSegmentsRelative :: [Text] -> Blaze.Builder
-encodePathSegmentsRelative xs = mconcat $ intersperse (Blaze.copyByteString "/") (map encodePathSegment xs)
+encodePathSegmentsRelative :: [Text] -> BSB.Builder
+encodePathSegmentsRelative xs = mconcat $ intersperse (BSB.char8 '/') (map encodePathSegment xs)
 
-encodePathSegment :: Text -> Blaze.Builder
+encodePathSegment :: Text -> BSB.Builder
 encodePathSegment = urlEncodeBuilder False . encodeUtf8
 
 -- | Parse a list of path segments from a valid URL fragment.
@@ -313,7 +314,7 @@ extractPath = ensureNonEmpty . extract
     ensureNonEmpty p  = p
 
 -- | Encode a whole path (path segments + query).
-encodePath :: [Text] -> Query -> Blaze.Builder
+encodePath :: [Text] -> Query -> BSB.Builder
 encodePath x [] = encodePathSegments x
 encodePath x y = encodePathSegments x `mappend` renderQueryBuilder True y
 
