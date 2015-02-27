@@ -256,7 +256,7 @@ urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
 encodePathSegments :: [Text] -> BSB.Builder
 encodePathSegments [] = mempty
 encodePathSegments (x:xs) =
-    BSB.byteString "/"
+    BSB.char8 '/'
     `mappend` encodePathSegment x
     `mappend` encodePathSegments xs
 
