@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 module Network.HTTP.Types.Method
 (
   Method
@@ -21,6 +22,7 @@ import           Control.Arrow         ((|||))
 import           Data.Array
 import qualified Data.ByteString       as B
 import qualified Data.ByteString.Char8 as B8
+import           Data.Typeable
 
 -- | HTTP method (flat string type).
 type Method = B.ByteString
@@ -49,7 +51,7 @@ data StdMethod
     | CONNECT
     | OPTIONS
     | PATCH
-    deriving (Read, Show, Eq, Ord, Enum, Bounded, Ix)
+    deriving (Read, Show, Eq, Ord, Enum, Bounded, Ix, Typeable)
 -- These are ordered by suspected frequency. More popular methods should go first.
 -- The reason is that methodList is used with lookup.
 -- lookup is probably faster for these few cases than setting up an elaborate data structure.
