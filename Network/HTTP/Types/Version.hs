@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 module Network.HTTP.Types.Version
 (
   HttpVersion(..)
@@ -7,15 +8,17 @@ module Network.HTTP.Types.Version
 )
 where
 
+import Data.Typeable
+
 -- | HTTP Version.
--- 
+--
 -- Note that the Show instance is intended merely for debugging.
-data HttpVersion 
+data HttpVersion
     = HttpVersion {
-        httpMajor :: !Int 
+        httpMajor :: !Int
       , httpMinor :: !Int
       }
-    deriving (Eq, Ord)
+    deriving (Eq, Ord, Typeable)
 
 instance Show HttpVersion where
     show (HttpVersion major minor) = "HTTP/" ++ show major ++ "." ++ show minor
