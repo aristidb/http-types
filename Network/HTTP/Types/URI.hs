@@ -215,7 +215,7 @@ urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
                 x' <- hexVal x
                 (y, ys) <- B.uncons xs
                 y' <- hexVal y
-                Just $ (combine x' y', ys)
+                Just (combine x' y', ys)
             Just (w, ws) -> Just (w, ws)
     hexVal w
         | 48 <= w && w <= 57  = Just $ w - 48 -- 0 - 9
