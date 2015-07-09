@@ -164,12 +164,16 @@ instance Enum Status where
 	toEnum 415 = status415
 	toEnum 416 = status416
 	toEnum 417 = status417
+	toEnum 428 = status428
+	toEnum 429 = status429
+	toEnum 431 = status431
 	toEnum 500 = status500
 	toEnum 501 = status501
 	toEnum 502 = status502
 	toEnum 503 = status503
 	toEnum 504 = status504
 	toEnum 505 = status505
+	toEnum 511 = status511
 	toEnum c   = mkStatus c B.empty
 
 -- | Create a Status from status code and message.
