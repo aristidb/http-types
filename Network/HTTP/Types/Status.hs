@@ -35,6 +35,8 @@ module Network.HTTP.Types.Status
 , useProxy305
 , status307
 , temporaryRedirect307
+, status308
+, permanentRedirect308
 , status400
 , badRequest400
 , status401
@@ -143,6 +145,7 @@ instance Enum Status where
 	toEnum 304 = status304
 	toEnum 305 = status305
 	toEnum 307 = status307
+	toEnum 308 = status308
 	toEnum 400 = status400
 	toEnum 401 = status401
 	toEnum 402 = status402
@@ -161,12 +164,16 @@ instance Enum Status where
 	toEnum 415 = status415
 	toEnum 416 = status416
 	toEnum 417 = status417
+	toEnum 428 = status428
+	toEnum 429 = status429
+	toEnum 431 = status431
 	toEnum 500 = status500
 	toEnum 501 = status501
 	toEnum 502 = status502
 	toEnum 503 = status503
 	toEnum 504 = status504
 	toEnum 505 = status505
+	toEnum 511 = status511
 	toEnum c   = mkStatus c B.empty
 
 -- | Create a Status from status code and message.
@@ -300,6 +307,14 @@ status307 = mkStatus 307 "Temporary Redirect"
 -- | Temporary Redirect 307
 temporaryRedirect307 :: Status
 temporaryRedirect307 = status307
+
+-- | Permanent Redirect 308
+status308 :: Status
+status308 = mkStatus 308 "Permanent Redirect"
+
+-- | Permanent Redirect 308
+permanentRedirect308 :: Status
+permanentRedirect308 = status308
 
 -- | Bad Request 400
 status400 :: Status
