@@ -24,6 +24,7 @@ module Network.HTTP.Types.Header
 , hLocation
 , hRange
 , hReferer
+, hRefresh
 , hServer
 , hUserAgent
   -- ** Byte ranges
@@ -59,7 +60,7 @@ type RequestHeaders = [Header]
 type ResponseHeaders = [Header]
 
 -- | HTTP Header names
-hAccept, hAcceptLanguage, hAuthorization, hCacheControl, hConnection, hContentEncoding, hContentLength, hContentMD5, hContentType, hCookie, hDate, hIfModifiedSince, hIfRange, hLastModified, hLocation, hRange, hReferer, hServer, hUserAgent :: HeaderName
+hAccept, hAcceptLanguage, hAuthorization, hCacheControl, hConnection, hContentEncoding, hContentLength, hContentMD5, hContentType, hCookie, hDate, hIfModifiedSince, hIfRange, hLastModified, hLocation, hRange, hReferer, hRefresh, hServer, hUserAgent :: HeaderName
 hAccept          = "Accept"
 hAcceptLanguage  = "Accept-Language"
 hAuthorization   = "Authorization"
@@ -77,6 +78,7 @@ hLastModified    = "Last-Modified"
 hLocation        = "Location"
 hRange           = "Range"
 hReferer         = "Referer"
+hRefresh         = "Refresh"
 hServer          = "Server"
 hUserAgent       = "User-Agent"
 
