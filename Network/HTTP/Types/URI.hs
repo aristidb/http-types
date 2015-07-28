@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, CPP #-}
 module Network.HTTP.Types.URI
 (
   -- * Query string
@@ -38,7 +38,9 @@ import           Data.Bits
 import           Data.Char
 import           Data.List
 import           Data.Maybe
+#if __GLASGOW_HASKELL__ < 710
 import           Data.Monoid
+#endif
 import           Data.Text                      (Text)
 import           Data.Text.Encoding             (encodeUtf8, decodeUtf8With)
 import           Data.Text.Encoding.Error       (lenientDecode)

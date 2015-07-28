@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, FlexibleInstances, MultiParamTypeClasses, DeriveDataTypeable #-}
+{-# LANGUAGE OverloadedStrings, FlexibleInstances, MultiParamTypeClasses, DeriveDataTypeable, CPP #-}
 module Network.HTTP.Types.Header
 (
   -- ** Types
@@ -8,24 +8,53 @@ module Network.HTTP.Types.Header
 , ResponseHeaders
   -- ** Common headers
 , hAccept
+, hAcceptCharset
+, hAcceptEncoding
 , hAcceptLanguage
+, hAcceptRanges
+, hAge
+, hAllow
 , hAuthorization
 , hCacheControl
-, hCookie
 , hConnection
 , hContentEncoding
+, hContentLanguage
 , hContentLength
+, hContentLocation
 , hContentMD5
+, hContentRange
 , hContentType
+, hCookie
 , hDate
+, hETag
+, hExpect
+, hExpires
+, hFrom
+, hHost
+, hIfMatch
 , hIfModifiedSince
+, hIfNoneMatch
 , hIfRange
+, hIfUnmodifiedSince
 , hLastModified
 , hLocation
+, hMaxForwards
+, hPragma
+, hProxyAuthenticate
+, hProxyAuthorization
 , hRange
 , hReferer
+, hRetryAfter
 , hServer
+, hTE
+, hTrailer
+, hTransferEncoding
+, hUpgrade
 , hUserAgent
+, hVary
+, hVia
+, hWWWAuthenticate
+, hWarning
   -- ** Byte ranges
 , ByteRange(..)
 , renderByteRangeBuilder
@@ -37,7 +66,9 @@ module Network.HTTP.Types.Header
 where
 
 import           Data.List
+#if __GLASGOW_HASKELL__ < 710
 import           Data.Monoid
+#endif
 import qualified Blaze.ByteString.Builder       as Blaze
 import qualified Blaze.ByteString.Builder.Char8 as Blaze
 import qualified Data.ByteString                as B
@@ -59,31 +90,61 @@ type RequestHeaders = [Header]
 type ResponseHeaders = [Header]
 
 -- | HTTP Header names
-hAccept, hAcceptLanguage, hAuthorization, hCacheControl, hConnection, hContentEncoding, hContentLength, hContentMD5, hContentType, hCookie, hDate, hIfModifiedSince, hIfRange, hLastModified, hLocation, hRange, hReferer, hServer, hUserAgent :: HeaderName
-hAccept          = "Accept"
-hAcceptLanguage  = "Accept-Language"
-hAuthorization   = "Authorization"
-hCacheControl    = "Cache-Control"
-hConnection      = "Connection"
-hContentEncoding = "Content-Encoding"
-hContentLength   = "Content-Length"
-hContentMD5      = "Content-MD5"
-hContentType     = "Content-Type"
-hCookie          = "Cookie"
-hDate            = "Date"
-hIfModifiedSince = "If-Modified-Since"
-hIfRange         = "If-Range"
-hLastModified    = "Last-Modified"
-hLocation        = "Location"
-hRange           = "Range"
-hReferer         = "Referer"
-hServer          = "Server"
-hUserAgent       = "User-Agent"
+-- According to http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
+hAccept, hAcceptCharset, hAcceptEncoding, hAcceptLanguage, hAcceptRanges, hAge, hAllow, hAuthorization, hCacheControl, hConnection, hContentEncoding, hContentLanguage, hContentLength, hContentLocation, hContentMD5, hContentRange, hContentType, hCookie, hDate, hETag, hExpect, hExpires, hFrom, hHost, hIfMatch, hIfModifiedSince, hIfNoneMatch, hIfRange, hIfUnmodifiedSince, hLastModified, hLocation, hMaxForwards, hPragma, hProxyAuthenticate, hProxyAuthorization, hRange, hReferer, hRetryAfter, hServer, hTE, hTrailer, hTransferEncoding, hUpgrade, hUserAgent, hVary, hVia, hWWWAuthenticate, hWarning :: HeaderName
+hAccept             = "Accept"
+hAcceptCharset      = "Accept-Charset"
+hAcceptEncoding     = "Accept-Encoding"
+hAcceptLanguage     = "Accept-Language"
+hAcceptRanges       = "Accept-Ranges"
+hAge                = "Age"
+hAllow              = "Allow"
+hAuthorization      = "Authorization"
+hCacheControl       = "Cache-Control"
+hConnection         = "Connection"
+hContentEncoding    = "Content-Encoding"
+hContentLanguage    = "Content-Language"
+hContentLength      = "Content-Length"
+hContentLocation    = "Content-Location"
+hContentMD5         = "Content-MD5"
+hContentRange       = "Content-Range"
+hContentType        = "Content-Type"
+hCookie             = "Cookie"
+hDate               = "Date"
+hETag               = "ETag"
+hExpect             = "Expect"
+hExpires            = "Expires"
+hFrom               = "From"
+hHost               = "Host"
+hIfMatch            = "If-Match"
+hIfModifiedSince    = "If-Modified-Since"
+hIfNoneMatch        = "If-None-Match"
+hIfRange            = "If-Range"
+hIfUnmodifiedSince  = "If-Unmodified-Since"
+hLastModified       = "Last-Modified"
+hLocation           = "Location"
+hMaxForwards        = "Max-Forwards"
+hPragma             = "Pragma"
+hProxyAuthenticate  = "Proxy-Authenticate"
+hProxyAuthorization = "Proxy-Authorization"
+hRange              = "Range"
+hReferer            = "Referer"
+hRetryAfter         = "Retry-After"
+hServer             = "Server"
+hTE                 = "TE"
+hTrailer            = "Trailer"
+hTransferEncoding   = "Transfer-Encoding"
+hUpgrade            = "Upgrade"
+hUserAgent          = "User-Agent"
+hVary               = "Vary"
+hVia                = "Via"
+hWWWAuthenticate    = "WWW-Authenticate"
+hWarning            = "Warning"
 
--- | RFC 2616 Byte range (individual). 
--- 
+-- | RFC 2616 Byte range (individual).
+--
 -- Negative indices are not allowed!
-data ByteRange 
+data ByteRange
   = ByteRangeFrom !Integer
   | ByteRangeFromTo !Integer !Integer
   | ByteRangeSuffix !Integer
