@@ -62,6 +62,7 @@ module Network.HTTP.Types.Header
 , ByteRanges
 , renderByteRangesBuilder
 , renderByteRanges
+, parseByteRanges
 )
 where
 
@@ -72,6 +73,7 @@ import           Data.Monoid
 import qualified Blaze.ByteString.Builder       as Blaze
 import qualified Blaze.ByteString.Builder.Char8 as Blaze
 import qualified Data.ByteString                as B
+import qualified Data.ByteString.Char8          as B8
 import qualified Data.CaseInsensitive           as CI
 import           Data.ByteString.Char8          () {-IsString-}
 import           Data.Typeable                  (Typeable)
@@ -167,3 +169,47 @@ renderByteRangesBuilder xs = Blaze.copyByteString "bytes=" `mappend`
 
 renderByteRanges :: ByteRanges -> B.ByteString
 renderByteRanges = Blaze.toByteString . renderByteRangesBuilder
+
+-- | Parse the value of a Range header into a 'ByteRanges'.
+--
+-- >>> parseByteRanges "error"
+-- Nothing
+-- >>> parseByteRanges "bytes=0-499"
+-- Just [ByteRangeFromTo 0 499]
+-- >>> parseByteRanges "bytes=500-999"
+-- Just [ByteRangeFromTo 500 999]
+-- >>> parseByteRanges "bytes=-500"
+-- Just [ByteRangeSuffix 500]
+-- >>> parseByteRanges "bytes=9500-"
+-- Just [ByteRangeFrom 9500]
+-- >>> parseByteRanges "bytes=0-0,-1"
+-- Just [ByteRangeFromTo 0 0,ByteRangeSuffix 1]
+-- >>> parseByteRanges "bytes=500-600,601-999"
+-- Just [ByteRangeFromTo 500 600,ByteRangeFromTo 601 999]
+-- >>> parseByteRanges "bytes=500-700,601-999"
+-- Just [ByteRangeFromTo 500 700,ByteRangeFromTo 601 999]
+parseByteRanges :: B.ByteString -> Maybe ByteRanges
+parseByteRanges bs1 = do
+    bs2 <- stripPrefixB "bytes=" bs1
+    (r, bs3) <- range bs2
+    ranges (r:) bs3
+  where
+    range bs2 = do
+        (i, bs3) <- B8.readInteger bs2
+        if i < 0 -- has prefix "-" ("-0" is not valid, but here treated as "0-")
+            then Just (ByteRangeSuffix (negate i), bs3)
+            else do
+                bs4 <- stripPrefixB "-" bs3
+                case B8.readInteger bs4 of
+                    Just (j, bs5) | j >= i -> Just (ByteRangeFromTo i j, bs5)
+                    _ -> Just (ByteRangeFrom i, bs4)
+    ranges front bs3
+        | B.null bs3 = Just (front [])
+        | otherwise = do
+            bs4 <- stripPrefixB "," bs3
+            (r, bs5) <- range bs4
+            ranges (front . (r:)) bs5
+
+    stripPrefixB x y
+        | x `B.isPrefixOf` y = Just (B.drop (B.length x) y)
+        | otherwise = Nothing
