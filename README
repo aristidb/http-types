@@ -1,1 +1,5 @@
 Generic HTTP types for Haskell (for both client and server code).
+
+This library also contains some utility functions, e.g. related to URI
+handling, that are not necessarily restricted in use to HTTP, but the scope is
+restricted to things that are useful inside HTTP, i.e. no FTP URI parsing.
