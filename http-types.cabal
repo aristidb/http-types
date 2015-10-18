@@ -10,7 +10,7 @@ Maintainer:          aristidb@googlemail.com
 Copyright:           (C) 2011 Aristid Breitkreuz
 Category:            Network, Web
 Build-type:          Simple
-Extra-source-files:  README
+Extra-source-files:  README, CHANGELOG
 Cabal-version:       >=1.8
 
 Source-repository this
