@@ -74,6 +74,8 @@ module Network.HTTP.Types.Status
 , expectationFailed417
 , status418
 , imATeaPot418
+, status422
+, unprocessableEntity422
 , status428
 , preconditionRequired428
 , status429
@@ -160,6 +162,7 @@ instance Enum Status where
     toEnum 415 = status415
     toEnum 416 = status416
     toEnum 417 = status417
+    toEnum 422 = status422
     toEnum 428 = status428
     toEnum 429 = status429
     toEnum 431 = status431
@@ -463,6 +466,16 @@ status418 = mkStatus 418 "I'm a teapot"
 -- | I'm a teapot 418
 imATeaPot418 :: Status
 imATeaPot418 = status418
+
+-- | Unprocessable Entity 422
+-- (<https://tools.ietf.org/html/rfc4918 RFC 4918>)
+status422 :: Status
+status422 = mkStatus 422 "Unprocessable Entity"
+
+-- | Unprocessable Entity 422
+-- (<https://tools.ietf.org/html/rfc4918 RFC 4918>)
+unprocessableEntity422 :: Status
+unprocessableEntity422 = status422
 
 -- | Precondition Required 428
 -- (<https://tools.ietf.org/html/rfc6585 RFC 6585>)
