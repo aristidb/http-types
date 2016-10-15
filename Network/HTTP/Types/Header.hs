@@ -55,6 +55,8 @@ module Network.HTTP.Types.Header
 , hVia
 , hWWWAuthenticate
 , hWarning
+, hContentDisposition
+, hMIMEVersion
   -- ** Byte ranges
 , ByteRange(..)
 , renderByteRangeBuilder
@@ -142,6 +144,12 @@ hVary               = "Vary"
 hVia                = "Via"
 hWWWAuthenticate    = "WWW-Authenticate"
 hWarning            = "Warning"
+
+-- | HTTP Header names
+-- According to http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html
+hContentDisposition, hMIMEVersion :: HeaderName
+hContentDisposition = "Content-Disposition"
+hMIMEVersion        = "MIME-Version"
 
 -- | RFC 2616 Byte range (individual).
 --
