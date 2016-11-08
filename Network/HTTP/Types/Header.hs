@@ -24,7 +24,6 @@ module Network.HTTP.Types.Header
 , hContentMD5
 , hContentRange
 , hContentType
-, hCookie
 , hDate
 , hETag
 , hExpect
@@ -57,6 +56,8 @@ module Network.HTTP.Types.Header
 , hWarning
 , hContentDisposition
 , hMIMEVersion
+, hCookie
+, hSetCookie
   -- ** Byte ranges
 , ByteRange(..)
 , renderByteRangeBuilder
@@ -93,9 +94,8 @@ type RequestHeaders = [Header]
 -- | Response Headers
 type ResponseHeaders = [Header]
 
--- | HTTP Header names
--- According to http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
-hAccept, hAcceptCharset, hAcceptEncoding, hAcceptLanguage, hAcceptRanges, hAge, hAllow, hAuthorization, hCacheControl, hConnection, hContentEncoding, hContentLanguage, hContentLength, hContentLocation, hContentMD5, hContentRange, hContentType, hCookie, hDate, hETag, hExpect, hExpires, hFrom, hHost, hIfMatch, hIfModifiedSince, hIfNoneMatch, hIfRange, hIfUnmodifiedSince, hLastModified, hLocation, hMaxForwards, hPragma, hProxyAuthenticate, hProxyAuthorization, hRange, hReferer, hRetryAfter, hServer, hTE, hTrailer, hTransferEncoding, hUpgrade, hUserAgent, hVary, hVia, hWWWAuthenticate, hWarning :: HeaderName
+-- | HTTP Header names according to http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
+hAccept, hAcceptCharset, hAcceptEncoding, hAcceptLanguage, hAcceptRanges, hAge, hAllow, hAuthorization, hCacheControl, hConnection, hContentEncoding, hContentLanguage, hContentLength, hContentLocation, hContentMD5, hContentRange, hContentType, hDate, hETag, hExpect, hExpires, hFrom, hHost, hIfMatch, hIfModifiedSince, hIfNoneMatch, hIfRange, hIfUnmodifiedSince, hLastModified, hLocation, hMaxForwards, hPragma, hProxyAuthenticate, hProxyAuthorization, hRange, hReferer, hRetryAfter, hServer, hTE, hTrailer, hTransferEncoding, hUpgrade, hUserAgent, hVary, hVia, hWWWAuthenticate, hWarning :: HeaderName
 hAccept             = "Accept"
 hAcceptCharset      = "Accept-Charset"
 hAcceptEncoding     = "Accept-Encoding"
@@ -113,7 +113,6 @@ hContentLocation    = "Content-Location"
 hContentMD5         = "Content-MD5"
 hContentRange       = "Content-Range"
 hContentType        = "Content-Type"
-hCookie             = "Cookie"
 hDate               = "Date"
 hETag               = "ETag"
 hExpect             = "Expect"
@@ -145,11 +144,15 @@ hVia                = "Via"
 hWWWAuthenticate    = "WWW-Authenticate"
 hWarning            = "Warning"
 
--- | HTTP Header names
--- According to http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html
+-- | HTTP Header names according to http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html
 hContentDisposition, hMIMEVersion :: HeaderName
 hContentDisposition = "Content-Disposition"
 hMIMEVersion        = "MIME-Version"
+
+-- | HTTP Header names according to https://tools.ietf.org/html/rfc6265#section-4
+hCookie, hSetCookie :: HeaderName
+hCookie             = "Cookie"
+hSetCookie          = "Set-Cookie"
 
 -- | RFC 2616 Byte range (individual).
 --
