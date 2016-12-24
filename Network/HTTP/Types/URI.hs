@@ -145,7 +145,7 @@ parseQuery = parseQueryString' . dropQuestion
          in parsePair x : parseQueryString' xs
       where
         parsePair x =
-            let (k, v) = B.breakByte 61 x -- equal sign
+            let (k, v) = B.break (== 61) x -- equal sign
                 v'' =
                     case B.uncons v of
                         Just (_, v') -> Just $ urlDecode True v'
@@ -280,7 +280,7 @@ decodePathSegments a =
             Just (47, bs') -> bs' -- 47 == /
             _ -> bs
     go bs =
-        let (x, y) = B.breakByte 47 bs
+        let (x, y) = B.break (== 47) bs
          in decodePathSegment x :
             if B.null y
                 then []
@@ -310,7 +310,7 @@ extractPath = ensureNonEmpty . extract
       | "http://"  `B.isPrefixOf` path = (snd . breakOnSlash . B.drop 7) path
       | "https://" `B.isPrefixOf` path = (snd . breakOnSlash . B.drop 8) path
       | otherwise                      = path
-    breakOnSlash = B.breakByte 47
+    breakOnSlash = B.break (== 47)
     ensureNonEmpty "" = "/"
     ensureNonEmpty p  = p
 
@@ -322,5 +322,5 @@ encodePath x y = encodePathSegments x `mappend` renderQueryBuilder True y
 -- | Decode a whole path (path segments + query).
 decodePath :: B.ByteString -> ([Text], Query)
 decodePath b =
-    let (x, y) = B.breakByte 63 b -- question mark
+    let (x, y) = B.break (== 63) b -- question mark
     in (decodePathSegments x, parseQuery y)
