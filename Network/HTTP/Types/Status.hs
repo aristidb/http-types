@@ -73,7 +73,7 @@ module Network.HTTP.Types.Status
 , status417
 , expectationFailed417
 , status418
-, imATeaPot418
+, imATeapot418
 , status422
 , unprocessableEntity422
 , status428
@@ -464,8 +464,8 @@ status418 :: Status
 status418 = mkStatus 418 "I'm a teapot"
 
 -- | I'm a teapot 418
-imATeaPot418 :: Status
-imATeaPot418 = status418
+imATeapot418 :: Status
+imATeapot418 = status418
 
 -- | Unprocessable Entity 422
 -- (<https://tools.ietf.org/html/rfc4918 RFC 4918>)
