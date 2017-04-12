@@ -93,7 +93,7 @@ module Network.HTTP.Types
 , status417
 , expectationFailed417
 , status418
-, imATeaPot418
+, imATeapot418
 , status500
 , internalServerError500
 , status501
