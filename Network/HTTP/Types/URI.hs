@@ -155,7 +155,7 @@ parseQuery = parseQueryString' . dropQuestion
 queryStringSeparators :: B.ByteString
 queryStringSeparators = B.pack [38,59] -- ampersand, semicolon
 
--- | Break the second bytestring at the first occurence of any bytes from
+-- | Break the second bytestring at the first occurrence of any bytes from
 -- the first bytestring, discarding that byte.
 breakDiscard :: B.ByteString -> B.ByteString -> (B.ByteString, B.ByteString)
 breakDiscard seps s =
