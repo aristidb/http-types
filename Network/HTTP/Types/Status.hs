@@ -77,7 +77,7 @@ module Network.HTTP.Types.Status
 , status422
 , unprocessableEntity422
 , status426
-, updateRequired426
+, upgradeRequired426
 , status428
 , preconditionRequired428
 , status429
