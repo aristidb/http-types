@@ -38,6 +38,7 @@ module Network.HTTP.Types.Header
 , hLastModified
 , hLocation
 , hMaxForwards
+, hOrigin
 , hPragma
 , hProxyAuthenticate
 , hProxyAuthorization
@@ -153,6 +154,10 @@ hMIMEVersion        = "MIME-Version"
 hCookie, hSetCookie :: HeaderName
 hCookie             = "Cookie"
 hSetCookie          = "Set-Cookie"
+
+-- | HTTP Header names according to https://tools.ietf.org/html/rfc6454
+hOrigin :: HeaderName
+hOrigin = "Origin"
 
 -- | RFC 2616 Byte range (individual).
 --

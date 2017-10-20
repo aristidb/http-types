@@ -76,6 +76,8 @@ module Network.HTTP.Types.Status
 , imATeapot418
 , status422
 , unprocessableEntity422
+, status426
+, updateRequired426
 , status428
 , preconditionRequired428
 , status429
@@ -163,6 +165,7 @@ instance Enum Status where
     toEnum 416 = status416
     toEnum 417 = status417
     toEnum 422 = status422
+    toEnum 426 = status426
     toEnum 428 = status428
     toEnum 429 = status429
     toEnum 431 = status431
@@ -481,6 +484,11 @@ unprocessableEntity422 = status422
 -- (<https://tools.ietf.org/html/rfc7231#section-6.5.15>)
 status426 :: Status
 status426 = mkStatus 426 "Upgrade Required"
+
+-- | Upgrade Required 426
+-- (<https://tools.ietf.org/html/rfc7231#section-6.5.15>)
+upgradeRequired426 :: Status
+upgradeRequired426 = status426
 
 -- | Precondition Required 428
 -- (<https://tools.ietf.org/html/rfc6585 RFC 6585>)
