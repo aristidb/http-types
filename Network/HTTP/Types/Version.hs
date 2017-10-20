@@ -5,6 +5,7 @@ module Network.HTTP.Types.Version
 , http09
 , http10
 , http11
+, http20
 )
 where
 
