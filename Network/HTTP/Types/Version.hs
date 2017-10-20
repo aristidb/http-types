@@ -34,3 +34,7 @@ http10 = HttpVersion 1 0
 -- | HTTP 1.1
 http11 :: HttpVersion
 http11 = HttpVersion 1 1
+
+-- | HTTP 2.0
+http20 :: HttpVersion
+http20 = HttpVersion 2 0
