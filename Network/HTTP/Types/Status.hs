@@ -477,6 +477,11 @@ status422 = mkStatus 422 "Unprocessable Entity"
 unprocessableEntity422 :: Status
 unprocessableEntity422 = status422
 
+-- | Upgrade Required 426
+-- (<https://tools.ietf.org/html/rfc7231#section-6.5.15>)
+status426 :: Status
+status426 = mkStatus 426 "Upgrade Required"
+
 -- | Precondition Required 428
 -- (<https://tools.ietf.org/html/rfc6585 RFC 6585>)
 status428 :: Status
