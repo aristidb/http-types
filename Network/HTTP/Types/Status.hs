@@ -164,6 +164,7 @@ instance Enum Status where
     toEnum 415 = status415
     toEnum 416 = status416
     toEnum 417 = status417
+    toEnum 418 = status418
     toEnum 422 = status422
     toEnum 426 = status426
     toEnum 428 = status428
