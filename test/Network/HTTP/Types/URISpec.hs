@@ -9,7 +9,8 @@ import           Debug.Trace
 import           Data.Text (Text)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as B8
-import qualified Blaze.ByteString.Builder as Blaze
+import qualified Data.ByteString.Builder as B
+import qualified Data.ByteString.Lazy as BL
 
 import           Network.HTTP.Types.URI
 
@@ -18,7 +19,7 @@ main = hspec spec
 
 propEncodeDecodePath :: ([Text], Query) -> Bool
 propEncodeDecodePath (p', q') =
-    let x = Blaze.toByteString $ encodePath a b
+    let x = BL.toStrict . B.toLazyByteString $ encodePath a b
         y = decodePath x
         z = y == (a, b)
      in if z then z else traceShow (a, b, x, y) z
@@ -50,7 +51,7 @@ spec = do
     it "is identity to encode and then decode" $
       property propEncodeDecodePath
     it "does not escape period and dash" $
-      Blaze.toByteString (encodePath ["foo-bar.baz"] []) `shouldBe` "/foo-bar.baz"
+      BL.toStrict (B.toLazyByteString (encodePath ["foo-bar.baz"] [])) `shouldBe` "/foo-bar.baz"
 
   describe "encode/decode query" $ do
     it "is identity to encode and then decode" $
@@ -62,7 +63,7 @@ spec = do
   describe "decodePathSegments" $ do
     it "is inverse to encodePathSegments" $
       property $ \p -> not (p == [""]) ==> do
-        (decodePathSegments . Blaze.toByteString . encodePathSegments) p `shouldBe` p
+        (decodePathSegments . BL.toStrict . B.toLazyByteString . encodePathSegments) p `shouldBe` p
 
   describe "extractPath" $ do
     context "when used with a relative URL" $ do

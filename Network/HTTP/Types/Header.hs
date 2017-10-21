@@ -74,10 +74,10 @@ import           Data.List
 #if __GLASGOW_HASKELL__ < 710
 import           Data.Monoid
 #endif
-import qualified Blaze.ByteString.Builder       as Blaze
-import qualified Blaze.ByteString.Builder.Char8 as Blaze
 import qualified Data.ByteString                as B
 import qualified Data.ByteString.Char8          as B8
+import qualified Data.ByteString.Builder        as B
+import qualified Data.ByteString.Lazy           as BL
 import qualified Data.CaseInsensitive           as CI
 import           Data.ByteString.Char8          () {-IsString-}
 import           Data.Typeable                  (Typeable)
@@ -168,23 +168,23 @@ data ByteRange
   | ByteRangeSuffix !Integer
   deriving (Show, Eq, Ord, Typeable, Data)
 
-renderByteRangeBuilder :: ByteRange -> Blaze.Builder
-renderByteRangeBuilder (ByteRangeFrom from) = Blaze.fromShow from `mappend` Blaze.fromChar '-'
-renderByteRangeBuilder (ByteRangeFromTo from to) = Blaze.fromShow from `mappend` Blaze.fromChar '-' `mappend` Blaze.fromShow to
-renderByteRangeBuilder (ByteRangeSuffix suffix) = Blaze.fromChar '-' `mappend` Blaze.fromShow suffix
+renderByteRangeBuilder :: ByteRange -> B.Builder
+renderByteRangeBuilder (ByteRangeFrom from) = B.integerDec from `mappend` B.char7 '-'
+renderByteRangeBuilder (ByteRangeFromTo from to) = B.integerDec from `mappend` B.char7 '-' `mappend` B.integerDec to
+renderByteRangeBuilder (ByteRangeSuffix suffix) = B.char7 '-' `mappend` B.integerDec suffix
 
 renderByteRange :: ByteRange -> B.ByteString
-renderByteRange = Blaze.toByteString . renderByteRangeBuilder
+renderByteRange = BL.toStrict . B.toLazyByteString . renderByteRangeBuilder
 
 -- | RFC 2616 Byte ranges (set).
 type ByteRanges = [ByteRange]
 
-renderByteRangesBuilder :: ByteRanges -> Blaze.Builder
-renderByteRangesBuilder xs = Blaze.copyByteString "bytes=" `mappend` 
-                             mconcat (intersperse (Blaze.fromChar ',') (map renderByteRangeBuilder xs))
+renderByteRangesBuilder :: ByteRanges -> B.Builder
+renderByteRangesBuilder xs = B.byteString "bytes=" `mappend`
+                             mconcat (intersperse (B.char7 ',') (map renderByteRangeBuilder xs))
 
 renderByteRanges :: ByteRanges -> B.ByteString
-renderByteRanges = Blaze.toByteString . renderByteRangesBuilder
+renderByteRanges = BL.toStrict . B.toLazyByteString . renderByteRangesBuilder
 
 -- | Parse the value of a Range header into a 'ByteRanges'.
 --
