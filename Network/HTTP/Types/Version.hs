@@ -5,6 +5,7 @@ module Network.HTTP.Types.Version
 , http09
 , http10
 , http11
+, http20
 )
 where
 
@@ -34,3 +35,7 @@ http10 = HttpVersion 1 0
 -- | HTTP 1.1
 http11 :: HttpVersion
 http11 = HttpVersion 1 1
+
+-- | HTTP 2.0
+http20 :: HttpVersion
+http20 = HttpVersion 2 0
