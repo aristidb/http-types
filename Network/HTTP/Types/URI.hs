@@ -91,7 +91,7 @@ type SimpleQuery = [SimpleQueryItem]
 
 -- | Convert 'SimpleQuery' to 'Query'.
 simpleQueryToQuery :: SimpleQuery -> Query
-simpleQueryToQuery = map (\(a, b) -> (a, Just b))
+simpleQueryToQuery = map (second Just)
 
 -- | Convert 'Query' to a 'Builder'.
 renderQueryBuilder :: Bool -- ^ prepend a question mark?
@@ -254,11 +254,7 @@ urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
 -- function in web-routes and did such thorough research to determine all
 -- correct escaping procedures.
 encodePathSegments :: [Text] -> B.Builder
-encodePathSegments [] = mempty
-encodePathSegments (x:xs) =
-    B.byteString "/"
-    `mappend` encodePathSegment x
-    `mappend` encodePathSegments xs
+encodePathSegments = foldr (\x -> mappend (B.byteString "/" `mappend` encodePathSegment x)) mempty
 
 -- | Like encodePathSegments, but without the initial slash.
 encodePathSegmentsRelative :: [Text] -> B.Builder

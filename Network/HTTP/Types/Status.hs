@@ -179,9 +179,13 @@ instance Enum Status where
     toEnum 511 = status511
     toEnum c   = mkStatus c B.empty
 
+instance Bounded Status where
+  minBound = status100
+  maxBound = status511
+
 -- | Create a Status from status code and message.
 mkStatus :: Int -> B.ByteString -> Status
-mkStatus i m = Status i m
+mkStatus = Status
 
 -- | Continue 100
 status100 :: Status

@@ -21,7 +21,8 @@ module Network.HTTP.Types
 , http09
 , http10
 , http11
-  -- * Status
+, http20
+-- * Status
 , Status(..)
 , mkStatus
 , status100
@@ -56,6 +57,8 @@ module Network.HTTP.Types
 , useProxy305
 , status307
 , temporaryRedirect307
+, status308
+, permanentRedirect308
 , status400
 , badRequest400
 , status401
@@ -94,6 +97,14 @@ module Network.HTTP.Types
 , expectationFailed417
 , status418
 , imATeapot418
+, status422
+, unprocessableEntity422
+, status428
+, preconditionRequired428
+, status429
+, tooManyRequests429
+, status431
+, requestHeaderFieldsTooLarge431
 , status500
 , internalServerError500
 , status501
@@ -106,6 +117,8 @@ module Network.HTTP.Types
 , gatewayTimeout504
 , status505
 , httpVersionNotSupported505
+, status511
+, networkAuthenticationRequired511
 , statusIsInformational
 , statusIsSuccessful
 , statusIsRedirection
