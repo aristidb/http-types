@@ -1,6 +1,10 @@
-* 0.11 [???]
+* 0.11 [2017-11-29]
 
 Remove dependency on blaze-builder. (Note that as a side effect of this, URI encoding is now using lower-case rather than uppercase hexadecimal.)
+
+Add Bounded instance to Status.
+
+Re-export more status codes and http20 from Network.HTTP.Types.
 
 * 0.10 [2017-10-22]
 
