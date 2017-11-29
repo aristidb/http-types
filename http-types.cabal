@@ -1,5 +1,5 @@
 Name:                http-types
-Version:             0.10
+Version:             0.11
 Synopsis:            Generic HTTP types for Haskell (for both client and server code).
 Description:         Generic HTTP types for Haskell (for both client and server code).
 Homepage:            https://github.com/aristidb/http-types
@@ -16,7 +16,7 @@ Cabal-version:       >=1.8
 Source-repository this
   type: git
   location: https://github.com/aristidb/http-types.git
-  tag: 0.10
+  tag: 0.11
 
 Source-repository head
   type: git
