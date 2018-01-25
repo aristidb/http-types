@@ -186,7 +186,11 @@ urlEncodeBuilder' extraUnreserved = mconcat . map encodeChar . B.unpack
                     | ch >= 48 && ch <= 57  = True -- 0-9
       unreserved c = c `elem` extraUnreserved
 
-      h2 v = B.word8 37 `mappend` B.word8HexFixed v -- percent (%)
+      -- must be upper-case
+      h2 v = B.word8 37 `mappend` B.word8 (h a) `mappend` B.word8 (h b) -- 37 = %
+          where (a, b) = v `divMod` 16
+      h i | i < 10    = 48 + i -- zero (0)
+          | otherwise = 65 + i - 10 -- 65: A
 
 -- | Percent-encoding for URLs (using 'B.Builder').
 urlEncodeBuilder
