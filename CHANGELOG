@@ -1,3 +1,8 @@
+* 0.12 [2018-01-28]
+
+URI encoding is now back to upper-case hexadecimal, as that is the preferred canonicalization, and the previous change caused issues with URI
+signing in at least amazonka.
+
 * 0.11 [2017-11-29]
 
 Remove dependency on blaze-builder. (Note that as a side effect of this, URI encoding is now using lower-case rather than uppercase hexadecimal.)
