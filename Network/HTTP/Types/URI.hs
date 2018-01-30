@@ -12,6 +12,12 @@ module Network.HTTP.Types.URI
 , renderSimpleQuery
 , parseQuery
 , parseSimpleQuery
+  -- **Escape only parts
+, renderQueryMinimalEscape
+, renderQueryBuilderMinimalEscape
+, EscItem(..)
+, NonEscQueryItem
+, NonEscQuery
   -- ** Text query string (UTF8 encoded)
 , QueryText
 , queryTextToQuery
@@ -323,3 +329,51 @@ decodePath :: B.ByteString -> ([Text], Query)
 decodePath b =
     let (x, y) = B.break (== 63) b -- question mark
     in (decodePathSegments x, parseQuery y)
+
+-----------------------------------------------------------------------------------------
+
+-- | For some URIs characters must not be URI encoded,
+-- eg '+' or ':' in q=a+language:haskell+created:2009-01-01..2009-02-01&sort=stars
+-- The character list unreservedPI instead of unreservedQS would solve this.
+-- But we explicitly decide what part to encode.
+-- This is mandatory when searching for '+': q=%2B+language:haskell.
+data EscItem = QE B.ByteString -- will be URL encoded
+             | QN B.ByteString -- will not be url encoded, eg '+' or ':'
+    deriving (Show, Eq, Ord)
+
+-- | Query item
+type NonEscQueryItem = (B.ByteString, [EscItem])
+
+-- | Query with some chars that should not be escaped.
+-- 
+-- General form: a=b&c=d:e+f&g=h
+type NonEscQuery = [NonEscQueryItem]
+
+-- | Convert 'NonEscQuery' to 'ByteString'.
+renderQueryMinimalEscape :: Bool -- ^ prepend question mark?
+            -> NonEscQuery -> B.ByteString
+renderQueryMinimalEscape qm = BL.toStrict . B.toLazyByteString . renderQueryBuilderMinimalEscape qm
+
+-- | Convert 'NonEscQuery' to a 'Builder'.
+renderQueryBuilderMinimalEscape :: Bool -- ^ prepend a question mark?
+                   -> NonEscQuery
+                   -> B.Builder
+renderQueryBuilderMinimalEscape _ [] = mempty
+-- FIXME replace mconcat + map with foldr
+renderQueryBuilderMinimalEscape qmark' (p:ps) = mconcat
+    $ go (if qmark' then qmark else mempty) p
+    : map (go amp) ps
+  where
+    qmark = B.byteString "?"
+    amp = B.byteString "&"
+    equal = B.byteString "="
+    go sep (k, mv) = mconcat [
+                      sep
+                     , urlEncodeBuilder True k
+                     , case mv of
+                         [] -> mempty
+                         vs -> equal `mappend` (mconcat (map encode vs))
+                     ]
+    encode (QE v) = urlEncodeBuilder True v
+    encode (QN v) = B.byteString v
+
