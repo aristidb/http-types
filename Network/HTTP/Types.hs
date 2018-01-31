@@ -170,6 +170,12 @@ module Network.HTTP.Types
 , renderSimpleQuery
 , parseQuery
 , parseSimpleQuery
+  -- **Escape only parts
+, renderQueryPartialEscape
+, renderQueryBuilderPartialEscape
+, EscapeItem(..)
+, PartialEscapeQueryItem
+, PartialEscapeQuery
   -- *** Text query string (UTF8 encoded)
 , QueryText
 , queryTextToQuery
