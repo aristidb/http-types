@@ -13,11 +13,11 @@ module Network.HTTP.Types.URI
 , parseQuery
 , parseSimpleQuery
   -- **Escape only parts
-, renderQueryMinimalEscape
-, renderQueryBuilderMinimalEscape
-, EscItem(..)
-, NonEscQueryItem
-, NonEscQuery
+, renderQueryPartialEscape
+, renderQueryBuilderPartialEscape
+, EscapeItem(..)
+, PartialEscapeQueryItem
+, PartialEscapeQuery
   -- ** Text query string (UTF8 encoded)
 , QueryText
 , queryTextToQuery
@@ -337,30 +337,30 @@ decodePath b =
 -- The character list unreservedPI instead of unreservedQS would solve this.
 -- But we explicitly decide what part to encode.
 -- This is mandatory when searching for '+': q=%2B+language:haskell.
-data EscItem = QE B.ByteString -- will be URL encoded
-             | QN B.ByteString -- will not be url encoded, eg '+' or ':'
+data EscapeItem = QE B.ByteString -- will be URL encoded
+                | QN B.ByteString -- will not be url encoded, eg '+' or ':'
     deriving (Show, Eq, Ord)
 
 -- | Query item
-type NonEscQueryItem = (B.ByteString, [EscItem])
+type PartialEscapeQueryItem = (B.ByteString, [EscapeItem])
 
 -- | Query with some chars that should not be escaped.
 -- 
 -- General form: a=b&c=d:e+f&g=h
-type NonEscQuery = [NonEscQueryItem]
+type PartialEscapeQuery = [PartialEscapeQueryItem]
 
--- | Convert 'NonEscQuery' to 'ByteString'.
-renderQueryMinimalEscape :: Bool -- ^ prepend question mark?
-            -> NonEscQuery -> B.ByteString
-renderQueryMinimalEscape qm = BL.toStrict . B.toLazyByteString . renderQueryBuilderMinimalEscape qm
+-- | Convert 'PartialEscapeQuery' to 'ByteString'.
+renderQueryPartialEscape :: Bool -- ^ prepend question mark?
+            -> PartialEscapeQuery -> B.ByteString
+renderQueryPartialEscape qm = BL.toStrict . B.toLazyByteString . renderQueryBuilderPartialEscape qm
 
--- | Convert 'NonEscQuery' to a 'Builder'.
-renderQueryBuilderMinimalEscape :: Bool -- ^ prepend a question mark?
-                   -> NonEscQuery
+-- | Convert 'PartialEscapeQuery' to a 'Builder'.
+renderQueryBuilderPartialEscape :: Bool -- ^ prepend a question mark?
+                   -> PartialEscapeQuery
                    -> B.Builder
-renderQueryBuilderMinimalEscape _ [] = mempty
+renderQueryBuilderPartialEscape _ [] = mempty
 -- FIXME replace mconcat + map with foldr
-renderQueryBuilderMinimalEscape qmark' (p:ps) = mconcat
+renderQueryBuilderPartialEscape qmark' (p:ps) = mconcat
     $ go (if qmark' then qmark else mempty) p
     : map (go amp) ps
   where
