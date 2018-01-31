@@ -1,3 +1,7 @@
+* 0.12.1 [2018-01-31]
+
+Add new functions for constructing a query URI where not all parts are escaped.
+
 * 0.12 [2018-01-28]
 
 URI encoding is now back to upper-case hexadecimal, as that is the preferred canonicalization, and the previous change caused issues with URI
