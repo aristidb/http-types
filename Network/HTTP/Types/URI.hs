@@ -61,8 +61,8 @@ type QueryItem = (B.ByteString, Maybe B.ByteString)
 
 -- | Query.
 -- 
--- General form: a=b&c=d, but if the value is Nothing, it becomes
--- a&c=d.
+-- General form: @a=b&c=d@, but if the value is Nothing, it becomes
+-- @a&c=d@.
 type Query = [QueryItem]
 
 -- | Like Query, but with 'Text' instead of 'B.ByteString' (UTF8-encoded).
@@ -137,8 +137,8 @@ renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . simpleQueryToQ
 -- decoding here. Most likely, you will want to use UTF-8 decoding, but this is
 -- left to the user of the library.
 -- 
--- * Percent decoding errors are ignored. In particular, "%Q" will be output as
--- "%Q".
+-- * Percent decoding errors are ignored. In particular, @"%Q"@ will be output as
+-- @"%Q"@.
 parseQuery :: B.ByteString -> Query
 parseQuery = parseQueryString' . dropQuestion
   where
@@ -207,13 +207,13 @@ urlEncodeBuilder True  = urlEncodeBuilder' unreservedQS
 urlEncodeBuilder False = urlEncodeBuilder' unreservedPI
 
 -- | Percent-encoding for URLs.
-urlEncode :: Bool -- ^ Whether to decode '+' to ' '
+urlEncode :: Bool -- ^ Whether to decode @\'+\'@ to @\' \'@
           -> B.ByteString -- ^ The ByteString to encode as URL
           -> B.ByteString -- ^ The encoded URL
 urlEncode q = BL.toStrict . B.toLazyByteString . urlEncodeBuilder q
 
 -- | Percent-decoding.
-urlDecode :: Bool -- ^ Whether to decode '+' to ' '
+urlDecode :: Bool -- ^ Whether to decode @\'+\'@ to @\' \'@
           -> B.ByteString -> B.ByteString
 urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
   where
@@ -242,22 +242,19 @@ urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
 -- 
 -- * UTF-8 encodes the characters.
 -- 
--- * Performs percent encoding on all unreserved characters, as well as \:\@\=\+\$,
+-- * Performs percent encoding on all unreserved characters, as well as @\:\@\=\+\$@,
 -- 
 -- * Prepends each segment with a slash.
 -- 
 -- For example:
 -- 
--- > encodePathSegments [\"foo\", \"bar\", \"baz\"]
--- 
+-- >>> encodePathSegments [\"foo\", \"bar\", \"baz\"]
 -- \"\/foo\/bar\/baz\"
 -- 
--- > encodePathSegments [\"foo bar\", \"baz\/bin\"]
--- 
+-- >>> encodePathSegments [\"foo bar\", \"baz\/bin\"]
 -- \"\/foo\%20bar\/baz\%2Fbin\"
 -- 
--- > encodePathSegments [\"שלום\"]
--- 
+-- >>> encodePathSegments [\"שלום\"]
 -- \"\/%D7%A9%D7%9C%D7%95%D7%9D\"
 -- 
 -- Huge thanks to Jeremy Shaw who created the original implementation of this
@@ -333,12 +330,12 @@ decodePath b =
 -----------------------------------------------------------------------------------------
 
 -- | For some URIs characters must not be URI encoded,
--- eg '+' or ':' in q=a+language:haskell+created:2009-01-01..2009-02-01&sort=stars
+-- e.g. @\'+\'@ or @\':\'@ in @q=a+language:haskell+created:2009-01-01..2009-02-01&sort=stars@
 -- The character list unreservedPI instead of unreservedQS would solve this.
 -- But we explicitly decide what part to encode.
--- This is mandatory when searching for '+': q=%2B+language:haskell.
+-- This is mandatory when searching for @\'+\'@: @q=%2B+language:haskell@.
 data EscapeItem = QE B.ByteString -- will be URL encoded
-                | QN B.ByteString -- will not be url encoded, eg '+' or ':'
+                | QN B.ByteString -- will not be url encoded, e.g. @\'+\'@ or @\':\'@
     deriving (Show, Eq, Ord)
 
 -- | Query item
@@ -346,7 +343,7 @@ type PartialEscapeQueryItem = (B.ByteString, [EscapeItem])
 
 -- | Query with some chars that should not be escaped.
 -- 
--- General form: a=b&c=d:e+f&g=h
+-- General form: @a=b&c=d:e+f&g=h@
 type PartialEscapeQuery = [PartialEscapeQueryItem]
 
 -- | Convert 'PartialEscapeQuery' to 'ByteString'.
