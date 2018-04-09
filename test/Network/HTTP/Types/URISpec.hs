@@ -91,3 +91,14 @@ spec = do
         context "when path is empty" $ do
           it "returns /" $ do
             extractPath "https://example.com" `shouldBe` "/"
+
+  describe "parseQuery" $ do
+    it "returns value with '+' replaced to ' '" $ do
+      parseQuery "?a=b+c+d" `shouldBe` [("a", Just "b c d")]
+
+  describe "parseQueryReplacePlus" $ do
+    it "returns value with '+' replaced to ' '" $ do
+      parseQueryReplacePlus True "?a=b+c+d" `shouldBe` [("a", Just "b c d")]
+
+    it "returns value with '+' preserved" $ do
+      parseQueryReplacePlus False "?a=b+c+d" `shouldBe` [("a", Just "b+c+d")]
