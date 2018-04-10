@@ -256,13 +256,13 @@ urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
 -- 
 -- For example:
 -- 
--- >>> encodePathSegments [\"foo\", \"bar\", \"baz\"]
+-- > encodePathSegments [\"foo\", \"bar\", \"baz\"]
 -- \"\/foo\/bar\/baz\"
 -- 
--- >>> encodePathSegments [\"foo bar\", \"baz\/bin\"]
+-- > encodePathSegments [\"foo bar\", \"baz\/bin\"]
 -- \"\/foo\%20bar\/baz\%2Fbin\"
 -- 
--- >>> encodePathSegments [\"שלום\"]
+-- > encodePathSegments [\"שלום\"]
 -- \"\/%D7%A9%D7%9C%D7%95%D7%9D\"
 -- 
 -- Huge thanks to Jeremy Shaw who created the original implementation of this
