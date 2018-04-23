@@ -11,6 +11,7 @@ module Network.HTTP.Types.URI
 , renderQueryBuilder
 , renderSimpleQuery
 , parseQuery
+, parseQueryReplacePlus
 , parseSimpleQuery
   -- **Escape only parts
 , renderQueryPartialEscape
@@ -139,8 +140,15 @@ renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . simpleQueryToQ
 -- 
 -- * Percent decoding errors are ignored. In particular, @"%Q"@ will be output as
 -- @"%Q"@.
+--
+-- * It decodes @\'+\'@ characters to @\' \'@
 parseQuery :: B.ByteString -> Query
-parseQuery = parseQueryString' . dropQuestion
+parseQuery = parseQueryReplacePlus True
+
+-- | Same functionality as 'parseQuery' with the option to decode @\'+\'@ characters to @\' \'@
+-- or preserve @\'+\'@
+parseQueryReplacePlus :: Bool -> B.ByteString -> Query
+parseQueryReplacePlus replacePlus bs = parseQueryString' $ dropQuestion bs
   where
     dropQuestion q =
         case B.uncons q of
@@ -155,9 +163,9 @@ parseQuery = parseQueryString' . dropQuestion
             let (k, v) = B.break (== 61) x -- equal sign
                 v'' =
                     case B.uncons v of
-                        Just (_, v') -> Just $ urlDecode True v'
+                        Just (_, v') -> Just $ urlDecode replacePlus v'
                         _ -> Nothing
-             in (urlDecode True k, v'')
+             in (urlDecode replacePlus k, v'')
 
 queryStringSeparators :: B.ByteString
 queryStringSeparators = B.pack [38,59] -- ampersand, semicolon
@@ -248,13 +256,13 @@ urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
 -- 
 -- For example:
 -- 
--- >>> encodePathSegments [\"foo\", \"bar\", \"baz\"]
+-- > encodePathSegments [\"foo\", \"bar\", \"baz\"]
 -- \"\/foo\/bar\/baz\"
 -- 
--- >>> encodePathSegments [\"foo bar\", \"baz\/bin\"]
+-- > encodePathSegments [\"foo bar\", \"baz\/bin\"]
 -- \"\/foo\%20bar\/baz\%2Fbin\"
 -- 
--- >>> encodePathSegments [\"שלום\"]
+-- > encodePathSegments [\"שלום\"]
 -- \"\/%D7%A9%D7%9C%D7%95%D7%9D\"
 -- 
 -- Huge thanks to Jeremy Shaw who created the original implementation of this
