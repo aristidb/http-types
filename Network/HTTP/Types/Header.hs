@@ -40,6 +40,8 @@ module Network.HTTP.Types.Header
 , hMaxForwards
 , hOrigin
 , hPragma
+, hPrefer
+, hPreferenceApplied
 , hProxyAuthenticate
 , hProxyAuthorization
 , hRange
@@ -158,6 +160,11 @@ hSetCookie          = "Set-Cookie"
 -- | HTTP Header names according to https://tools.ietf.org/html/rfc6454
 hOrigin :: HeaderName
 hOrigin = "Origin"
+
+-- | HTTP Header names according to https://tools.ietf.org/html/rfc7240
+hPrefer, hPreferenceApplied :: HeaderName
+hPrefer = "Prefer"
+hPreferenceApplied = "Preference-Applied"
 
 -- | RFC 2616 Byte range (individual).
 --
