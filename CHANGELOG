@@ -1,3 +1,9 @@
+* 0.12.2 [2018-09-26]
+
+Add new parseQueryReplacePlus function, which allows specifying whether to replace '+' with ' '.
+
+Add header name constants for "Prefer" and "Preference-Applied" (RFC 7240).
+
 * 0.12.1 [2018-01-31]
 
 Add new functions for constructing a query URI where not all parts are escaped.
