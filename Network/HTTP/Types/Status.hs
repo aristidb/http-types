@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, DeriveDataTypeable #-}
+{-# LANGUAGE OverloadedStrings, DeriveDataTypeable, DeriveGeneric #-}
 module Network.HTTP.Types.Status
 ( Status(..)
 , mkStatus
@@ -106,7 +106,9 @@ module Network.HTTP.Types.Status
 ) where
 
 import qualified Data.ByteString as B
-import Data.Typeable
+import Data.Typeable (Typeable)
+import Data.Data (Data)
+import GHC.Generics (Generic)
 
 -- | HTTP Status.
 --
@@ -119,7 +121,7 @@ import Data.Typeable
 data Status
     = Status { statusCode :: Int
              , statusMessage :: B.ByteString
-             } deriving (Show, Typeable)
+             } deriving (Show, Typeable, Data, Generic)
 
 instance Eq Status where
     Status { statusCode = a } == Status { statusCode = b } = a == b

@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveDataTypeable, DeriveGeneric #-}
 module Network.HTTP.Types.Version
 (
   HttpVersion(..)
@@ -9,7 +9,9 @@ module Network.HTTP.Types.Version
 )
 where
 
-import Data.Typeable
+import Data.Typeable (Typeable)
+import Data.Data (Data)
+import GHC.Generics (Generic)
 
 -- | HTTP Version.
 --
@@ -19,7 +21,7 @@ data HttpVersion
         httpMajor :: !Int
       , httpMinor :: !Int
       }
-    deriving (Eq, Ord, Typeable)
+    deriving (Eq, Ord, Typeable, Data, Generic)
 
 instance Show HttpVersion where
     show (HttpVersion major minor) = "HTTP/" ++ show major ++ "." ++ show minor

@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, FlexibleInstances, MultiParamTypeClasses, DeriveDataTypeable, CPP #-}
+{-# LANGUAGE OverloadedStrings, FlexibleInstances, MultiParamTypeClasses, DeriveDataTypeable, DeriveGeneric, CPP #-}
 module Network.HTTP.Types.Header
 (
   -- ** Types
@@ -84,6 +84,7 @@ import qualified Data.CaseInsensitive           as CI
 import           Data.ByteString.Char8          () {-IsString-}
 import           Data.Typeable                  (Typeable)
 import           Data.Data                      (Data)
+import           GHC.Generics                   (Generic)
 
 -- | Header
 type Header = (HeaderName, B.ByteString)
@@ -173,7 +174,7 @@ data ByteRange
   = ByteRangeFrom !Integer
   | ByteRangeFromTo !Integer !Integer
   | ByteRangeSuffix !Integer
-  deriving (Show, Eq, Ord, Typeable, Data)
+  deriving (Show, Eq, Ord, Typeable, Data, Generic)
 
 renderByteRangeBuilder :: ByteRange -> B.Builder
 renderByteRangeBuilder (ByteRangeFrom from) = B.integerDec from `mappend` B.char7 '-'
