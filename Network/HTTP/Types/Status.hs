@@ -2,6 +2,7 @@
 module Network.HTTP.Types.Status
 ( Status(..)
 , mkStatus
+, renderStatus
 , status100
 , continue100
 , status101
@@ -188,6 +189,10 @@ instance Bounded Status where
 -- | Create a Status from status code and message.
 mkStatus :: Int -> B.ByteString -> Status
 mkStatus = Status
+
+-- | Render a Status to a ByteString.
+renderStatus :: Status -> B.ByteString
+renderStatus (Status c m) = (B.pack $ fmap (fromIntegral . fromEnum) $ show c) <> " " <> m
 
 -- | Continue 100
 status100 :: Status

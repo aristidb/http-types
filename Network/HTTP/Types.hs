@@ -25,6 +25,7 @@ module Network.HTTP.Types
 -- * Status
 , Status(..)
 , mkStatus
+, renderStatus
 , status100
 , continue100
 , status101
