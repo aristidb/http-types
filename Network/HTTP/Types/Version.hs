@@ -2,6 +2,7 @@
 module Network.HTTP.Types.Version
 (
   HttpVersion(..)
+, renderHttpVersion
 , http09
 , http10
 , http11
@@ -12,6 +13,7 @@ where
 import Data.Typeable (Typeable)
 import Data.Data (Data)
 import GHC.Generics (Generic)
+import Data.ByteString as B
 
 -- | HTTP Version.
 --
@@ -25,6 +27,9 @@ data HttpVersion
 
 instance Show HttpVersion where
     show (HttpVersion major minor) = "HTTP/" ++ show major ++ "." ++ show minor
+
+renderHttpVersion :: HttpVersion -> B.ByteString
+renderHttpVersion = B.pack . fmap (fromIntegral . fromEnum) . show
 
 -- | HTTP 0.9
 http09 :: HttpVersion

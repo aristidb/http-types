@@ -18,6 +18,7 @@ module Network.HTTP.Types
 , renderStdMethod
   -- * Versions
 , HttpVersion(..)
+, renderHttpVersion
 , http09
 , http10
 , http11
