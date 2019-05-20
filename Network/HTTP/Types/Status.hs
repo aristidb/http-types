@@ -110,6 +110,7 @@ import qualified Data.ByteString as B
 import Data.Typeable (Typeable)
 import Data.Data (Data)
 import GHC.Generics (Generic)
+import Data.Semigroup ((<>))
 
 -- | HTTP Status.
 --
