@@ -215,13 +215,13 @@ urlEncodeBuilder True  = urlEncodeBuilder' unreservedQS
 urlEncodeBuilder False = urlEncodeBuilder' unreservedPI
 
 -- | Percent-encoding for URLs.
-urlEncode :: Bool -- ^ Whether to decode @\'+\'@ to @\' \'@
+urlEncode :: Bool -- ^ @True@ = encode @\'+\'@ to @%2B@ . @False@ = @\'+\'@ remains as-is.
           -> B.ByteString -- ^ The ByteString to encode as URL
           -> B.ByteString -- ^ The encoded URL
 urlEncode q = BL.toStrict . B.toLazyByteString . urlEncodeBuilder q
 
 -- | Percent-decoding.
-urlDecode :: Bool -- ^ Whether to decode @\'+\'@ to @\' \'@
+urlDecode :: Bool -- ^ @True@ = decode @\'+\'@ to @\' \'@ (space). @False@ = @\'+\'@ remains as-is.
           -> B.ByteString -> B.ByteString
 urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
   where
