@@ -84,6 +84,8 @@ module Network.HTTP.Types.Status
 , tooManyRequests429
 , status431
 , requestHeaderFieldsTooLarge431
+, status451
+, unavailableForLegalReasons451
 , status500
 , internalServerError500
 , status501
@@ -526,6 +528,16 @@ status431 = mkStatus 431 "Request Header Fields Too Large"
 -- (<https://tools.ietf.org/html/rfc6585 RFC 6585>)
 requestHeaderFieldsTooLarge431 :: Status
 requestHeaderFieldsTooLarge431 = status431
+
+-- | Unavailable For Legal Reasons 451
+-- (<https://tools.ietf.org/html/rfc7725>)
+status451 :: Status
+status451 = mkStatus 451 "Unavailable For Legal Reasons"
+
+-- | Unavailable For Legal Reasons 451
+-- (<https://tools.ietf.org/html/rfc7725>)
+unavailableForLegalReasons451 :: Status
+unavailableForLegalReasons451 = status451
 
 -- | Internal Server Error 500
 status500 :: Status
