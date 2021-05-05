@@ -95,9 +95,9 @@ module Network.HTTP.Types.Status
 , status504
 , gatewayTimeout504
 , status505
+, httpVersionNotSupported505
 , status511
 , networkAuthenticationRequired511
-, httpVersionNotSupported505
 , statusIsInformational
 , statusIsSuccessful
 , statusIsRedirection
