@@ -215,7 +215,7 @@ urlEncodeBuilder True  = urlEncodeBuilder' unreservedQS
 urlEncodeBuilder False = urlEncodeBuilder' unreservedPI
 
 -- | Percent-encoding for URLs.
-urlEncode :: Bool -- ^ Whether to decode @\'+\'@ to @\' \'@
+urlEncode :: Bool -- ^ Whether input is in query string. True: Query string, False: Path element
           -> B.ByteString -- ^ The ByteString to encode as URL
           -> B.ByteString -- ^ The encoded URL
 urlEncode q = BL.toStrict . B.toLazyByteString . urlEncodeBuilder q
