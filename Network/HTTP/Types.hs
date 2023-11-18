@@ -1,7 +1,13 @@
 module Network.HTTP.Types
 (
   -- * Methods
+  --
+  -- | The HTTP standard defines a set of standard methods, when to use them,
+  -- and how to handle them. The standard set has been provided as a separate
+  -- data type 'StdMethod', but since you can also use custom methods, the
+  -- basic type 'Method' is just a synonym for 'ByteString'.
   Method
+  -- ** Constants
 , methodGet
 , methodPost
 , methodHead
@@ -12,6 +18,7 @@ module Network.HTTP.Types
 , methodOptions
 , methodPatch
 , StdMethod(..)
+  -- ** Parsing and redering methods
 , parseMethod
 , renderMethod
 , renderStdMethod
