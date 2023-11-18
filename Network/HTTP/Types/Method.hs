@@ -22,8 +22,8 @@ import           Control.Arrow         ((|||))
 import           Data.Array
 import qualified Data.ByteString       as B
 import qualified Data.ByteString.Char8 as B8
-import           Data.Typeable        (Typeable)
 import           Data.Data            (Data)
+import           Data.Typeable        (Typeable)
 import           GHC.Generics         (Generic)
 
 -- | HTTP method (flat 'ByteString' type).
@@ -107,7 +107,7 @@ parseMethod bs = maybe (Left bs) Right $ lookup bs methodList
 
 -- | Convert an algebraic method to a 'ByteString'.
 --
--- @bs == renderMethod (parseMethod bs)@
+-- prop> renderMethod (parseMethod bs) == bs
 --
 -- @since 0.3.0
 renderMethod :: Either B.ByteString StdMethod -> Method
