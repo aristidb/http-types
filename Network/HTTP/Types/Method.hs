@@ -108,7 +108,7 @@ parseMethod bs = maybe (Left bs) Right $ lookup bs methodList
 
 -- | Convert an algebraic method to a 'ByteString'.
 --
--- @bs == renderMethod (parseMethod bs)@
+-- prop> renderMethod (parseMethod bs) == bs
 --
 -- @since 0.3.0
 renderMethod :: Either B.ByteString StdMethod -> Method
