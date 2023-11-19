@@ -1,90 +1,96 @@
-{-# LANGUAGE OverloadedStrings, FlexibleInstances, MultiParamTypeClasses, DeriveDataTypeable, DeriveGeneric, CPP #-}
-module Network.HTTP.Types.Header
-(
-  -- ** Types
-  Header
-, HeaderName
-, RequestHeaders
-, ResponseHeaders
-  -- ** Common headers
-, hAccept
-, hAcceptCharset
-, hAcceptEncoding
-, hAcceptLanguage
-, hAcceptRanges
-, hAge
-, hAllow
-, hAuthorization
-, hCacheControl
-, hConnection
-, hContentEncoding
-, hContentLanguage
-, hContentLength
-, hContentLocation
-, hContentMD5
-, hContentRange
-, hContentType
-, hDate
-, hETag
-, hExpect
-, hExpires
-, hFrom
-, hHost
-, hIfMatch
-, hIfModifiedSince
-, hIfNoneMatch
-, hIfRange
-, hIfUnmodifiedSince
-, hLastModified
-, hLocation
-, hMaxForwards
-, hOrigin
-, hPragma
-, hPrefer
-, hPreferenceApplied
-, hProxyAuthenticate
-, hProxyAuthorization
-, hRange
-, hReferer
-, hRetryAfter
-, hServer
-, hTE
-, hTrailer
-, hTransferEncoding
-, hUpgrade
-, hUserAgent
-, hVary
-, hVia
-, hWWWAuthenticate
-, hWarning
-, hContentDisposition
-, hMIMEVersion
-, hCookie
-, hSetCookie
-  -- ** Byte ranges
-, ByteRange(..)
-, renderByteRangeBuilder
-, renderByteRange
-, ByteRanges
-, renderByteRangesBuilder
-, renderByteRanges
-, parseByteRanges
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
+
+module Network.HTTP.Types.Header (
+    -- ** Types
+    Header,
+    HeaderName,
+    RequestHeaders,
+    ResponseHeaders,
+
+    -- ** Common headers
+    hAccept,
+    hAcceptCharset,
+    hAcceptEncoding,
+    hAcceptLanguage,
+    hAcceptRanges,
+    hAge,
+    hAllow,
+    hAuthorization,
+    hCacheControl,
+    hConnection,
+    hContentEncoding,
+    hContentLanguage,
+    hContentLength,
+    hContentLocation,
+    hContentMD5,
+    hContentRange,
+    hContentType,
+    hDate,
+    hETag,
+    hExpect,
+    hExpires,
+    hFrom,
+    hHost,
+    hIfMatch,
+    hIfModifiedSince,
+    hIfNoneMatch,
+    hIfRange,
+    hIfUnmodifiedSince,
+    hLastModified,
+    hLocation,
+    hMaxForwards,
+    hOrigin,
+    hPragma,
+    hPrefer,
+    hPreferenceApplied,
+    hProxyAuthenticate,
+    hProxyAuthorization,
+    hRange,
+    hReferer,
+    hRetryAfter,
+    hServer,
+    hTE,
+    hTrailer,
+    hTransferEncoding,
+    hUpgrade,
+    hUserAgent,
+    hVary,
+    hVia,
+    hWWWAuthenticate,
+    hWarning,
+    hContentDisposition,
+    hMIMEVersion,
+    hCookie,
+    hSetCookie,
+
+    -- ** Byte ranges
+    ByteRange (..),
+    renderByteRangeBuilder,
+    renderByteRange,
+    ByteRanges,
+    renderByteRangesBuilder,
+    renderByteRanges,
+    parseByteRanges,
 )
 where
 
-import           Data.List
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Builder as B
+import qualified Data.ByteString.Char8 as B8
+import qualified Data.ByteString.Lazy as BL
+import qualified Data.CaseInsensitive as CI
+import Data.Data (Data)
+import Data.List (intersperse)
 #if __GLASGOW_HASKELL__ < 710
-import           Data.Monoid
+import Data.Monoid
 #endif
-import qualified Data.ByteString                as B
-import qualified Data.ByteString.Char8          as B8
-import qualified Data.ByteString.Builder        as B
-import qualified Data.ByteString.Lazy           as BL
-import qualified Data.CaseInsensitive           as CI
-import           Data.ByteString.Char8          () {-IsString-}
-import           Data.Typeable                  (Typeable)
-import           Data.Data                      (Data)
-import           GHC.Generics                   (Generic)
+import Data.Typeable (Typeable)
+import GHC.Generics (Generic)
 
 -- | Header
 type Header = (HeaderName, B.ByteString)
@@ -100,63 +106,63 @@ type ResponseHeaders = [Header]
 
 -- | HTTP Header names according to http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
 hAccept, hAcceptCharset, hAcceptEncoding, hAcceptLanguage, hAcceptRanges, hAge, hAllow, hAuthorization, hCacheControl, hConnection, hContentEncoding, hContentLanguage, hContentLength, hContentLocation, hContentMD5, hContentRange, hContentType, hDate, hETag, hExpect, hExpires, hFrom, hHost, hIfMatch, hIfModifiedSince, hIfNoneMatch, hIfRange, hIfUnmodifiedSince, hLastModified, hLocation, hMaxForwards, hPragma, hProxyAuthenticate, hProxyAuthorization, hRange, hReferer, hRetryAfter, hServer, hTE, hTrailer, hTransferEncoding, hUpgrade, hUserAgent, hVary, hVia, hWWWAuthenticate, hWarning :: HeaderName
-hAccept             = "Accept"
-hAcceptCharset      = "Accept-Charset"
-hAcceptEncoding     = "Accept-Encoding"
-hAcceptLanguage     = "Accept-Language"
-hAcceptRanges       = "Accept-Ranges"
-hAge                = "Age"
-hAllow              = "Allow"
-hAuthorization      = "Authorization"
-hCacheControl       = "Cache-Control"
-hConnection         = "Connection"
-hContentEncoding    = "Content-Encoding"
-hContentLanguage    = "Content-Language"
-hContentLength      = "Content-Length"
-hContentLocation    = "Content-Location"
-hContentMD5         = "Content-MD5"
-hContentRange       = "Content-Range"
-hContentType        = "Content-Type"
-hDate               = "Date"
-hETag               = "ETag"
-hExpect             = "Expect"
-hExpires            = "Expires"
-hFrom               = "From"
-hHost               = "Host"
-hIfMatch            = "If-Match"
-hIfModifiedSince    = "If-Modified-Since"
-hIfNoneMatch        = "If-None-Match"
-hIfRange            = "If-Range"
-hIfUnmodifiedSince  = "If-Unmodified-Since"
-hLastModified       = "Last-Modified"
-hLocation           = "Location"
-hMaxForwards        = "Max-Forwards"
-hPragma             = "Pragma"
-hProxyAuthenticate  = "Proxy-Authenticate"
+hAccept = "Accept"
+hAcceptCharset = "Accept-Charset"
+hAcceptEncoding = "Accept-Encoding"
+hAcceptLanguage = "Accept-Language"
+hAcceptRanges = "Accept-Ranges"
+hAge = "Age"
+hAllow = "Allow"
+hAuthorization = "Authorization"
+hCacheControl = "Cache-Control"
+hConnection = "Connection"
+hContentEncoding = "Content-Encoding"
+hContentLanguage = "Content-Language"
+hContentLength = "Content-Length"
+hContentLocation = "Content-Location"
+hContentMD5 = "Content-MD5"
+hContentRange = "Content-Range"
+hContentType = "Content-Type"
+hDate = "Date"
+hETag = "ETag"
+hExpect = "Expect"
+hExpires = "Expires"
+hFrom = "From"
+hHost = "Host"
+hIfMatch = "If-Match"
+hIfModifiedSince = "If-Modified-Since"
+hIfNoneMatch = "If-None-Match"
+hIfRange = "If-Range"
+hIfUnmodifiedSince = "If-Unmodified-Since"
+hLastModified = "Last-Modified"
+hLocation = "Location"
+hMaxForwards = "Max-Forwards"
+hPragma = "Pragma"
+hProxyAuthenticate = "Proxy-Authenticate"
 hProxyAuthorization = "Proxy-Authorization"
-hRange              = "Range"
-hReferer            = "Referer"
-hRetryAfter         = "Retry-After"
-hServer             = "Server"
-hTE                 = "TE"
-hTrailer            = "Trailer"
-hTransferEncoding   = "Transfer-Encoding"
-hUpgrade            = "Upgrade"
-hUserAgent          = "User-Agent"
-hVary               = "Vary"
-hVia                = "Via"
-hWWWAuthenticate    = "WWW-Authenticate"
-hWarning            = "Warning"
+hRange = "Range"
+hReferer = "Referer"
+hRetryAfter = "Retry-After"
+hServer = "Server"
+hTE = "TE"
+hTrailer = "Trailer"
+hTransferEncoding = "Transfer-Encoding"
+hUpgrade = "Upgrade"
+hUserAgent = "User-Agent"
+hVary = "Vary"
+hVia = "Via"
+hWWWAuthenticate = "WWW-Authenticate"
+hWarning = "Warning"
 
 -- | HTTP Header names according to http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html
 hContentDisposition, hMIMEVersion :: HeaderName
 hContentDisposition = "Content-Disposition"
-hMIMEVersion        = "MIME-Version"
+hMIMEVersion = "MIME-Version"
 
 -- | HTTP Header names according to https://tools.ietf.org/html/rfc6265#section-4
 hCookie, hSetCookie :: HeaderName
-hCookie             = "Cookie"
-hSetCookie          = "Set-Cookie"
+hCookie = "Cookie"
+hSetCookie = "Set-Cookie"
 
 -- | HTTP Header names according to https://tools.ietf.org/html/rfc6454
 hOrigin :: HeaderName
@@ -171,10 +177,10 @@ hPreferenceApplied = "Preference-Applied"
 --
 -- Negative indices are not allowed!
 data ByteRange
-  = ByteRangeFrom !Integer
-  | ByteRangeFromTo !Integer !Integer
-  | ByteRangeSuffix !Integer
-  deriving (Show, Eq, Ord, Typeable, Data, Generic)
+    = ByteRangeFrom !Integer
+    | ByteRangeFromTo !Integer !Integer
+    | ByteRangeSuffix !Integer
+    deriving (Show, Eq, Ord, Typeable, Data, Generic)
 
 renderByteRangeBuilder :: ByteRange -> B.Builder
 renderByteRangeBuilder (ByteRangeFrom from) = B.integerDec from `mappend` B.char7 '-'
@@ -188,8 +194,9 @@ renderByteRange = BL.toStrict . B.toLazyByteString . renderByteRangeBuilder
 type ByteRanges = [ByteRange]
 
 renderByteRangesBuilder :: ByteRanges -> B.Builder
-renderByteRangesBuilder xs = B.byteString "bytes=" `mappend`
-                             mconcat (intersperse (B.char7 ',') (map renderByteRangeBuilder xs))
+renderByteRangesBuilder xs =
+    B.byteString "bytes="
+        `mappend` mconcat (intersperse (B.char7 ',') (map renderByteRangeBuilder xs))
 
 renderByteRanges :: ByteRanges -> B.ByteString
 renderByteRanges = BL.toStrict . B.toLazyByteString . renderByteRangesBuilder
@@ -216,7 +223,7 @@ parseByteRanges :: B.ByteString -> Maybe ByteRanges
 parseByteRanges bs1 = do
     bs2 <- stripPrefixB "bytes=" bs1
     (r, bs3) <- range bs2
-    ranges (r:) bs3
+    ranges (r :) bs3
   where
     range bs2 = do
         (i, bs3) <- B8.readInteger bs2
@@ -232,7 +239,7 @@ parseByteRanges bs1 = do
         | otherwise = do
             bs4 <- stripPrefixB "," bs3
             (r, bs5) <- range bs4
-            ranges (front . (r:)) bs5
+            ranges (front . (r :)) bs5
 
     stripPrefixB x y
         | x `B.isPrefixOf` y = Just (B.drop (B.length x) y)
