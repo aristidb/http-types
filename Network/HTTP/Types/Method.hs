@@ -1,63 +1,72 @@
-{-# LANGUAGE DeriveDataTypeable, DeriveGeneric #-}
-module Network.HTTP.Types.Method
-(
-  Method
-, methodGet
-, methodPost
-, methodHead
-, methodPut
-, methodDelete
-, methodTrace
-, methodConnect
-, methodOptions
-, methodPatch
-, StdMethod(..)
-, parseMethod
-, renderMethod
-, renderStdMethod
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
+
+module Network.HTTP.Types.Method (
+    Method,
+    methodGet,
+    methodPost,
+    methodHead,
+    methodPut,
+    methodDelete,
+    methodTrace,
+    methodConnect,
+    methodOptions,
+    methodPatch,
+    StdMethod (..),
+    parseMethod,
+    renderMethod,
+    renderStdMethod,
 )
 where
 
-import           Control.Arrow         ((|||))
-import           Data.Array
-import qualified Data.ByteString       as B
+import Control.Arrow ((|||))
+import Data.Array (Array, Ix, assocs, listArray, (!))
+import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as B8
-import           Data.Data            (Data)
-import           Data.Typeable        (Typeable)
-import           GHC.Generics         (Generic)
+import Data.Data (Data)
+import Data.Typeable (Typeable)
+import GHC.Generics (Generic)
 
 -- | HTTP method (flat 'ByteString' type).
 type Method = B.ByteString
 
 -- | HTTP GET Method
-methodGet,
-    -- | HTTP POST Method
-    methodPost,
-    -- | HTTP HEAD Method
-    methodHead,
-    -- | HTTP PUT Method
-    methodPut,
-    -- | HTTP DELETE Method
-    methodDelete,
-    -- | HTTP TRACE Method
-    methodTrace,
-    -- | HTTP CONNECT Method
-    methodConnect,
-    -- | HTTP OPTIONS Method
-    methodOptions,
-    -- | HTTP PATCH Method
-    --
-    -- @since 0.8.0
-    methodPatch :: Method
-methodGet     = renderStdMethod GET
-methodPost    = renderStdMethod POST
-methodHead    = renderStdMethod HEAD
-methodPut     = renderStdMethod PUT
-methodDelete  = renderStdMethod DELETE
-methodTrace   = renderStdMethod TRACE
+methodGet :: Method
+methodGet = renderStdMethod GET
+
+-- | HTTP POST Method
+methodPost :: Method
+methodPost = renderStdMethod POST
+
+-- | HTTP HEAD Method
+methodHead :: Method
+methodHead = renderStdMethod HEAD
+
+-- | HTTP PUT Method
+methodPut :: Method
+methodPut = renderStdMethod PUT
+
+-- | HTTP DELETE Method
+methodDelete :: Method
+methodDelete = renderStdMethod DELETE
+
+-- | HTTP TRACE Method
+methodTrace :: Method
+methodTrace = renderStdMethod TRACE
+
+-- | HTTP CONNECT Method
+methodConnect :: Method
 methodConnect = renderStdMethod CONNECT
+
+-- | HTTP OPTIONS Method
+methodOptions :: Method
 methodOptions = renderStdMethod OPTIONS
-methodPatch   = renderStdMethod PATCH
+
+-- | HTTP PATCH Method
+--
+-- @since 0.8.0
+methodPatch :: Method
+methodPatch = renderStdMethod PATCH
 
 -- | HTTP standard method (as defined by RFC 2616, and PATCH which is defined
 --   by RFC 5789).
@@ -72,21 +81,23 @@ data StdMethod
     | TRACE
     | CONNECT
     | OPTIONS
-    | PATCH -- ^ @since 0.8.0
-    deriving (
-        Read,
-        Show,
-        Eq,
-        Ord,
-        Enum,
-        Bounded,
-        Ix,
-        Typeable,
-        Generic,
-        -- ^ @since 0.12.4
-        Data
-        -- ^ @since 0.12.4
-    )
+    | -- | @since 0.8.0
+      PATCH
+    deriving
+        ( Read
+        , Show
+        , Eq
+        , Ord
+        , Enum
+        , Bounded
+        , Ix
+        , Typeable
+        , -- | @since 0.12.4
+          Generic
+        , -- | @since 0.12.4
+          Data
+        )
+
 -- These are ordered by suspected frequency. More popular methods should go first.
 -- The reason is that methodList is used with lookup.
 -- lookup is probably faster for these few cases than setting up an elaborate data structure.
