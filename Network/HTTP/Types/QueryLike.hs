@@ -7,13 +7,14 @@ module Network.HTTP.Types.QueryLike (
 )
 where
 
-import Control.Arrow
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Lazy as L
-import Data.Maybe
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as T
-import Network.HTTP.Types.URI
+import Control.Arrow ((***))
+import Data.ByteString as B (ByteString, concat)
+import Data.ByteString.Lazy as L (ByteString, toChunks)
+import Data.Maybe (catMaybes)
+import Data.Text as T (Text, pack)
+import Data.Text.Encoding as T (encodeUtf8)
+
+import Network.HTTP.Types.URI (Query)
 
 -- | Types which can, and commonly are, converted to 'Query' are in this class.
 --
