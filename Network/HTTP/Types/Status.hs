@@ -124,10 +124,10 @@ import GHC.Generics (Generic)
 --
 -- Only the 'statusCode' is used for comparisons.
 --
--- Please use 'mkStatus' to create status codes from code and message, or the 'Enum' instance or the
--- status code constants (like 'ok200'). There might be additional record members in the future.
+-- /Please use 'mkStatus' to create status codes from code and message, or the 'Enum' instance or the/
+-- /status code constants (like 'ok200'). There might be additional record members in the future./
 --
--- Note that the Show instance is only for debugging.
+-- Note that the 'Show' instance is only for debugging.
 data Status = Status
     { statusCode :: Int
     , statusMessage :: B.ByteString
@@ -222,7 +222,7 @@ instance Bounded Status where
     minBound = status100
     maxBound = status511
 
--- | Create a Status from status code and message.
+-- | Create a 'Status' from a status code and message.
 mkStatus :: Int -> B.ByteString -> Status
 mkStatus = Status
 
@@ -768,11 +768,15 @@ networkAuthenticationRequired511 = status511
 
 -- | Informational class
 --
+-- Checks if the status is in the 1XX range.
+--
 -- @since 0.8.0
 statusIsInformational :: Status -> Bool
 statusIsInformational (Status {statusCode=code}) = code >= 100 && code < 200
 
 -- | Successful class
+--
+-- Checks if the status is in the 2XX range.
 --
 -- @since 0.8.0
 statusIsSuccessful :: Status -> Bool
@@ -780,17 +784,23 @@ statusIsSuccessful (Status {statusCode=code}) = code >= 200 && code < 300
 
 -- | Redirection class
 --
+-- Checks if the status is in the 3XX range.
+--
 -- @since 0.8.0
 statusIsRedirection :: Status -> Bool
 statusIsRedirection (Status {statusCode=code}) = code >= 300 && code < 400
 
 -- | Client Error class
 --
+-- Checks if the status is in the 4XX range.
+--
 -- @since 0.8.0
 statusIsClientError :: Status -> Bool
 statusIsClientError (Status {statusCode=code}) = code >= 400 && code < 500
 
 -- | Server Error class
+--
+-- Checks if the status is in the 5XX range.
 --
 -- @since 0.8.0
 statusIsServerError :: Status -> Bool
