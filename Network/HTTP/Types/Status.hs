@@ -2,7 +2,15 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Network.HTTP.Types.Status
-( Status(..)
+(
+-- If we ever want to deprecate the 'Status' data constructor:
+-- #if __GLASGOW_HASKELL__ >= 908
+--   {-# DEPRECATED "Use 'mkStatus' when constructing a 'Status'" #-} Status(Status)
+-- #else
+  Status(Status)
+-- #endif
+, statusCode
+, statusMessage
 , mkStatus
 , status100
 , continue100
@@ -132,6 +140,14 @@ data Status
         Generic
         -- ^ @since 0.12.4
         )
+
+-- FIXME: If the data constructor of 'Status' is ever deprecated, we should define
+-- a pattern synonym to minimize any breakage. This also involves changing the
+-- name of the constructor, so that it doesn't clash with the new pattern synonym
+-- that's replacing it.
+--
+-- > data Status = MkStatus ...
+-- > pattern Status code msg = MkStatus code msg
 
 instance Eq Status where
     Status { statusCode = a } == Status { statusCode = b } = a == b
