@@ -79,19 +79,16 @@ module Network.HTTP.Types.Header (
 )
 where
 
-import Data.List
-#if __GLASGOW_HASKELL__ < 710
-import           Data.Monoid
-#endif
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Builder as B
-import Data.ByteString.Char8 ()
 import qualified Data.ByteString.Char8 as B8
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.CaseInsensitive as CI
-{-IsString-}
-
 import Data.Data (Data)
+import Data.List (intersperse)
+#if __GLASGOW_HASKELL__ < 710
+import Data.Monoid
+#endif
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 
