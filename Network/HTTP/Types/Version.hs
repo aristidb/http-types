@@ -1,16 +1,15 @@
-{-# LANGUAGE DeriveDataTypeable, DeriveGeneric #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 module Network.HTTP.Types.Version
-(
-  HttpVersion(..)
-, http09
-, http10
-, http11
-, http20
-)
-where
+  ( HttpVersion(..)
+  , http09
+  , http10
+  , http11
+  , http20
+  ) where
 
-import Data.Typeable (Typeable)
 import Data.Data (Data)
+import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 
 -- | HTTP Version.
@@ -21,7 +20,15 @@ data HttpVersion
         httpMajor :: !Int
       , httpMinor :: !Int
       }
-    deriving (Eq, Ord, Typeable, Data, Generic)
+    deriving (
+        Eq,
+        Ord,
+        Typeable,
+        Data,
+        -- ^ @since 0.12.4
+        Generic
+        -- ^ @since 0.12.4
+        )
 
 instance Show HttpVersion where
     show (HttpVersion major minor) = "HTTP/" ++ show major ++ "." ++ show minor
@@ -39,5 +46,7 @@ http11 :: HttpVersion
 http11 = HttpVersion 1 1
 
 -- | HTTP 2.0
+--
+-- @since 0.10
 http20 :: HttpVersion
 http20 = HttpVersion 2 0
