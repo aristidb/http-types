@@ -1,121 +1,121 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Network.HTTP.Types.Status
-(
--- If we ever want to deprecate the 'Status' data constructor:
--- #if __GLASGOW_HASKELL__ >= 908
---   {-# DEPRECATED "Use 'mkStatus' when constructing a 'Status'" #-} Status(Status)
--- #else
-  Status(Status)
--- #endif
-, statusCode
-, statusMessage
-, mkStatus
-, status100
-, continue100
-, status101
-, switchingProtocols101
-, status200
-, ok200
-, status201
-, created201
-, status202
-, accepted202
-, status203
-, nonAuthoritative203
-, status204
-, noContent204
-, status205
-, resetContent205
-, status206
-, partialContent206
-, status300
-, multipleChoices300
-, status301
-, movedPermanently301
-, status302
-, found302
-, status303
-, seeOther303
-, status304
-, notModified304
-, status305
-, useProxy305
-, status307
-, temporaryRedirect307
-, status308
-, permanentRedirect308
-, status400
-, badRequest400
-, status401
-, unauthorized401
-, status402
-, paymentRequired402
-, status403
-, forbidden403
-, status404
-, notFound404
-, status405
-, methodNotAllowed405
-, status406
-, notAcceptable406
-, status407
-, proxyAuthenticationRequired407
-, status408
-, requestTimeout408
-, status409
-, conflict409
-, status410
-, gone410
-, status411
-, lengthRequired411
-, status412
-, preconditionFailed412
-, status413
-, requestEntityTooLarge413
-, status414
-, requestURITooLong414
-, status415
-, unsupportedMediaType415
-, status416
-, requestedRangeNotSatisfiable416
-, status417
-, expectationFailed417
-, status418
-, imATeapot418
-, status422
-, unprocessableEntity422
-, status426
-, upgradeRequired426
-, status428
-, preconditionRequired428
-, status429
-, tooManyRequests429
-, status431
-, requestHeaderFieldsTooLarge431
-, status500
-, internalServerError500
-, status501
-, notImplemented501
-, status502
-, badGateway502
-, status503
-, serviceUnavailable503
-, status504
-, gatewayTimeout504
-, status505
-, status511
-, networkAuthenticationRequired511
-, httpVersionNotSupported505
-, statusIsInformational
-, statusIsSuccessful
-, statusIsRedirection
-, statusIsClientError
-, statusIsServerError
+
+module Network.HTTP.Types.Status (
+    -- If we ever want to deprecate the 'Status' data constructor:
+    -- #if __GLASGOW_HASKELL__ >= 908
+    --   {-# DEPRECATED "Use 'mkStatus' when constructing a 'Status'" #-} Status(Status)
+    -- #else
+    Status (Status),
+    -- #endif
+    statusCode,
+    statusMessage,
+    mkStatus,
+    status100,
+    continue100,
+    status101,
+    switchingProtocols101,
+    status200,
+    ok200,
+    status201,
+    created201,
+    status202,
+    accepted202,
+    status203,
+    nonAuthoritative203,
+    status204,
+    noContent204,
+    status205,
+    resetContent205,
+    status206,
+    partialContent206,
+    status300,
+    multipleChoices300,
+    status301,
+    movedPermanently301,
+    status302,
+    found302,
+    status303,
+    seeOther303,
+    status304,
+    notModified304,
+    status305,
+    useProxy305,
+    status307,
+    temporaryRedirect307,
+    status308,
+    permanentRedirect308,
+    status400,
+    badRequest400,
+    status401,
+    unauthorized401,
+    status402,
+    paymentRequired402,
+    status403,
+    forbidden403,
+    status404,
+    notFound404,
+    status405,
+    methodNotAllowed405,
+    status406,
+    notAcceptable406,
+    status407,
+    proxyAuthenticationRequired407,
+    status408,
+    requestTimeout408,
+    status409,
+    conflict409,
+    status410,
+    gone410,
+    status411,
+    lengthRequired411,
+    status412,
+    preconditionFailed412,
+    status413,
+    requestEntityTooLarge413,
+    status414,
+    requestURITooLong414,
+    status415,
+    unsupportedMediaType415,
+    status416,
+    requestedRangeNotSatisfiable416,
+    status417,
+    expectationFailed417,
+    status418,
+    imATeapot418,
+    status422,
+    unprocessableEntity422,
+    status426,
+    upgradeRequired426,
+    status428,
+    preconditionRequired428,
+    status429,
+    tooManyRequests429,
+    status431,
+    requestHeaderFieldsTooLarge431,
+    status500,
+    internalServerError500,
+    status501,
+    notImplemented501,
+    status502,
+    badGateway502,
+    status503,
+    serviceUnavailable503,
+    status504,
+    gatewayTimeout504,
+    status505,
+    status511,
+    networkAuthenticationRequired511,
+    httpVersionNotSupported505,
+    statusIsInformational,
+    statusIsSuccessful,
+    statusIsRedirection,
+    statusIsClientError,
+    statusIsServerError,
 ) where
 
-import qualified Data.ByteString as B
+import Data.ByteString as B (ByteString, empty)
 import Data.Data (Data)
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
@@ -128,17 +128,17 @@ import GHC.Generics (Generic)
 -- status code constants (like 'ok200'). There might be additional record members in the future.
 --
 -- Note that the Show instance is only for debugging.
-data Status
-    = Status { statusCode :: Int
-             , statusMessage :: B.ByteString
-             }
-    deriving (
-        Show,
-        Typeable,
-        Data,
-        -- ^ @since 0.12.4
-        Generic
-        -- ^ @since 0.12.4
+data Status = Status
+    { statusCode :: Int
+    , statusMessage :: B.ByteString
+    }
+    deriving
+        ( Show
+        , Typeable
+        , -- | @since 0.12.4
+          Data
+        , -- | @since 0.12.4
+          Generic
         )
 
 -- FIXME: If the data constructor of 'Status' is ever deprecated, we should define
@@ -149,13 +149,22 @@ data Status
 -- > data Status = MkStatus ...
 -- > pattern Status code msg = MkStatus code msg
 
+-- | A 'Status' is equal to another 'Status' if the status codes are equal.
 instance Eq Status where
     Status { statusCode = a } == Status { statusCode = b } = a == b
 
+-- | 'Status'es are ordered according to their status codes only.
 instance Ord Status where
     compare Status { statusCode = a } Status { statusCode = b } = a `compare` b
 
--- | @since 0.7.3
+-- | Be advised, that when using the 'enumFrom*' family of methods or
+-- ranges in lists, it will generate all possible status codes.
+--
+-- E.g. @[status100 .. status200]@ generates 'Status'es of @100, 101, 102 .. 198, 199, 200@
+--
+-- The statuses not included in this library will have an empty message.
+--
+-- @since 0.7.3
 instance Enum Status where
     fromEnum = statusCode
     toEnum 100 = status100
@@ -206,12 +215,12 @@ instance Enum Status where
     toEnum 504 = status504
     toEnum 505 = status505
     toEnum 511 = status511
-    toEnum c   = mkStatus c B.empty
+    toEnum c = mkStatus c B.empty
 
 -- | @since 0.11
 instance Bounded Status where
-  minBound = status100
-  maxBound = status511
+    minBound = status100
+    maxBound = status511
 
 -- | Create a Status from status code and message.
 mkStatus :: Int -> B.ByteString -> Status
