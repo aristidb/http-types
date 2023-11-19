@@ -7,8 +7,7 @@ module Network.HTTP.Types.Version (
     http10,
     http11,
     http20,
-)
-where
+) where
 
 import Data.Data (Data)
 import Data.Typeable (Typeable)
@@ -17,19 +16,18 @@ import GHC.Generics (Generic)
 -- | HTTP Version.
 --
 -- Note that the Show instance is intended merely for debugging.
-data HttpVersion
-    = HttpVersion {
-        httpMajor :: !Int
-      , httpMinor :: !Int
-      }
-    deriving (
-        Eq,
-        Ord,
-        Typeable,
-        Data,
-        -- ^ @since 0.12.4
-        Generic
-        -- ^ @since 0.12.4
+data HttpVersion = HttpVersion
+    { httpMajor :: !Int
+    , httpMinor :: !Int
+    }
+    deriving
+        ( Eq
+        , Ord
+        , Typeable
+        , -- | @since 0.12.4
+          Data
+        , -- | @since 0.12.4
+          Generic
         )
 
 instance Show HttpVersion where
