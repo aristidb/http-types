@@ -46,24 +46,21 @@ module Network.HTTP.Types.URI (
 )
 where
 
-import Control.Arrow
-import Data.Bits
-import Data.Char
-import Data.List
-import Data.Maybe
-#if __GLASGOW_HASKELL__ < 710
-import           Data.Monoid
-#endif
+import Control.Arrow (second, (***))
+import Data.Bits (shiftL, (.|.))
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Builder as B
-import Data.ByteString.Char8 ()
 import qualified Data.ByteString.Lazy as BL
+import Data.Char (ord)
+import Data.List (intersperse)
+import Data.Maybe (fromMaybe)
+#if __GLASGOW_HASKELL__ < 710
+import Data.Monoid
+#endif
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8With, encodeUtf8)
 import Data.Text.Encoding.Error (lenientDecode)
-import Data.Word
-
-{-IsString-}
+import Data.Word (Word8)
 
 -- | Query item
 type QueryItem = (B.ByteString, Maybe B.ByteString)
@@ -260,9 +257,10 @@ urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
     go bs =
         case B.uncons bs of
             Nothing -> Nothing
-            Just (43, ws) | replacePlus -> Just (32, ws) -- plus to space
+            -- plus to space
+            Just (43, ws) | replacePlus -> Just (32, ws)
+            -- percent
             Just (37, ws) -> Just $ fromMaybe (37, ws) $ do
-                -- percent
                 (x, xs) <- B.uncons ws
                 x' <- hexVal x
                 (y, ys) <- B.uncons xs
@@ -418,7 +416,7 @@ renderQueryBuilderPartialEscape qmark' (p : ps) =
             , urlEncodeBuilder True k
             , case mv of
                 [] -> mempty
-                vs -> equal `mappend` (mconcat (map encode vs))
+                vs -> equal `mappend` mconcat (map encode vs)
             ]
     encode (QE v) = urlEncodeBuilder True v
     encode (QN v) = B.byteString v
