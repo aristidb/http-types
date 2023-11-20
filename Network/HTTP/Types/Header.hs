@@ -6,13 +6,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Network.HTTP.Types.Header (
-    -- ** Types
+    -- ** Type synonyms
     Header,
     HeaderName,
     RequestHeaders,
     ResponseHeaders,
 
     -- ** Common headers
+
+    -- | The following header constants are provided for convenience,
+    -- to prevent accidental spelling errors.
     hAccept,
     hAcceptCharset,
     hAcceptEncoding,
@@ -23,6 +26,7 @@ module Network.HTTP.Types.Header (
     hAuthorization,
     hCacheControl,
     hConnection,
+    hContentDisposition,
     hContentEncoding,
     hContentLanguage,
     hContentLength,
@@ -30,6 +34,7 @@ module Network.HTTP.Types.Header (
     hContentMD5,
     hContentRange,
     hContentType,
+    hCookie,
     hDate,
     hETag,
     hExpect,
@@ -44,6 +49,7 @@ module Network.HTTP.Types.Header (
     hLastModified,
     hLocation,
     hMaxForwards,
+    hMIMEVersion,
     hOrigin,
     hPragma,
     hPrefer,
@@ -54,6 +60,7 @@ module Network.HTTP.Types.Header (
     hReferer,
     hRetryAfter,
     hServer,
+    hSetCookie,
     hTE,
     hTrailer,
     hTransferEncoding,
@@ -63,12 +70,12 @@ module Network.HTTP.Types.Header (
     hVia,
     hWWWAuthenticate,
     hWarning,
-    hContentDisposition,
-    hMIMEVersion,
-    hCookie,
-    hSetCookie,
 
     -- ** Byte ranges
+
+    -- | Convenience functions and types to handle values from Range headers.
+    --
+    -- https://www.rfc-editor.org/rfc/rfc9110.html#name-byte-ranges
     ByteRange (..),
     renderByteRangeBuilder,
     renderByteRange,
@@ -92,112 +99,306 @@ import Data.Monoid
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 
--- | Header
+-- | A full HTTP header field with the name and value separated.
+--
+-- E.g. @Content-Length: 28@ parsed into a 'Header' would turn into @("Content-Length", "28")@
 type Header = (HeaderName, B.ByteString)
 
--- | Header name
+-- | A case-insensitive name of a header field.
+--
+-- This is the part of the header field before the colon: @HeaderName: some value@
 type HeaderName = CI.CI B.ByteString
 
--- | Request Headers
+-- | A list of 'Header's.
+--
+-- Same type as 'ResponseHeaders', but useful to differentiate in type signatures.
 type RequestHeaders = [Header]
 
--- | Response Headers
+-- | A list of 'Header's.
+--
+-- Same type as 'RequestHeaders', but useful to differentiate in type signatures.
 type ResponseHeaders = [Header]
 
--- | HTTP Header names according to http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
-hAccept, hAcceptCharset, hAcceptEncoding, hAcceptLanguage, hAcceptRanges, hAge, hAllow, hAuthorization, hCacheControl, hConnection, hContentEncoding, hContentLanguage, hContentLength, hContentLocation, hContentMD5, hContentRange, hContentType, hDate, hETag, hExpect, hExpires, hFrom, hHost, hIfMatch, hIfModifiedSince, hIfNoneMatch, hIfRange, hIfUnmodifiedSince, hLastModified, hLocation, hMaxForwards, hPragma, hProxyAuthenticate, hProxyAuthorization, hRange, hReferer, hRetryAfter, hServer, hTE, hTrailer, hTransferEncoding, hUpgrade, hUserAgent, hVary, hVia, hWWWAuthenticate, hWarning :: HeaderName
+-- | [Accept](https://www.rfc-editor.org/rfc/rfc9110.html#name-accept)
+hAccept :: HeaderName
 hAccept = "Accept"
+
+-- | [Accept-Charset](https://www.rfc-editor.org/rfc/rfc9110.html#name-accept-charset)
+hAcceptCharset :: HeaderName
 hAcceptCharset = "Accept-Charset"
+
+-- | [Accept-Encoding](https://www.rfc-editor.org/rfc/rfc9110.html#name-accept-encoding)
+hAcceptEncoding :: HeaderName
 hAcceptEncoding = "Accept-Encoding"
+
+-- | [Accept-Language](https://www.rfc-editor.org/rfc/rfc9110.html#name-accept-language)
+hAcceptLanguage :: HeaderName
 hAcceptLanguage = "Accept-Language"
+
+-- | [Accept-Ranges](https://www.rfc-editor.org/rfc/rfc9110.html#name-accept-ranges)
+hAcceptRanges :: HeaderName
 hAcceptRanges = "Accept-Ranges"
+
+-- | [Age](https://www.rfc-editor.org/rfc/rfc9111.html#name-age)
+hAge :: HeaderName
 hAge = "Age"
+
+-- | [Allow](https://www.rfc-editor.org/rfc/rfc9110.html#name-allow)
+hAllow :: HeaderName
 hAllow = "Allow"
+
+-- | [Authorization](https://www.rfc-editor.org/rfc/rfc9110.html#name-authorization)
+hAuthorization :: HeaderName
 hAuthorization = "Authorization"
+
+-- | [Cache-Control](https://www.rfc-editor.org/rfc/rfc9111.html#name-cache-control)
+hCacheControl :: HeaderName
 hCacheControl = "Cache-Control"
+
+-- | [Connection](https://www.rfc-editor.org/rfc/rfc9110.html#name-connection)
+hConnection :: HeaderName
 hConnection = "Connection"
+
+-- | [Content-Encoding](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-encoding)
+hContentEncoding :: HeaderName
 hContentEncoding = "Content-Encoding"
+
+-- | [Content-Language](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-language)
+hContentLanguage :: HeaderName
 hContentLanguage = "Content-Language"
+
+-- | [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-length)
+hContentLength :: HeaderName
 hContentLength = "Content-Length"
+
+-- | [Content-Location](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-location)
+hContentLocation :: HeaderName
 hContentLocation = "Content-Location"
+
+-- | [Content-MD5](https://www.rfc-editor.org/rfc/rfc2616.html#section-14.15)
+--
+-- /This header has been obsoleted in RFC 9110./
+hContentMD5 :: HeaderName
 hContentMD5 = "Content-MD5"
+
+-- | [Content-Range](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-range)
+hContentRange :: HeaderName
 hContentRange = "Content-Range"
+
+-- | [Content-Type](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-type)
+hContentType :: HeaderName
 hContentType = "Content-Type"
+
+-- | [Date](https://www.rfc-editor.org/rfc/rfc9110.html#name-date)
+hDate :: HeaderName
 hDate = "Date"
+
+-- | [ETag](https://www.rfc-editor.org/rfc/rfc9110.html#name-etag)
+hETag :: HeaderName
 hETag = "ETag"
+
+-- | [Expect](https://www.rfc-editor.org/rfc/rfc9110.html#name-expect)
+hExpect :: HeaderName
 hExpect = "Expect"
+
+-- | [Expires](https://www.rfc-editor.org/rfc/rfc9111.html#name-expires)
+hExpires :: HeaderName
 hExpires = "Expires"
+
+-- | [From](https://www.rfc-editor.org/rfc/rfc9110.html#name-from)
+hFrom :: HeaderName
 hFrom = "From"
+
+-- | [Host](https://www.rfc-editor.org/rfc/rfc9110.html#name-host-and-authority)
+hHost :: HeaderName
 hHost = "Host"
+
+-- | [If-Match](https://www.rfc-editor.org/rfc/rfc9110.html#name-if-match)
+hIfMatch :: HeaderName
 hIfMatch = "If-Match"
+
+-- | [If-Modified-Since](https://www.rfc-editor.org/rfc/rfc9110.html#name-if-modified-since)
+hIfModifiedSince :: HeaderName
 hIfModifiedSince = "If-Modified-Since"
+
+-- | [If-None-Match](https://www.rfc-editor.org/rfc/rfc9110.html#name-if-none-match)
+hIfNoneMatch :: HeaderName
 hIfNoneMatch = "If-None-Match"
+
+-- | [If-Range](https://www.rfc-editor.org/rfc/rfc9110.html#name-if-range)
+hIfRange :: HeaderName
 hIfRange = "If-Range"
+
+-- | [If-Unmodified-Since](https://www.rfc-editor.org/rfc/rfc9110.html#name-if-unmodified-since)
+hIfUnmodifiedSince :: HeaderName
 hIfUnmodifiedSince = "If-Unmodified-Since"
+
+-- | [Last-Modified](https://www.rfc-editor.org/rfc/rfc9110.html#name-last-modified)
+hLastModified :: HeaderName
 hLastModified = "Last-Modified"
+
+-- | [Location](https://www.rfc-editor.org/rfc/rfc9110.html#name-location)
+hLocation :: HeaderName
 hLocation = "Location"
+
+-- | [Max-Forwards](https://www.rfc-editor.org/rfc/rfc9110.html#name-max-forwards)
+hMaxForwards :: HeaderName
 hMaxForwards = "Max-Forwards"
+
+-- | [Pragma](https://www.rfc-editor.org/rfc/rfc9111.html#name-pragma)
+--
+-- /This header has been deprecated in RFC 9111 in favor of "Cache-Control"./
+hPragma :: HeaderName
 hPragma = "Pragma"
+
+-- | [Proxy-Authenticate](https://www.rfc-editor.org/rfc/rfc9110.html#name-proxy-authenticate)
+hProxyAuthenticate :: HeaderName
 hProxyAuthenticate = "Proxy-Authenticate"
+
+-- | [Proxy-Authorization](https://www.rfc-editor.org/rfc/rfc9110.html#name-proxy-authorization)
+hProxyAuthorization :: HeaderName
 hProxyAuthorization = "Proxy-Authorization"
+
+-- | [Range](https://www.rfc-editor.org/rfc/rfc9110.html#name-range)
+hRange :: HeaderName
 hRange = "Range"
+
+-- | [Referer](https://www.rfc-editor.org/rfc/rfc9110.html#name-referer)
+hReferer :: HeaderName
 hReferer = "Referer"
+
+-- | [Retry-After](https://www.rfc-editor.org/rfc/rfc9110.html#name-retry-after)
+hRetryAfter :: HeaderName
 hRetryAfter = "Retry-After"
+
+-- | [Server](https://www.rfc-editor.org/rfc/rfc9110.html#name-server)
+hServer :: HeaderName
 hServer = "Server"
+
+-- | [TE](https://www.rfc-editor.org/rfc/rfc9110.html#name-te)
+hTE :: HeaderName
 hTE = "TE"
+
+-- | [Trailer](https://www.rfc-editor.org/rfc/rfc9110.html#name-trailer)
+hTrailer :: HeaderName
 hTrailer = "Trailer"
+
+-- | [Transfer-Encoding](https://www.rfc-editor.org/rfc/rfc9112#name-transfer-encoding)
+hTransferEncoding :: HeaderName
 hTransferEncoding = "Transfer-Encoding"
+
+-- | [Upgrade](https://www.rfc-editor.org/rfc/rfc9110.html#name-upgrade)
+hUpgrade :: HeaderName
 hUpgrade = "Upgrade"
+
+-- | [User-Agent](https://www.rfc-editor.org/rfc/rfc9110.html#name-user-agent)
+hUserAgent :: HeaderName
 hUserAgent = "User-Agent"
+
+-- | [Vary](https://www.rfc-editor.org/rfc/rfc9110.html#name-vary)
+hVary :: HeaderName
 hVary = "Vary"
+
+-- | [Via](https://www.rfc-editor.org/rfc/rfc9110.html#name-via)
+hVia :: HeaderName
 hVia = "Via"
+
+-- | [WWW-Authenticate](https://www.rfc-editor.org/rfc/rfc9110.html#name-www-authenticate)
+hWWWAuthenticate :: HeaderName
 hWWWAuthenticate = "WWW-Authenticate"
+
+-- | [Warning](https://www.rfc-editor.org/rfc/rfc9111.html#name-warning)
+--
+-- /This header has been obsoleted in RFC 9110./
+hWarning :: HeaderName
 hWarning = "Warning"
 
--- | HTTP Header names according to http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html
-hContentDisposition, hMIMEVersion :: HeaderName
+-- | [Content-Disposition](https://www.rfc-editor.org/rfc/rfc6266.html)
+hContentDisposition :: HeaderName
 hContentDisposition = "Content-Disposition"
+
+-- | [MIME-Version](https://www.rfc-editor.org/rfc/rfc2616.html#section-19.4.1)
+hMIMEVersion :: HeaderName
 hMIMEVersion = "MIME-Version"
 
--- | HTTP Header names according to https://tools.ietf.org/html/rfc6265#section-4
-hCookie, hSetCookie :: HeaderName
+-- | [Cookie](https://www.rfc-editor.org/rfc/rfc6265.html#section-4.2)
+hCookie :: HeaderName
 hCookie = "Cookie"
+
+-- | [Set-Cookie](https://www.rfc-editor.org/rfc/rfc6265.html#section-4.1)
+hSetCookie :: HeaderName
 hSetCookie = "Set-Cookie"
 
--- | HTTP Header names according to https://tools.ietf.org/html/rfc6454
+-- | [Origin](https://www.rfc-editor.org/rfc/rfc6454.html#section-7)
 hOrigin :: HeaderName
 hOrigin = "Origin"
 
--- | HTTP Header names according to https://tools.ietf.org/html/rfc7240
-hPrefer, hPreferenceApplied :: HeaderName
+-- | [Prefer](https://www.rfc-editor.org/rfc/rfc7240.html#section-2)
+hPrefer :: HeaderName
 hPrefer = "Prefer"
+
+-- | [Preference-Applied](https://www.rfc-editor.org/rfc/rfc7240.html#section-3)
+hPreferenceApplied :: HeaderName
 hPreferenceApplied = "Preference-Applied"
 
--- | RFC 2616 Byte range (individual).
+-- | An individual byte range.
 --
 -- Negative indices are not allowed!
+--
+-- @since 0.6.11
 data ByteRange
     = ByteRangeFrom !Integer
     | ByteRangeFromTo !Integer !Integer
     | ByteRangeSuffix !Integer
-    deriving (Show, Eq, Ord, Typeable, Data, Generic)
+    deriving
+        ( -- | @since 0.8.4
+          Show
+        , -- | @since 0.8.4
+          Eq
+        , -- | @since 0.8.4
+          Ord
+        , -- | @since 0.8.4
+          Typeable
+        , -- | @since 0.8.4
+          Data
+        , -- | @since 0.12.4
+          Generic
+        )
 
+-- | Turns a byte range into a byte string 'B.Builder'.
+--
+-- @since 0.6.11
 renderByteRangeBuilder :: ByteRange -> B.Builder
 renderByteRangeBuilder (ByteRangeFrom from) = B.integerDec from `mappend` B.char7 '-'
 renderByteRangeBuilder (ByteRangeFromTo from to) = B.integerDec from `mappend` B.char7 '-' `mappend` B.integerDec to
 renderByteRangeBuilder (ByteRangeSuffix suffix) = B.char7 '-' `mappend` B.integerDec suffix
 
+-- | Renders a byte range into a 'B.ByteString'.
+--
+-- @renderByteRange (ByteRangeFrom 2048) == "2048-"@
+--
+-- @since 0.6.11
 renderByteRange :: ByteRange -> B.ByteString
 renderByteRange = BL.toStrict . B.toLazyByteString . renderByteRangeBuilder
 
--- | RFC 2616 Byte ranges (set).
+-- | A list of byte ranges.
+--
+-- @since 0.6.11
 type ByteRanges = [ByteRange]
 
+-- | Turns a list of byte ranges into a byte string 'B.Builder'.
+--
+-- @since 0.6.11
 renderByteRangesBuilder :: ByteRanges -> B.Builder
 renderByteRangesBuilder xs =
     B.byteString "bytes="
-        `mappend` mconcat (intersperse (B.char7 ',') (map renderByteRangeBuilder xs))
+        `mappend` mconcat (intersperse (B.char7 ',') $ map renderByteRangeBuilder xs)
 
+-- | Renders a list of byte ranges into a 'B.ByteString'.
+--
+-- @renderByteRanges [ByteRangeFrom 2048, ByteRangeTo 20] == "bytes=2048-,-20"@
+--
+-- @since 0.6.11
 renderByteRanges :: ByteRanges -> B.ByteString
 renderByteRanges = BL.toStrict . B.toLazyByteString . renderByteRangesBuilder
 
@@ -219,6 +420,8 @@ renderByteRanges = BL.toStrict . B.toLazyByteString . renderByteRangesBuilder
 -- Just [ByteRangeFromTo 500 600,ByteRangeFromTo 601 999]
 -- >>> parseByteRanges "bytes=500-700,601-999"
 -- Just [ByteRangeFromTo 500 700,ByteRangeFromTo 601 999]
+--
+-- @since 0.9.1
 parseByteRanges :: B.ByteString -> Maybe ByteRanges
 parseByteRanges bs1 = do
     bs2 <- stripPrefixB "bytes=" bs1
@@ -241,6 +444,8 @@ parseByteRanges bs1 = do
             (r, bs5) <- range bs4
             ranges (front . (r :)) bs5
 
+    -- FIXME: Use 'stripPrefix' from the 'bytestring' package.
+    -- Might have to update the dependency constraints though.
     stripPrefixB x y
         | x `B.isPrefixOf` y = Just (B.drop (B.length x) y)
         | otherwise = Nothing
