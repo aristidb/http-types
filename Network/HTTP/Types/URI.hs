@@ -1,33 +1,48 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+-- | Query strings generally have the following form:
+--
+-- @"key1=value1&key2=value2" (given a 'Query' of [("key1", Just "value1"), ("key2", Just "value2")])@
+--
+-- But if the value of @key1@ is 'Nothing', it becomes:
+--
+-- @key1&key2=value2 (given: [("key1", Nothing), ("key2", Just "value2")])@
+--
+-- This module also provides type synonyms and functions to handle queries
+-- that do not allow/expect key without values. These are the 'SimpleQuery'
+-- type and their associated functions.
 module Network.HTTP.Types.URI (
-    -- * Query string
+    -- * Query strings
+
+    -- ** Query
     QueryItem,
     Query,
-    SimpleQueryItem,
-    SimpleQuery,
-    simpleQueryToQuery,
     renderQuery,
     renderQueryBuilder,
-    renderSimpleQuery,
     parseQuery,
     parseQueryReplacePlus,
-    parseSimpleQuery,
 
-    -- ** Escape only parts
-    renderQueryPartialEscape,
-    renderQueryBuilderPartialEscape,
-    EscapeItem (..),
-    PartialEscapeQueryItem,
-    PartialEscapeQuery,
-
-    -- ** Text query string (UTF8 encoded)
+    -- *** Query (Text)
     QueryText,
     queryTextToQuery,
     queryToQueryText,
     renderQueryText,
     parseQueryText,
+
+    -- ** SimpleQuery
+    SimpleQueryItem,
+    SimpleQuery,
+    simpleQueryToQuery,
+    renderSimpleQuery,
+    parseSimpleQuery,
+
+    -- ** PartialEscapeQuery
+    PartialEscapeQueryItem,
+    PartialEscapeQuery,
+    EscapeItem (..),
+    renderQueryPartialEscape,
+    renderQueryBuilderPartialEscape,
 
     -- * Path segments
     encodePathSegments,
@@ -62,13 +77,16 @@ import Data.Text.Encoding (decodeUtf8With, encodeUtf8)
 import Data.Text.Encoding.Error (lenientDecode)
 import Data.Word (Word8)
 
--- | Query item
+-- | An item from the query string, split up into two parts.
+--
+-- The second part should be 'Nothing' if there was no key-value
+-- separator after the query item name.
+--
+-- /N.B. The most standard key-value separator is the equals sign: @=@,/
+-- /but in HTTP forms can sometimes be a semicolon: @;@/
 type QueryItem = (B.ByteString, Maybe B.ByteString)
 
--- | Query.
---
--- General form: @a=b&c=d@, but if the value is Nothing, it becomes
--- @a&c=d@.
+-- | A sequence of 'QueryItem's.
 type Query = [QueryItem]
 
 -- | Like Query, but with 'Text' instead of 'B.ByteString' (UTF8-encoded).
@@ -195,6 +213,9 @@ breakDiscard seps s =
      in (x, B.drop 1 y)
 
 -- | Parse 'SimpleQuery' from a 'ByteString'.
+--
+-- This uses 'parseQuery' under the hood, and will transform
+-- any 'Nothing' values into an empty 'B.ByteString'.
 parseSimpleQuery :: B.ByteString -> SimpleQuery
 parseSimpleQuery = map (second $ fromMaybe B.empty) . parseQuery
 
