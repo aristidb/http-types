@@ -120,224 +120,332 @@ type RequestHeaders = [Header]
 type ResponseHeaders = [Header]
 
 -- | [Accept](https://www.rfc-editor.org/rfc/rfc9110.html#name-accept)
+--
+-- @since 0.7.0
 hAccept :: HeaderName
 hAccept = "Accept"
 
 -- | [Accept-Charset](https://www.rfc-editor.org/rfc/rfc9110.html#name-accept-charset)
+--
+-- @since 0.9
 hAcceptCharset :: HeaderName
 hAcceptCharset = "Accept-Charset"
 
 -- | [Accept-Encoding](https://www.rfc-editor.org/rfc/rfc9110.html#name-accept-encoding)
+--
+-- @since 0.9
 hAcceptEncoding :: HeaderName
 hAcceptEncoding = "Accept-Encoding"
 
 -- | [Accept-Language](https://www.rfc-editor.org/rfc/rfc9110.html#name-accept-language)
+--
+-- @since 0.7.0
 hAcceptLanguage :: HeaderName
 hAcceptLanguage = "Accept-Language"
 
 -- | [Accept-Ranges](https://www.rfc-editor.org/rfc/rfc9110.html#name-accept-ranges)
+--
+-- @since 0.9
 hAcceptRanges :: HeaderName
 hAcceptRanges = "Accept-Ranges"
 
 -- | [Age](https://www.rfc-editor.org/rfc/rfc9111.html#name-age)
+--
+-- @since 0.9
 hAge :: HeaderName
 hAge = "Age"
 
 -- | [Allow](https://www.rfc-editor.org/rfc/rfc9110.html#name-allow)
+--
+-- @since 0.9
 hAllow :: HeaderName
 hAllow = "Allow"
 
 -- | [Authorization](https://www.rfc-editor.org/rfc/rfc9110.html#name-authorization)
+--
+-- @since 0.7.0
 hAuthorization :: HeaderName
 hAuthorization = "Authorization"
 
 -- | [Cache-Control](https://www.rfc-editor.org/rfc/rfc9111.html#name-cache-control)
+--
+-- @since 0.7.0
 hCacheControl :: HeaderName
 hCacheControl = "Cache-Control"
 
 -- | [Connection](https://www.rfc-editor.org/rfc/rfc9110.html#name-connection)
+--
+-- @since 0.7.0
 hConnection :: HeaderName
 hConnection = "Connection"
 
 -- | [Content-Encoding](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-encoding)
+--
+-- @since 0.7.0
 hContentEncoding :: HeaderName
 hContentEncoding = "Content-Encoding"
 
 -- | [Content-Language](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-language)
+--
+-- @since 0.9
 hContentLanguage :: HeaderName
 hContentLanguage = "Content-Language"
 
 -- | [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-length)
+--
+-- @since 0.7.0
 hContentLength :: HeaderName
 hContentLength = "Content-Length"
 
 -- | [Content-Location](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-location)
+--
+-- @since 0.9
 hContentLocation :: HeaderName
 hContentLocation = "Content-Location"
 
 -- | [Content-MD5](https://www.rfc-editor.org/rfc/rfc2616.html#section-14.15)
 --
 -- /This header has been obsoleted in RFC 9110./
+--
+-- @since 0.7.0
 hContentMD5 :: HeaderName
 hContentMD5 = "Content-MD5"
 
 -- | [Content-Range](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-range)
+--
+-- @since 0.9
 hContentRange :: HeaderName
 hContentRange = "Content-Range"
 
 -- | [Content-Type](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-type)
+--
+-- @since 0.7.0
 hContentType :: HeaderName
 hContentType = "Content-Type"
 
 -- | [Date](https://www.rfc-editor.org/rfc/rfc9110.html#name-date)
+--
+-- @since 0.7.0
 hDate :: HeaderName
 hDate = "Date"
 
 -- | [ETag](https://www.rfc-editor.org/rfc/rfc9110.html#name-etag)
+--
+-- @since 0.9
 hETag :: HeaderName
 hETag = "ETag"
 
 -- | [Expect](https://www.rfc-editor.org/rfc/rfc9110.html#name-expect)
+--
+-- @since 0.9
 hExpect :: HeaderName
 hExpect = "Expect"
 
 -- | [Expires](https://www.rfc-editor.org/rfc/rfc9111.html#name-expires)
+--
+-- @since 0.9
 hExpires :: HeaderName
 hExpires = "Expires"
 
 -- | [From](https://www.rfc-editor.org/rfc/rfc9110.html#name-from)
+--
+-- @since 0.9
 hFrom :: HeaderName
 hFrom = "From"
 
 -- | [Host](https://www.rfc-editor.org/rfc/rfc9110.html#name-host-and-authority)
+--
+-- @since 0.9
 hHost :: HeaderName
 hHost = "Host"
 
 -- | [If-Match](https://www.rfc-editor.org/rfc/rfc9110.html#name-if-match)
+--
+-- @since 0.9
 hIfMatch :: HeaderName
 hIfMatch = "If-Match"
 
 -- | [If-Modified-Since](https://www.rfc-editor.org/rfc/rfc9110.html#name-if-modified-since)
+--
+-- @since 0.7.0
 hIfModifiedSince :: HeaderName
 hIfModifiedSince = "If-Modified-Since"
 
 -- | [If-None-Match](https://www.rfc-editor.org/rfc/rfc9110.html#name-if-none-match)
+--
+-- @since 0.9
 hIfNoneMatch :: HeaderName
 hIfNoneMatch = "If-None-Match"
 
 -- | [If-Range](https://www.rfc-editor.org/rfc/rfc9110.html#name-if-range)
+--
+-- @since 0.7.0
 hIfRange :: HeaderName
 hIfRange = "If-Range"
 
 -- | [If-Unmodified-Since](https://www.rfc-editor.org/rfc/rfc9110.html#name-if-unmodified-since)
+--
+-- @since 0.9
 hIfUnmodifiedSince :: HeaderName
 hIfUnmodifiedSince = "If-Unmodified-Since"
 
 -- | [Last-Modified](https://www.rfc-editor.org/rfc/rfc9110.html#name-last-modified)
+--
+-- @since 0.7.0
 hLastModified :: HeaderName
 hLastModified = "Last-Modified"
 
 -- | [Location](https://www.rfc-editor.org/rfc/rfc9110.html#name-location)
+--
+-- @since 0.7.1
 hLocation :: HeaderName
 hLocation = "Location"
 
 -- | [Max-Forwards](https://www.rfc-editor.org/rfc/rfc9110.html#name-max-forwards)
+--
+-- @since 0.9
 hMaxForwards :: HeaderName
 hMaxForwards = "Max-Forwards"
 
 -- | [Pragma](https://www.rfc-editor.org/rfc/rfc9111.html#name-pragma)
 --
 -- /This header has been deprecated in RFC 9111 in favor of "Cache-Control"./
+--
+-- @since 0.9
 hPragma :: HeaderName
 hPragma = "Pragma"
 
 -- | [Proxy-Authenticate](https://www.rfc-editor.org/rfc/rfc9110.html#name-proxy-authenticate)
+--
+-- @since 0.9
 hProxyAuthenticate :: HeaderName
 hProxyAuthenticate = "Proxy-Authenticate"
 
 -- | [Proxy-Authorization](https://www.rfc-editor.org/rfc/rfc9110.html#name-proxy-authorization)
+--
+-- @since 0.9
 hProxyAuthorization :: HeaderName
 hProxyAuthorization = "Proxy-Authorization"
 
 -- | [Range](https://www.rfc-editor.org/rfc/rfc9110.html#name-range)
+--
+-- @since 0.7.0
 hRange :: HeaderName
 hRange = "Range"
 
 -- | [Referer](https://www.rfc-editor.org/rfc/rfc9110.html#name-referer)
+--
+-- @since 0.7.0
 hReferer :: HeaderName
 hReferer = "Referer"
 
 -- | [Retry-After](https://www.rfc-editor.org/rfc/rfc9110.html#name-retry-after)
+--
+-- @since 0.9
 hRetryAfter :: HeaderName
 hRetryAfter = "Retry-After"
 
 -- | [Server](https://www.rfc-editor.org/rfc/rfc9110.html#name-server)
+--
+-- @since 0.7.1
 hServer :: HeaderName
 hServer = "Server"
 
 -- | [TE](https://www.rfc-editor.org/rfc/rfc9110.html#name-te)
+--
+-- @since 0.9
 hTE :: HeaderName
 hTE = "TE"
 
 -- | [Trailer](https://www.rfc-editor.org/rfc/rfc9110.html#name-trailer)
+--
+-- @since 0.9
 hTrailer :: HeaderName
 hTrailer = "Trailer"
 
 -- | [Transfer-Encoding](https://www.rfc-editor.org/rfc/rfc9112#name-transfer-encoding)
+--
+-- @since 0.9
 hTransferEncoding :: HeaderName
 hTransferEncoding = "Transfer-Encoding"
 
 -- | [Upgrade](https://www.rfc-editor.org/rfc/rfc9110.html#name-upgrade)
+--
+-- @since 0.9
 hUpgrade :: HeaderName
 hUpgrade = "Upgrade"
 
 -- | [User-Agent](https://www.rfc-editor.org/rfc/rfc9110.html#name-user-agent)
+--
+-- @since 0.7.0
 hUserAgent :: HeaderName
 hUserAgent = "User-Agent"
 
 -- | [Vary](https://www.rfc-editor.org/rfc/rfc9110.html#name-vary)
+--
+-- @since 0.9
 hVary :: HeaderName
 hVary = "Vary"
 
 -- | [Via](https://www.rfc-editor.org/rfc/rfc9110.html#name-via)
+--
+-- @since 0.9
 hVia :: HeaderName
 hVia = "Via"
 
 -- | [WWW-Authenticate](https://www.rfc-editor.org/rfc/rfc9110.html#name-www-authenticate)
+--
+-- @since 0.9
 hWWWAuthenticate :: HeaderName
 hWWWAuthenticate = "WWW-Authenticate"
 
 -- | [Warning](https://www.rfc-editor.org/rfc/rfc9111.html#name-warning)
 --
 -- /This header has been obsoleted in RFC 9110./
+--
+-- @since 0.9
 hWarning :: HeaderName
 hWarning = "Warning"
 
 -- | [Content-Disposition](https://www.rfc-editor.org/rfc/rfc6266.html)
+--
+-- @since 0.10
 hContentDisposition :: HeaderName
 hContentDisposition = "Content-Disposition"
 
 -- | [MIME-Version](https://www.rfc-editor.org/rfc/rfc2616.html#section-19.4.1)
+--
+-- @since 0.10
 hMIMEVersion :: HeaderName
 hMIMEVersion = "MIME-Version"
 
 -- | [Cookie](https://www.rfc-editor.org/rfc/rfc6265.html#section-4.2)
+--
+-- @since 0.7.0
 hCookie :: HeaderName
 hCookie = "Cookie"
 
 -- | [Set-Cookie](https://www.rfc-editor.org/rfc/rfc6265.html#section-4.1)
+--
+-- @since 0.10
 hSetCookie :: HeaderName
 hSetCookie = "Set-Cookie"
 
 -- | [Origin](https://www.rfc-editor.org/rfc/rfc6454.html#section-7)
+--
+-- @since 0.10
 hOrigin :: HeaderName
 hOrigin = "Origin"
 
 -- | [Prefer](https://www.rfc-editor.org/rfc/rfc7240.html#section-2)
+--
+-- @since 0.12.2
 hPrefer :: HeaderName
 hPrefer = "Prefer"
 
 -- | [Preference-Applied](https://www.rfc-editor.org/rfc/rfc7240.html#section-3)
+--
+-- @since 0.12.2
 hPreferenceApplied :: HeaderName
 hPreferenceApplied = "Preference-Applied"
 
