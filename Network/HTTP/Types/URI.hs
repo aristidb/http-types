@@ -44,19 +44,21 @@ module Network.HTTP.Types.URI (
     renderQueryPartialEscape,
     renderQueryBuilderPartialEscape,
 
-    -- * Path segments
-    encodePathSegments,
-    decodePathSegments,
-    encodePathSegmentsRelative,
+    -- * Path
 
-    -- * Path (segments + query string)
+    -- ** Segments + Query String
     extractPath,
     encodePath,
     decodePath,
 
+    -- ** Path Segments
+    encodePathSegments,
+    encodePathSegmentsRelative,
+    decodePathSegments,
+
     -- * URL encoding / decoding
-    urlEncodeBuilder,
     urlEncode,
+    urlEncodeBuilder,
     urlDecode,
 )
 where
@@ -81,9 +83,6 @@ import Data.Word (Word8)
 --
 -- The second part should be 'Nothing' if there was no key-value
 -- separator after the query item name.
---
--- /N.B. The most standard key-value separator is the equals sign: @=@,/
--- /but in HTTP forms can sometimes be a semicolon: @;@/
 type QueryItem = (B.ByteString, Maybe B.ByteString)
 
 -- | A sequence of 'QueryItem's.
@@ -97,11 +96,9 @@ queryTextToQuery :: QueryText -> Query
 queryTextToQuery = map $ encodeUtf8 *** fmap encodeUtf8
 
 -- | Convert 'QueryText' to a 'B.Builder'.
-renderQueryText ::
-    -- | prepend a question mark?
-    Bool ->
-    QueryText ->
-    B.Builder
+--
+-- If you want a question mark (@?@) added to the front of the result, use 'True'.
+renderQueryText :: Bool -> QueryText -> B.Builder
 renderQueryText b = renderQueryBuilder b . queryTextToQuery
 
 -- | Convert 'Query' to 'QueryText' (leniently decoding the UTF-8).
@@ -111,29 +108,29 @@ queryToQueryText =
   where
     go = decodeUtf8With lenientDecode
 
--- | Parse 'QueryText' from a 'B.ByteString'. See 'parseQuery' for details.
+-- | Parse a 'QueryText' from a 'B.ByteString'. See 'parseQuery' for details.
+--
+-- @'queryToQueryText' . 'parseQuery'@
 parseQueryText :: B.ByteString -> QueryText
 parseQueryText = queryToQueryText . parseQuery
 
--- | Simplified Query item type without support for parameter-less items.
+-- | Simplified query item type without support for parameter-less items.
 type SimpleQueryItem = (B.ByteString, B.ByteString)
 
--- | Simplified Query type without support for parameter-less items.
+-- | A sequence of 'SimpleQueryItem's.
 type SimpleQuery = [SimpleQueryItem]
 
 -- | Convert 'SimpleQuery' to 'Query'.
 simpleQueryToQuery :: SimpleQuery -> Query
 simpleQueryToQuery = map (second Just)
 
--- | Convert 'Query' to a 'Builder'.
-renderQueryBuilder ::
-    -- | prepend a question mark?
-    Bool ->
-    Query ->
-    B.Builder
+-- | Renders the given 'Query' into a 'Builder'.
+--
+-- If you want a question mark (@?@) added to the front of the result, use 'True'.
+renderQueryBuilder :: Bool -> Query -> B.Builder
 renderQueryBuilder _ [] = mempty
--- FIXME replace mconcat + map with foldr
 renderQueryBuilder qmark' (p : ps) =
+    -- FIXME: replace mconcat + map with foldr
     mconcat $
         go (if qmark' then qmark else mempty) p
             : map (go amp) ps
@@ -150,17 +147,19 @@ renderQueryBuilder qmark' (p : ps) =
                 Just v -> equal `mappend` urlEncodeBuilder True v
             ]
 
--- | Convert 'Query' to 'ByteString'.
+-- | Renders the given 'Query' into a 'B.ByteString'.
+--
+-- If you want a question mark (@?@) added to the front of the result, use 'True'.
 renderQuery ::
-    -- | prepend question mark?
     Bool ->
     Query ->
     B.ByteString
 renderQuery qm = BL.toStrict . B.toLazyByteString . renderQueryBuilder qm
 
--- | Convert 'SimpleQuery' to 'ByteString'.
+-- | Render the given 'SimpleQuery' into a 'ByteString'.
+--
+-- If you want a question mark (@?@) added to the front of the result, use 'True'.
 renderSimpleQuery ::
-    -- | prepend question mark?
     Bool ->
     SimpleQuery ->
     B.ByteString
@@ -180,8 +179,10 @@ renderSimpleQuery useQuestionMark = renderQuery useQuestionMark . simpleQueryToQ
 parseQuery :: B.ByteString -> Query
 parseQuery = parseQueryReplacePlus True
 
--- | Same functionality as 'parseQuery' with the option to decode @\'+\'@ characters to @\' \'@
--- or preserve @\'+\'@
+-- | Same functionality as 'parseQuery', but with the option to decode @\'+\'@ characters to @\' \'@
+-- or to preserve any @\'+\'@ encountered.
+--
+-- If you want to replace any @\'+\'@ with a space, use 'True'.
 parseQueryReplacePlus :: Bool -> B.ByteString -> Query
 parseQueryReplacePlus replacePlus bs = parseQueryString' $ dropQuestion bs
   where
@@ -227,6 +228,12 @@ unreservedQS = map ord8 "-_.~"
 unreservedPI = map ord8 "-_.~:@&=+$,"
 
 -- | Percent-encoding for URLs.
+--
+-- This will substitute every byte with it's percent-encoded equivalent unless:
+--
+-- * The byte is alphanumeric. (i.e. one of @/[A-Za-z0-9]/@)
+--
+-- * The byte is one of the 'Word8' listed in the first argument.
 urlEncodeBuilder' :: [Word8] -> B.ByteString -> B.Builder
 urlEncodeBuilder' extraUnreserved = mconcat . map encodeChar . B.unpack
   where
@@ -249,30 +256,36 @@ urlEncodeBuilder' extraUnreserved = mconcat . map encodeChar . B.unpack
         | otherwise = 65 + i - 10 -- 65: A
 
 -- | Percent-encoding for URLs (using 'B.Builder').
-urlEncodeBuilder ::
-    -- | Whether input is in query string. True: Query string, False: Path element
-    Bool ->
-    B.ByteString ->
-    B.Builder
+--
+-- In short:
+--
+-- * if you're encoding (parts of) a path element, use 'False'.
+--
+-- * if you're encoding (parts of) a query string, use 'True'.
+--
+-- === __In-depth explanation__
+--
+-- This will substitute every byte with it's percent-encoded equivalent unless:
+--
+-- * The byte is alphanumeric. (i.e. @A-Z@, @a-z@, or @0-9@)
+--
+-- * The byte is either a dash @\'-\'@, an underscore @\'_\'@, a dot @\'.\'@, or a tilde @\'~\'@
+--
+-- * If 'True' is used, the following will also not be percent-encoded:
+--
+--     * colon @\':\'@, at sign @\'\@\'@, ampersand @\'&\'@, equals sign @\'=\'@, plus sign @\'+\'@, or a dollar sign @\'$\'@
+urlEncodeBuilder :: Bool -> B.ByteString -> B.Builder
 urlEncodeBuilder True = urlEncodeBuilder' unreservedQS
 urlEncodeBuilder False = urlEncodeBuilder' unreservedPI
 
--- | Percent-encoding for URLs.
-urlEncode ::
-    -- | Whether to decode @\'+\'@ to @\' \'@
-    Bool ->
-    -- | The ByteString to encode as URL
-    B.ByteString ->
-    -- | The encoded URL
-    B.ByteString
+-- | Percent-encoding for URLs. Like 'urlEncodeBuilder', but also builds the 'B.ByteString'.
+urlEncode :: Bool -> B.ByteString -> B.ByteString
 urlEncode q = BL.toStrict . B.toLazyByteString . urlEncodeBuilder q
 
 -- | Percent-decoding.
-urlDecode ::
-    -- | Whether to decode @\'+\'@ to @\' \'@
-    Bool ->
-    B.ByteString ->
-    B.ByteString
+--
+-- When given 'True', will also change @\'+\'@ to @\' \'@
+urlDecode :: Bool -> B.ByteString -> B.ByteString
 urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
   where
     go bs =
@@ -302,28 +315,34 @@ urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
 --
 -- * UTF-8 encodes the characters.
 --
--- * Performs percent encoding on all unreserved characters, as well as @\:\@\=\+\$@,
---
 -- * Prepends each segment with a slash.
+--
+-- * Performs percent-encoding on all characters that are not:
+--
+--     * alphanumeric (i.e. @A-Z@ and @a-z@)
+--
+--     * digits (i.e. @0-9@)
+--
+--     * a dash @\'-\'@, an underscore @\'_\'@, a dot @\'.\'@, or a tilde @\'~\'@
 --
 -- For example:
 --
--- > encodePathSegments [\"foo\", \"bar\", \"baz\"]
--- \"\/foo\/bar\/baz\"
+-- >>> encodePathSegments ["foo", "bar", "baz"]
+-- "/foo/bar/baz"
 --
--- > encodePathSegments [\"foo bar\", \"baz\/bin\"]
--- \"\/foo\%20bar\/baz\%2Fbin\"
+-- >>> encodePathSegments ["foo bar", "baz/bin"]
+-- "/foo%20bar/baz%2Fbin"
 --
--- > encodePathSegments [\"שלום\"]
--- \"\/%D7%A9%D7%9C%D7%95%D7%9D\"
+-- >>> encodePathSegments ["שלום"]
+-- "/%D7%A9%D7%9C%D7%95%D7%9D"
 --
--- Huge thanks to Jeremy Shaw who created the original implementation of this
+-- Huge thanks to /Jeremy Shaw/ who created the original implementation of this
 -- function in web-routes and did such thorough research to determine all
 -- correct escaping procedures.
 encodePathSegments :: [Text] -> B.Builder
 encodePathSegments = foldr (\x -> mappend (B.byteString "/" `mappend` encodePathSegment x)) mempty
 
--- | Like encodePathSegments, but without the initial slash.
+-- | Like 'encodePathSegments', but without the initial slash.
 encodePathSegmentsRelative :: [Text] -> B.Builder
 encodePathSegmentsRelative xs = mconcat $ intersperse (B.byteString "/") (map encodePathSegment xs)
 
@@ -331,6 +350,8 @@ encodePathSegment :: Text -> B.Builder
 encodePathSegment = urlEncodeBuilder False . encodeUtf8
 
 -- | Parse a list of path segments from a valid URL fragment.
+--
+-- Will also decode any percent-encoded characters.
 decodePathSegments :: B.ByteString -> [Text]
 decodePathSegments "" = []
 decodePathSegments "/" = []
@@ -352,7 +373,14 @@ decodePathSegment :: B.ByteString -> Text
 decodePathSegment = decodeUtf8With lenientDecode . urlDecode False
 
 -- | Extract whole path (path segments + query) from a
--- <http://tools.ietf.org/html/rfc2616#section-5.1.2 RFC 2616 Request-URI>.
+-- [RFC 2616 Request-URI](http://tools.ietf.org/html/rfc2616#section-5.1.2).
+--
+-- Though a more accurate description of this function's behaviour is that
+-- it removes the domain/origin if the string starts with an HTTP protocol.
+-- (i.e. @http://@ or @https://@)
+--
+-- This function will not change anything when given any other 'B.ByteString'.
+-- (except return a root path @\"\/\"@ if given an empty string)
 --
 -- >>> extractPath "/path"
 -- "/path"
@@ -365,6 +393,9 @@ decodePathSegment = decodeUtf8With lenientDecode . urlDecode False
 --
 -- >>> extractPath ""
 -- "/"
+--
+-- >>> extractPath "www.google.com/some/path"
+-- "www.google.com/some/path"
 extractPath :: B.ByteString -> B.ByteString
 extractPath = ensureNonEmpty . extract
   where
