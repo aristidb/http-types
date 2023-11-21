@@ -15,7 +15,7 @@ import GHC.Generics (Generic)
 
 -- | HTTP Version.
 --
--- Note that the Show instance is intended merely for debugging.
+-- Note that the 'Show' instance is intended merely for debugging.
 data HttpVersion = HttpVersion
     { httpMajor :: !Int
     , httpMinor :: !Int
@@ -30,6 +30,7 @@ data HttpVersion = HttpVersion
           Generic
         )
 
+-- | @show http11 == "HTTP/1.1"@
 instance Show HttpVersion where
     show (HttpVersion major minor) = "HTTP/" ++ show major ++ "." ++ show minor
 
