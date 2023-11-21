@@ -1,8 +1,12 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 
+-- | Types and constants for HTTP methods.
 module Network.HTTP.Types.Method (
+    -- * HTTP methods
     Method,
+
+    -- ** Constants
     methodGet,
     methodPost,
     methodHead,
@@ -12,6 +16,10 @@ module Network.HTTP.Types.Method (
     methodConnect,
     methodOptions,
     methodPatch,
+
+    -- ** Standard Methods
+
+    -- | One data type that holds all standard HTTP methods.
     StdMethod (..),
     parseMethod,
     renderMethod,

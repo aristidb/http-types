@@ -2,7 +2,12 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+-- | Types and constants to describe HTTP status codes.
+--
+-- At the bottom are some functions to check if a given 'Status' is from a certain category. (i.e. @1XX@, @2XX@, etc.)
 module Network.HTTP.Types.Status (
+    -- * HTTP Status
+
     -- If we ever want to deprecate the 'Status' data constructor:
     -- #if __GLASGOW_HASKELL__ >= 908
     --   {-# DEPRECATED "Use 'mkStatus' when constructing a 'Status'" #-} Status(Status)
@@ -12,6 +17,8 @@ module Network.HTTP.Types.Status (
     statusCode,
     statusMessage,
     mkStatus,
+
+    -- * Common statuses
     status100,
     continue100,
     status101,
@@ -108,6 +115,8 @@ module Network.HTTP.Types.Status (
     status511,
     networkAuthenticationRequired511,
     httpVersionNotSupported505,
+
+    -- * Checking status code category
     statusIsInformational,
     statusIsSuccessful,
     statusIsRedirection,
@@ -157,7 +166,7 @@ instance Eq Status where
 instance Ord Status where
     compare Status { statusCode = a } Status { statusCode = b } = a `compare` b
 
--- | Be advised, that when using the 'enumFrom*' family of methods or
+-- | Be advised, that when using the \"enumFrom*\" family of methods or
 -- ranges in lists, it will generate all possible status codes.
 --
 -- E.g. @[status100 .. status200]@ generates 'Status'es of @100, 101, 102 .. 198, 199, 200@

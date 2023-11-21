@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
+-- | Some type classes to make more general functions when handling query strings.
 module Network.HTTP.Types.QueryLike (
     QueryLike (..),
     QueryKeyLike (..),
