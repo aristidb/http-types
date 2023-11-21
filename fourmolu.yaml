@@ -1,0 +1,16 @@
+indentation: 4
+# column-limit: 100
+function-arrows: trailing
+comma-style: leading # for lists, tuples etc. - can also be 'trailing'
+import-export-style: diff-friendly
+indent-wheres: false # 'false' means save space by only half-indenting the 'where' keyword
+record-brace-spaces: false # rec {x = 1} vs. rec{x = 1}
+newlines-between-decls: 1 # number of newlines between top-level declarations
+haddock-style: single-line # '--' vs. '{-'
+haddock-style-module: null
+let-style: auto
+in-style: right-align
+single-constraint-parens: always
+unicode: never
+respectful: true # don't be too opinionated about newlines etc.
+diff-friendly-import-export: true # 'false' uses Ormolu-style lists
