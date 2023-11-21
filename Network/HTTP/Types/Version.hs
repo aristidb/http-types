@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 
+-- | Types and constants to describe the HTTP version.
 module Network.HTTP.Types.Version (
     HttpVersion (..),
     http09,
@@ -30,7 +31,8 @@ data HttpVersion = HttpVersion
           Generic
         )
 
--- | @show http11 == "HTTP/1.1"@
+-- | >>> show http11
+-- "HTTP/1.1"
 instance Show HttpVersion where
     show (HttpVersion major minor) = "HTTP/" ++ show major ++ "." ++ show minor
 

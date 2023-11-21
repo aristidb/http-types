@@ -5,8 +5,11 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+-- | Type and constants for handling HTTP header fields.
+--
+-- At the bottom are also some functions to handle certain header field values.
 module Network.HTTP.Types.Header (
-    -- ** Type synonyms
+    -- * HTTP Headers
     Header,
     HeaderName,
     RequestHeaders,
@@ -101,7 +104,7 @@ import GHC.Generics (Generic)
 
 -- | A full HTTP header field with the name and value separated.
 --
--- E.g. @Content-Length: 28@ parsed into a 'Header' would turn into @("Content-Length", "28")@
+-- E.g. @\"Content-Length: 28\"@ parsed into a 'Header' would turn into @("Content-Length", "28")@
 type Header = (HeaderName, B.ByteString)
 
 -- | A case-insensitive name of a header field.
