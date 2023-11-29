@@ -486,7 +486,8 @@ renderByteRangeBuilder (ByteRangeSuffix suffix) = B.char7 '-' `mappend` B.intege
 
 -- | Renders a byte range into a 'B.ByteString'.
 --
--- @renderByteRange (ByteRangeFrom 2048) == "2048-"@
+-- >>> renderByteRange (ByteRangeFrom 2048)
+-- "2048-"
 --
 -- @since 0.6.11
 renderByteRange :: ByteRange -> B.ByteString
@@ -507,7 +508,8 @@ renderByteRangesBuilder xs =
 
 -- | Renders a list of byte ranges into a 'B.ByteString'.
 --
--- @renderByteRanges [ByteRangeFrom 2048, ByteRangeTo 20] == "bytes=2048-,-20"@
+-- >>> renderByteRanges [ByteRangeFrom 2048, ByteRangeSuffix 20]
+-- "bytes=2048-,-20"
 --
 -- @since 0.6.11
 renderByteRanges :: ByteRanges -> B.ByteString

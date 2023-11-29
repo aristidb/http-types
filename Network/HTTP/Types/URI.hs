@@ -10,7 +10,7 @@
 -- @key1&key2=value2 (given: [("key1", Nothing), ("key2", Just "value2")])@
 --
 -- This module also provides type synonyms and functions to handle queries
--- that do not allow/expect key without values. These are the 'SimpleQuery'
+-- that do not allow/expect keys without values. These are the 'SimpleQuery'
 -- type and their associated functions.
 module Network.HTTP.Types.URI (
     -- * Query strings
