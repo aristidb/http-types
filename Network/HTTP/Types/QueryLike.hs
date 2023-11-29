@@ -30,45 +30,31 @@ class QueryLike a where
     toQuery :: a -> Query
 
 -- | Types which, in a Query-like key-value list, are used in the Key position.
+--
+-- @since 0.7.0
 class QueryKeyLike a where
     toQueryKey :: a -> B.ByteString
 
 -- | Types which, in a Query-like key-value list, are used in the Value position.
+--
+-- @since 0.7.0
 class QueryValueLike a where
     toQueryValue :: a -> Maybe B.ByteString
 
--- | @since 0.7.0
 instance (QueryKeyLike k, QueryValueLike v) => QueryLike [(k, v)] where
     toQuery = map (toQueryKey *** toQueryValue)
 
--- | @since 0.7.0
 instance (QueryKeyLike k, QueryValueLike v) => QueryLike [Maybe (k, v)] where
     toQuery = toQuery . catMaybes
 
--- | @since 0.7.0
 instance QueryKeyLike B.ByteString where toQueryKey = id
-
--- | @since 0.7.0
 instance QueryKeyLike L.ByteString where toQueryKey = B.concat . L.toChunks
-
--- | @since 0.7.0
 instance QueryKeyLike T.Text where toQueryKey = T.encodeUtf8
-
--- | @since 0.7.0
 instance QueryKeyLike [Char] where toQueryKey = T.encodeUtf8 . T.pack
 
--- | @since 0.7.0
 instance QueryValueLike B.ByteString where toQueryValue = Just
-
--- | @since 0.7.0
 instance QueryValueLike L.ByteString where toQueryValue = Just . B.concat . L.toChunks
-
--- | @since 0.7.0
 instance QueryValueLike T.Text where toQueryValue = Just . T.encodeUtf8
-
--- | @since 0.7.0
 instance QueryValueLike [Char] where toQueryValue = Just . T.encodeUtf8 . T.pack
-
--- | @since 0.7.0
 instance QueryValueLike a => QueryValueLike (Maybe a) where
     toQueryValue = maybe Nothing toQueryValue
