@@ -2,6 +2,11 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 -- | Types and constants for HTTP methods.
+--
+-- The HTTP standard defines a set of standard methods, when to use them,
+-- and how to handle them. The standard set has been provided as a separate
+-- data type 'StdMethod', but since you can also use custom methods, the
+-- basic type 'Method' is just a synonym for 'ByteString'.
 module Network.HTTP.Types.Method (
     -- * HTTP methods
     Method,

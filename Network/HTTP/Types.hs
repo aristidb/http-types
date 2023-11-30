@@ -1,10 +1,8 @@
 module Network.HTTP.Types (
     -- * Methods
 
-    -- | The HTTP standard defines a set of standard methods, when to use them,
-    -- and how to handle them. The standard set has been provided as a separate
-    -- data type 'StdMethod', but since you can also use custom methods, the
-    -- basic type 'Method' is just a synonym for 'ByteString'.
+    -- | __For more information__: "Network.HTTP.Types.Method"
+
     Method,
 
     -- ** Constants
@@ -25,6 +23,9 @@ module Network.HTTP.Types (
     renderStdMethod,
 
     -- * Versions
+
+    -- | __For more information__: "Network.HTTP.Types.Version"
+
     HttpVersion (..),
     http09,
     http10,
@@ -32,6 +33,9 @@ module Network.HTTP.Types (
     http20,
 
     -- * Status
+
+    -- | __For more information__: "Network.HTTP.Types.Status"
+
     Status (..),
 
     -- ** Constants
@@ -138,6 +142,8 @@ module Network.HTTP.Types (
 
     -- * Headers
 
+    -- | __For more information__: "Network.HTTP.Types.Header"
+
     -- ** Types
     Header,
     HeaderName,
@@ -176,48 +182,57 @@ module Network.HTTP.Types (
 
     -- * URI
 
-    -- ** Query string
-    QueryItem,
+    -- | __For more extensive information__: "Network.HTTP.Types.URI"
+
+    -- ** Query strings
+
+    -- *** Query
     Query,
-    SimpleQueryItem,
-    SimpleQuery,
-    simpleQueryToQuery,
+    QueryItem,
     renderQuery,
     renderQueryBuilder,
-    renderSimpleQuery,
     parseQuery,
-    parseSimpleQuery,
+    parseQueryReplacePlus,
 
-    -- ** Escape only parts
-    renderQueryPartialEscape,
-    renderQueryBuilderPartialEscape,
-    EscapeItem (..),
-    PartialEscapeQueryItem,
-    PartialEscapeQuery,
-
-    -- *** Text query string (UTF8 encoded)
+    -- *** Query (Text)
     QueryText,
     queryTextToQuery,
     queryToQueryText,
     renderQueryText,
     parseQueryText,
 
+    -- *** SimpleQuery
+    SimpleQuery,
+    SimpleQueryItem,
+    simpleQueryToQuery,
+    renderSimpleQuery,
+    parseSimpleQuery,
+
+    -- *** PartialEscapeQuery
+    PartialEscapeQuery,
+    PartialEscapeQueryItem,
+    EscapeItem (..),
+    renderQueryPartialEscape,
+    renderQueryBuilderPartialEscape,
+
     -- ** Generalized query types
     QueryLike (toQuery),
 
-    -- ** Path segments
-    encodePathSegments,
-    decodePathSegments,
-    encodePathSegmentsRelative,
+    -- ** Path
 
-    -- ** Path (segments + query string)
+    -- *** Segments + Query String
     extractPath,
     encodePath,
     decodePath,
 
+    -- *** Path Segments
+    encodePathSegments,
+    encodePathSegmentsRelative,
+    decodePathSegments,
+
     -- ** URL encoding / decoding
-    urlEncodeBuilder,
     urlEncode,
+    urlEncodeBuilder,
     urlDecode,
 )
 where
