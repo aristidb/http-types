@@ -372,7 +372,7 @@ urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
 --
 -- * Prepends each segment with a slash.
 --
--- * Performs percent-encoding on all characters that are not:
+-- * Performs percent-encoding on all characters that are __not__:
 --
 --     * alphanumeric (i.e. @A-Z@ and @a-z@)
 --
@@ -382,8 +382,8 @@ urlDecode replacePlus z = fst $ B.unfoldrN (B.length z) go z
 --
 -- For example:
 --
--- >>> encodePathSegments ["foo", "bar", "baz"]
--- "/foo/bar/baz"
+-- >>> encodePathSegments ["foo", "bar1", "~baz"]
+-- "/foo/bar1/~baz"
 --
 -- >>> encodePathSegments ["foo bar", "baz/bin"]
 -- "/foo%20bar/baz%2Fbin"
