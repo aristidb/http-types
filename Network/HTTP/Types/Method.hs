@@ -40,6 +40,16 @@ import Data.Data (Data)
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 
+-- $setup
+-- >>> import Data.ByteString.Char8 (ByteString)
+-- >>> import Data.Text (pack)
+-- >>> import Data.Text.Encoding (encodeUtf8)
+-- >>> import Test.QuickCheck
+-- >>> :{
+-- instance Arbitrary ByteString where
+--     arbitrary = encodeUtf8 . pack <$> arbitrary
+-- :}
+
 -- | HTTP method (flat 'ByteString' type).
 type Method = B.ByteString
 

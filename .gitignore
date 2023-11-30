@@ -4,3 +4,5 @@ cabal.sandbox.config
 dist/*
 dist-newstyle/*
 *_flymake.hs
+*.lock
+.stack-work/*
