@@ -194,7 +194,7 @@ module Network.HTTP.Types (
     parseQuery,
     parseQueryReplacePlus,
 
-    -- *** Query (Text)
+    -- *** Text query string (UTF8 encoded)
     QueryText,
     queryTextToQuery,
     queryToQueryText,
