@@ -275,7 +275,7 @@ unreservedPI = map ord8 "-_.~:@&=+$,"
 
 -- | Percent-encoding for URLs.
 --
--- This will substitute every byte with it's percent-encoded equivalent unless:
+-- This will substitute every byte with its percent-encoded equivalent unless:
 --
 -- * The byte is alphanumeric. (i.e. one of @/[A-Za-z0-9]/@)
 --
@@ -321,7 +321,7 @@ urlEncodeBuilder False = urlEncodeBuilder' unreservedPI
 --
 -- === __In-depth explanation__
 --
--- This will substitute every byte with it's percent-encoded equivalent unless:
+-- This will substitute every byte with its percent-encoded equivalent unless:
 --
 -- * The byte is alphanumeric. (i.e. @A-Z@, @a-z@, or @0-9@)
 --
